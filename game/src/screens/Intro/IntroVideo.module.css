@@ -1,0 +1,50 @@
+/* IntroVideo · 真视频版 */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;  /* 填充全屏 */
+  background: #000;
+}
+
+/* 跳过按钮 · 右下角 · 立即可见 */
+.skipButton {
+  position: absolute;
+  right: 32px;
+  bottom: 32px;
+  padding: 12px 24px;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--color-paper);
+  border: 1px solid var(--color-gold);
+  font-family: var(--font-serif);
+  font-size: 14px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 1s ease-out;
+}
+
+.skipButton:hover {
+  background: rgba(212, 160, 23, 0.3);
+  color: var(--color-gold);
+  box-shadow: 0 0 16px rgba(212, 160, 23, 0.7);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

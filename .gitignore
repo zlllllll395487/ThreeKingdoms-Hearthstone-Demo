@@ -1,0 +1,34 @@
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite / build output
+game/dist/
+game/.vite/
+game/.cache/
+*.local
+
+# 编辑器 / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+desktop.ini
+
+# Claude 工作目录（不应进版本控制）
+.claude/
+
+# 测试 / 临时
+*.log
+*.tmp
+coverage/
+.env
+.env.local
+
+# 大文件原始素材（可选 — 如果担心 repo 大小可解开注释）
+# assetofsanguo/开屏动画.mp4

@@ -1,0 +1,149 @@
+[
+  {
+    "id": "N02",
+    "name": "庞统",
+    "cost": 3,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "rare",
+    "attack": 2,
+    "health": 3,
+    "tribe": "strategist",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "randomCardToHand",
+        "params": { "type": "spell" }
+      }
+    ],
+    "portrait": "pangtong.png",
+    "description": "威名：随机将一张计策牌加入你的手牌。",
+    "flavor": "凤雏先生。"
+  },
+  {
+    "id": "N03",
+    "name": "李儒",
+    "cost": 2,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "rare",
+    "attack": 1,
+    "health": 4,
+    "tribe": "strategist",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "grantSpellPower",
+        "params": { "amount": 1 }
+      }
+    ],
+    "portrait": "liru.png",
+    "description": "你的计策伤害 +1（仅本局有效）。",
+    "flavor": "毒士谋深。"
+  },
+  {
+    "id": "N05",
+    "name": "万箭齐发",
+    "cost": 3,
+    "type": "spell",
+    "faction": "neutral",
+    "rarity": "rare",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
+      }
+    ],
+    "portrait": "wanjian.png",
+    "description": "对所有敌方武将造成 1 点伤害。",
+    "flavor": "万箭齐发，遮天蔽日。"
+  },
+  {
+    "id": "N06",
+    "name": "潘凤",
+    "cost": 2,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 3,
+    "health": 2,
+    "tribe": "infantry",
+    "portrait": "panfeng.png",
+    "description": "",
+    "flavor": "吾有上将潘凤，可斩华雄！"
+  },
+  {
+    "id": "N07",
+    "name": "邢道荣",
+    "cost": 1,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 1,
+    "health": 2,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "portrait": "xingdaorong.png",
+    "description": "镇守。"
+  },
+  {
+    "id": "N09",
+    "name": "募兵令",
+    "cost": 2,
+    "type": "spell",
+    "faction": "neutral",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_MINBING", "count": 2, "side": "self" }
+      }
+    ],
+    "portrait": "mubing.png",
+    "description": "召唤两个 1/1 的民兵（步兵）。"
+  },
+  {
+    "id": "N10",
+    "name": "休养生息",
+    "cost": 2,
+    "type": "spell",
+    "faction": "neutral",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "heal",
+        "params": { "target": "hero", "side": "self", "amount": 4 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "drawCard",
+        "params": { "count": 1 }
+      }
+    ],
+    "portrait": "xiuyang.png",
+    "description": "恢复 4 点生命值。摸 1 张牌。"
+  },
+  {
+    "id": "N11",
+    "name": "谋士",
+    "cost": 3,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 2,
+    "health": 3,
+    "tribe": "strategist",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "drawCard",
+        "params": { "count": 1 }
+      }
+    ],
+    "portrait": "moushi.png",
+    "description": "威名：摸 1 张牌。"
+  }
+]

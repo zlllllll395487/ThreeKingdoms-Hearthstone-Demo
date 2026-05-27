@@ -1,0 +1,157 @@
+[
+  {
+    "id": "S01",
+    "name": "关羽",
+    "cost": 6,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "legendary",
+    "attack": 5,
+    "health": 6,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "equipWeapon",
+        "params": { "weaponId": "WQ1" }
+      }
+    ],
+    "portrait": "guanyu.png",
+    "description": "突袭。威名：装备一把青龙偃月刀。",
+    "flavor": "「美髯公」温酒斩华雄。"
+  },
+  {
+    "id": "S02",
+    "name": "张飞",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "epic",
+    "attack": 4,
+    "health": 5,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "effects": [
+      {
+        "trigger": "deathrattle",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
+      }
+    ],
+    "portrait": "zhangfei.png",
+    "description": "镇守。遗志：对所有敌方武将造成 1 点伤害。",
+    "flavor": "燕人张翼德在此！"
+  },
+  {
+    "id": "S03",
+    "name": "桃园结义",
+    "cost": 3,
+    "type": "spell",
+    "faction": "shu",
+    "rarity": "rare",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_YIBING", "count": 3, "side": "self" }
+      }
+    ],
+    "portrait": "taoyuan.png",
+    "description": "召唤三个 1/2 的「义兵」（步兵）。",
+    "flavor": "不求同年同月同日生，但愿同年同月同日死。"
+  },
+  {
+    "id": "S04",
+    "name": "仁德之政",
+    "cost": 3,
+    "type": "spell",
+    "faction": "shu",
+    "rarity": "rare",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "buffAll",
+        "params": { "side": "self", "attack": 1, "health": 1 }
+      }
+    ],
+    "portrait": "rende.png",
+    "description": "使所有友方武将获得 +1/+1。",
+    "flavor": "惟贤惟德，能服于人。"
+  },
+  {
+    "id": "S05",
+    "name": "黄忠",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 4,
+    "tribe": "cavalry",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "dealDamage",
+        "params": { "amount": 2, "targetSelector": "enemyMinion" }
+      }
+    ],
+    "portrait": "huangzhong.png",
+    "description": "威名：对一个敌方武将造成 2 点伤害。",
+    "flavor": "老将黄忠，请战！"
+  },
+  {
+    "id": "S06",
+    "name": "蜀国步兵",
+    "cost": 1,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 2,
+    "health": 1,
+    "tribe": "infantry",
+    "portrait": "soldierofshu.png",
+    "description": ""
+  },
+  {
+    "id": "S07",
+    "name": "廖化",
+    "cost": 2,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 2,
+    "health": 3,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "portrait": "liaohua.png",
+    "description": "镇守。"
+  },
+  {
+    "id": "S08",
+    "name": "关平",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 4,
+    "health": 5,
+    "tribe": "cavalry",
+    "portrait": "guanping.png",
+    "description": ""
+  },
+  {
+    "id": "S09",
+    "name": "马岱",
+    "cost": 2,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 2,
+    "health": 2,
+    "tribe": "infantry",
+    "keywords": ["rush"],
+    "portrait": "madai.png",
+    "description": "突袭。"
+  }
+]

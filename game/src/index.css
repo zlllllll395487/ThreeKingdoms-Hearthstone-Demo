@@ -1,0 +1,107 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Long+Cang&family=ZCOOL+QingKe+HuangYou&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
+
+/* ============================================
+   三国炉石 · 全局主题
+   基于刘备立绘参考图提取的色板（白金主调）
+   ============================================ */
+
+@theme {
+  /* 主色板 */
+  --color-paper: #f8f4e9;       /* 米白宣纸 */
+  --color-gold: #d4a017;        /* 鎏金高光 */
+  --color-gold-deep: #b8860b;   /* 古金描边 */
+  --color-cinnabar: #c8362f;    /* 朱砂红 */
+  --color-ink: #1a1a1a;         /* 墨黑 */
+  --color-ink-soft: #5c4a3a;    /* 深棕（次要文字） */
+  --color-night: #2c3a4d;       /* 夜青（背景暗调） */
+  --color-rust: #8b2d26;        /* 战旗绛红 */
+
+  /* 阵营色 */
+  --color-shu: #3d8b5c;         /* 蜀绿 */
+  --color-wei: #1e4d7b;         /* 魏蓝 */
+  --color-wu: #7b2d26;          /* 吴绛 */
+  --color-qun: #6e5c30;         /* 群雄古铜 */
+  --color-neutral-faction: #8c8c8c;  /* 中立青灰 */
+
+  /* 稀有度色 */
+  --color-rarity-common: #8c8c8c;
+  --color-rarity-rare: #3d7bb8;
+  --color-rarity-epic: #7b3da8;
+  --color-rarity-legendary: #d4a017;
+
+  /* 字体 · 古风三件套 + 兜底 */
+  --font-kai: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', '楷体', serif;             /* 楷书书法大标题 */
+  --font-display: 'Long Cang', 'Ma Shan Zheng', 'STKaiti', serif;             /* 飘逸装饰 */
+  --font-serif: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', serif; /* 古朴正文 */
+  --font-numeric: 'ZCOOL QingKe HuangYou', 'Noto Serif SC', sans-serif;       /* 数字（费用/攻血） */
+}
+
+/* ============================================
+   基础重置
+   ============================================ */
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-serif);
+  background: linear-gradient(135deg, #1a1a1a 0%, #2c3a4d 100%);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   通用工具类
+   ============================================ */
+
+.border-gold {
+  border: 2px solid var(--color-gold);
+  box-shadow:
+    0 0 0 1px var(--color-gold-deep),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.seal {
+  background: var(--color-cinnabar);
+  color: var(--color-paper);
+  font-family: var(--font-kai);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(139, 45, 38, 0.5);
+}
+
+.bg-paper {
+  background:
+    linear-gradient(180deg, #f8f4e9 0%, #ede4cc 100%),
+    radial-gradient(circle at 30% 20%, rgba(212, 160, 23, 0.05), transparent 50%);
+  background-blend-mode: multiply;
+}
+
+.flavor-text {
+  font-family: var(--font-display);
+  color: var(--color-ink-soft);
+  font-style: italic;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+

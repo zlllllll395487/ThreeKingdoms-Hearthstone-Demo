@@ -151,9 +151,9 @@
 
 ## 二、武将立绘（`assets/portraits/`）
 
-### 2.1 已有（11）
+### 2.1 已有（18）
 
-| 文件 | 卡名 | 阵营 | 稀有度 |
+| 文件 | 卡名 | 阵营 | 稀有度 / 类型 |
 |---|---|---|---|
 | `guanyu.png` | 关羽 | 蜀 | legendary |
 | `zhangfei.png` | 张飞 | 蜀 | epic |
@@ -166,20 +166,17 @@
 | `liru.png` | 李儒 | 中立 | rare |
 | `panfeng.png` | 潘凤 | 中立 | common |
 | `xingdaorong.png` | 邢道荣 | 中立 | common |
+| `taoyuan.png` | 桃园结义 | 蜀 | rare（计策）|
+| `rende.png` | 仁德之政 | 蜀 | rare（计策）|
+| `wanjian.png` | 万箭齐发 | 中立 | rare（计策）|
+| `mubing.png` | 募兵令 | 中立 | common（计策）|
+| `xiuyang.png` | 休养生息 | 中立 | common（计策）|
+| `moushi.png` | 谋士 | 中立 | common（武将）|
+| `qinglongdao.png` | 青龙偃月刀 | 蜀 | rare（兵器）|
 
-### 2.2 待出（7）
+### 2.2 待出 ✅ 已全部完成（2026-05-27）
 
-| 文件 | 卡名 | 类型 | Prompt 已生成 |
-|---|---|---|:---:|
-| `taoyuan.png` | 桃园结义 | spell | ✅ |
-| `rende.png` | 仁德之政 | spell | ✅ |
-| `wanjian.png` | 万箭齐发 | spell | ✅ |
-| `mubing.png` | 募兵令 | spell | ✅ |
-| `xiuyang.png` | 休养生息 | spell | ✅ |
-| `moushi.png` | 谋士 | minion | ✅ |
-| `qinglongdao.png` | 青龙偃月刀 | weapon | ✅ |
-
-Prompt 在 chat 历史里；统一风格规范见 [docs/06-美术资源清单.md](../../docs/06-美术资源清单.md)。
+7 张缺失立绘已于 2026-05-27 来自 `assetofsanguo/组件4.0/` 全部接入。
 
 ---
 

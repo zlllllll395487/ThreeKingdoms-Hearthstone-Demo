@@ -63,19 +63,21 @@ intro.mp4 (立即可跳过)
 
 ## 🟠 待办（按优先级）
 
-### P0 · 立绘待出（7 张）
+### P0 · 立绘 ✅ 完成
 
-需要 AI 出图后命名放进 `src/assets/portraits/`：
+7 张缺失立绘已于 2026-05-27 全部到位（来自 `assetofsanguo/组件4.0/`）：
 
-- `taoyuan.png` — 桃园结义场景
-- `rende.png` — 仁德之政场景
-- `wanjian.png` — 万箭齐发场景
-- `mubing.png` — 募兵令场景
-- `xiuyang.png` — 休养生息场景
-- `moushi.png` — 谋士人物（半身）
-- `qinglongdao.png` — 青龙偃月刀兵器
+- ✅ `taoyuan.png` — 桃园结义
+- ✅ `rende.png` — 仁德之政
+- ✅ `wanjian.png` — 万箭齐发
+- ✅ `mubing.png` — 募兵令
+- ✅ `xiuyang.png` — 休养生息
+- ✅ `moushi.png` — 谋士
+- ✅ `qinglongdao.png` — 青龙偃月刀
 
-Prompt 模板与风格统一规范见 chat 历史；可参考 [docs/08-P1-P2武将立绘完整Prompt集合.md](../docs/08-P1-P2武将立绘完整Prompt集合.md)。
+加上原有 11 张武将立绘，**18 张立绘全部到位**，17 张卡片现在都有真实立绘渲染。
+
+通用资源新增：`btn_back.png`（返回按钮，已放进 `assets/ui/`，待接入到 Codex/Settings 等屏幕的返回操作）。
 
 ### P1 · 玩家 UI 12 件套（M1）
 

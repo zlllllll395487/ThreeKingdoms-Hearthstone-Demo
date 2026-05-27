@@ -127,7 +127,7 @@ export function MainMenu() {
         {/* 底层：限时活动 */}
         <button
           className={styles.cardEvent}
-          onClick={dev('限时活动 · 桃园结义')}
+          onClick={() => navigate('event')}
           aria-label="限时活动"
         >
           {cardEventUrl && <img src={cardEventUrl} alt="限时活动" />}
@@ -136,7 +136,7 @@ export function MainMenu() {
         {/* 顶层：剧情模式（z-index 最高，盖在对战之上） */}
         <div
           className={styles.cardStory}
-          onClick={dev('剧情模式 · 演义壹之壹')}
+          onClick={() => navigate('storymode')}
           role="button"
         >
           {cardStoryUrl && <img src={cardStoryUrl} alt="剧情模式" />}
@@ -147,7 +147,7 @@ export function MainMenu() {
       <div className={styles.bottomLeft}>
         <button
           className={styles.eventBanner}
-          onClick={dev('桃园结义限定活动')}
+          onClick={() => navigate('event')}
           aria-label="桃园结义"
         >
           {bannerEventUrl && <img src={bannerEventUrl} alt="桃园结义" />}
@@ -180,13 +180,13 @@ export function MainMenu() {
         <button className={styles.tab} onClick={() => navigate('codex')}>
           {tabCodexUrl && <img src={tabCodexUrl} alt="图鉴" />}
         </button>
-        <button className={styles.tab} onClick={dev('每日任务')}>
+        <button className={styles.tab} onClick={() => navigate('quest')}>
           {tabQuestUrl && <img src={tabQuestUrl} alt="任务" />}
         </button>
-        <button className={styles.tab} onClick={dev('商城')}>
+        <button className={styles.tab} onClick={() => navigate('shop')}>
           {tabShopUrl && <img src={tabShopUrl} alt="商城" />}
         </button>
-        <button className={styles.tab} onClick={dev('设置')}>
+        <button className={styles.tab} onClick={() => navigate('settings')}>
           {tabSettingsUrl && <img src={tabSettingsUrl} alt="设置" />}
         </button>
       </div>

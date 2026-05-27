@@ -19,6 +19,11 @@ export type Screen =
   | 'loading'     // 进入主菜单前的进度条加载页
   | 'mainmenu'    // 主菜单 Hub
   | 'codex'       // 卡牌图鉴
+  | 'storymode'   // 剧情模式（子页面）
+  | 'quest'       // 任务（子页面）
+  | 'shop'        // 商城（子页面）
+  | 'settings'    // 设置（子页面）
+  | 'event'       // 限定活动 · 桃园结义（子页面）
   | 'battle'      // 对战（W2-W4 实装）
   | 'result'      // 战后结算（W2-W4 实装）
 

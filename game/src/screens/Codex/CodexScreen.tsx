@@ -72,8 +72,16 @@ export function CodexScreen() {
         <button
           className={styles.backButton}
           onClick={() => navigate('mainmenu')}
+          aria-label="返回主菜单"
         >
-          ‹ 返回
+          {(() => {
+            const btnBackUrl = getUiAssetUrl('btn_back.png')
+            return btnBackUrl ? (
+              <img src={btnBackUrl} alt="返回" className={styles.backButtonImg} />
+            ) : (
+              <span>‹ 返回</span>
+            )
+          })()}
         </button>
         {(() => {
           const logoUrl = getUiAssetUrl('logo_codex.png')

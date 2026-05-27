@@ -33,9 +33,19 @@ intro.mp4 (立即可跳过)
 | Intro | `screens/Intro/IntroVideo.tsx` | intro.mp4 |
 | Loading | `screens/Loading/LoadingScreen.tsx` | loading_bg + 3 秒 14 步进度序列 |
 | MainMenu | `screens/MainMenu/MainMenu.tsx` | player_ui_block + 3 货币 + 4 Tab + 3 卡叠层 + war-room 底板 + 桃园 + 长公告卷轴 + 设置 Tab |
-| Codex | `screens/Codex/CodexScreen.tsx` | codex_background + logo_codex + 17 张卡片渲染 |
+| Codex | `screens/Codex/CodexScreen.tsx` | codex_background + logo_codex + 17 张卡片渲染 + btn_back 返回按钮 |
 | Battle | `screens/Battle/BattleScreen.tsx` | battle-background + icon_weapons + text_battle_title + 双 PNG 按钮（占位） |
 | Result | `screens/Result/ResultScreen.tsx` | win/defeat_background + text_victory/defeat + 双 PNG 按钮 |
+| **SubPage × 5** | `screens/SubPage/SubPageScreen.tsx` | **subpage_story/quest/shop/settings/event.png 全屏背景 + btn_back 返回按钮** |
+
+5 个子页面对接：
+- 剧情模式 → MainMenu 剧情卡 click → `navigate('storymode')`
+- 任务 → 底部任务 Tab → `navigate('quest')`
+- 商城 → 底部商城 Tab → `navigate('shop')`
+- 设置 → 底部设置 Tab → `navigate('settings')`
+- 限定活动 → MainMenu 限时活动卡 / 桃园 banner click → `navigate('event')`
+
+每个子页面左上角都有统一返回按钮 `btn_back.png`（古铜雕花牌），点击回主菜单。
 
 ### 3. Card 组件完整渲染（17 张卡）
 

@@ -5,6 +5,7 @@ import { IntroVideo } from '@/screens/Intro/IntroVideo'
 import { LoadingScreen } from '@/screens/Loading/LoadingScreen'
 import { MainMenu } from '@/screens/MainMenu/MainMenu'
 import { CodexScreen } from '@/screens/Codex/CodexScreen'
+import { SubPageScreen } from '@/screens/SubPage/SubPageScreen'
 import { BattleScreen } from '@/screens/Battle/BattleScreen'
 import { ResultScreen } from '@/screens/Result/ResultScreen'
 import { DevelopingModal } from '@/components/Modal/DevelopingModal'
@@ -64,6 +65,11 @@ function App() {
         {currentScreen === 'loading' && <LoadingScreen />}
         {currentScreen === 'mainmenu' && <MainMenu />}
         {currentScreen === 'codex' && <CodexScreen />}
+        {currentScreen === 'storymode' && <SubPageScreen screen="storymode" />}
+        {currentScreen === 'quest' && <SubPageScreen screen="quest" />}
+        {currentScreen === 'shop' && <SubPageScreen screen="shop" />}
+        {currentScreen === 'settings' && <SubPageScreen screen="settings" />}
+        {currentScreen === 'event' && <SubPageScreen screen="event" />}
         {currentScreen === 'battle' && <BattleScreen />}
         {currentScreen === 'result' && <ResultScreen />}
 

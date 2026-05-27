@@ -1,0 +1,63 @@
+/* SubPageScreen · 通用子页面（全屏 PNG + 返回按钮） */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0604;
+  animation: subpageFadeIn 0.3s ease-out;
+}
+
+@keyframes subpageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* 左上角返回按钮 · 古铜雕花牌 */
+.backBtn {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  z-index: 10;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.75));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.backBtn img {
+  height: 64px;
+  width: auto;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+.backBtn:hover {
+  transform: translateY(-2px) scale(1.05);
+  filter: drop-shadow(0 10px 20px rgba(212, 160, 23, 0.85));
+}
+
+.backBtn:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.backBtn span {
+  font-family: var(--font-kai);
+  font-size: 20px;
+  letter-spacing: 4px;
+  color: var(--color-gold);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+}

@@ -32,3 +32,6 @@ coverage/
 
 # 大文件原始素材（可选 — 如果担心 repo 大小可解开注释）
 # assetofsanguo/开屏动画.mp4
+
+# 对话原始记录备份（149 MB，太大不入 git）
+docs/11-对话原始记录-*.jsonl

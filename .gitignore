@@ -35,3 +35,10 @@ coverage/
 
 # 对话原始记录备份（149 MB，太大不入 git）
 docs/11-对话原始记录-*.jsonl
+
+# 未压缩原始资源备份（296 MB，本地保留供未来打安装包用，不入 git）
+# 任何时候可从 git tag v5.5-uncompressed-backup 还原
+game/_assets_original/
+
+# 样品对比目录
+game/_compress_samples/

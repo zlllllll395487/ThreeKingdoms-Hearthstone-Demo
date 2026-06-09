@@ -31,7 +31,7 @@ interface GameStore {
   // ============================================
   // Actions
   // ============================================
-  startGame: () => void
+  startGame: (opts?: { playerFaction?: 'shu' | 'wu'; aiFaction?: 'shu' | 'wu' }) => void
   endGame: () => void
 
   selectCard: (instanceId: string | null) => void
@@ -45,22 +45,20 @@ interface GameStore {
   syncState: () => void
 }
 
-const PLAYER_HERO_INFO = {
-  name: '刘备',
-  faction: 'shu' as const,
-  health: 30,
-  maxHealth: 30,
-  armor: 0,
-  attack: 0,
+/** v5.5 阵营 → 主公映射 */
+const HERO_BY_FACTION = {
+  shu: { name: '刘备', faction: 'shu' as const },
+  wu: { name: '孙权', faction: 'wu' as const },
 }
 
-const AI_HERO_INFO = {
-  name: '曹操',
-  faction: 'wei' as const,
-  health: 30,
-  maxHealth: 30,
-  armor: 0,
-  attack: 0,
+function makeHero(faction: 'shu' | 'wu') {
+  return {
+    ...HERO_BY_FACTION[faction],
+    health: 30,
+    maxHealth: 30,
+    armor: 0,
+    attack: 0,
+  }
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -72,11 +70,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   pendingTargetForCard: null,
   aiThinking: false,
 
-  startGame: () => {
+  startGame: (opts) => {
+    const playerFaction = opts?.playerFaction ?? 'shu'
+    const aiFaction = opts?.aiFaction ?? 'wu'
     const engine = GameEngine.createGame({
       cardPool: getAllCardsIncludingTokens(),
-      playerHero: { ...PLAYER_HERO_INFO },
-      aiHero: { ...AI_HERO_INFO },
+      playerHero: makeHero(playerFaction),
+      aiHero: makeHero(aiFaction),
       deckSize: 30,
       initialHand: { player: 3, ai: 4 },
     })

@@ -5,10 +5,11 @@
     "cost": 3,
     "type": "minion",
     "faction": "neutral",
-    "rarity": "rare",
+    "rarity": "epic",
     "attack": 2,
     "health": 3,
     "tribe": "strategist",
+    "keywords": ["spellpower"],
     "effects": [
       {
         "trigger": "battlecry",
@@ -17,79 +18,79 @@
       }
     ],
     "portrait": "pangtong.png",
-    "description": "威名：随机将一张计策牌加入你的手牌。",
-    "flavor": "凤雏先生。"
+    "description": "神算 1。威名：随机将一张谋略加入你的手牌。",
+    "flavor": "凤雏，与卧龙齐名。"
   },
   {
     "id": "N03",
     "name": "李儒",
-    "cost": 2,
+    "cost": 3,
     "type": "minion",
     "faction": "neutral",
     "rarity": "rare",
-    "attack": 1,
-    "health": 4,
+    "attack": 2,
+    "health": 3,
     "tribe": "strategist",
+    "keywords": ["spellpower"],
     "effects": [
       {
         "trigger": "battlecry",
-        "action": "grantSpellPower",
+        "action": "addPermanentSpellPower",
         "params": { "amount": 1 }
       }
     ],
     "portrait": "liru.png",
-    "description": "你的计策伤害 +1（仅本局有效）。",
-    "flavor": "毒士谋深。"
+    "description": "神算 1。威名：本局法术伤害 +1。",
+    "flavor": "毒士李儒。"
   },
   {
-    "id": "N05",
-    "name": "万箭齐发",
-    "cost": 3,
-    "type": "spell",
-    "faction": "neutral",
-    "rarity": "rare",
-    "effects": [
-      {
-        "trigger": "onCast",
-        "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
-      }
-    ],
-    "portrait": "wanjian.png",
-    "description": "对所有敌方武将造成 1 点伤害。",
-    "flavor": "万箭齐发，遮天蔽日。"
-  },
-  {
-    "id": "N06",
+    "id": "N04",
     "name": "潘凤",
-    "cost": 2,
+    "cost": 4,
     "type": "minion",
     "faction": "neutral",
     "rarity": "common",
-    "attack": 3,
-    "health": 2,
+    "attack": 4,
+    "health": 3,
     "tribe": "infantry",
+    "keywords": ["taunt"],
     "portrait": "panfeng.png",
-    "description": "",
+    "description": "镇守。",
     "flavor": "吾有上将潘凤，可斩华雄！"
   },
   {
-    "id": "N07",
+    "id": "N05",
     "name": "邢道荣",
+    "cost": 5,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 4,
+    "health": 5,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "portrait": "xingdaorong.png",
+    "description": "镇守。",
+    "flavor": "零陵上将军。"
+  },
+  {
+    "id": "N06",
+    "name": "流民",
     "cost": 1,
     "type": "minion",
     "faction": "neutral",
     "rarity": "common",
     "attack": 1,
-    "health": 2,
+    "health": 1,
     "tribe": "infantry",
-    "keywords": ["taunt"],
-    "portrait": "xingdaorong.png",
-    "description": "镇守。"
+    "portrait": "liumin.png",
+    "cardvisual": "流民.png",
+    "description": "",
+    "flavor": "战乱之苦，流离失所。"
   },
   {
-    "id": "N09",
-    "name": "募兵令",
+    "id": "N07",
+    "name": "金疮药",
     "cost": 2,
     "type": "spell",
     "faction": "neutral",
@@ -97,53 +98,36 @@
     "effects": [
       {
         "trigger": "onCast",
-        "action": "summonToken",
-        "params": { "tokenId": "TK_MINBING", "count": 2, "side": "self" }
+        "action": "healHero",
+        "params": { "side": "self", "amount": 5 }
       }
     ],
-    "portrait": "mubing.png",
-    "description": "召唤两个 1/1 的民兵（步兵）。"
+    "portrait": "jinchuangyao.png",
+    "cardvisual": "金疮药.png",
+    "description": "恢复主公 5 点生命。",
+    "flavor": "军中常备。"
   },
   {
-    "id": "N10",
+    "id": "N08",
     "name": "休养生息",
-    "cost": 2,
+    "cost": 3,
     "type": "spell",
     "faction": "neutral",
-    "rarity": "common",
+    "rarity": "rare",
     "effects": [
       {
         "trigger": "onCast",
-        "action": "heal",
-        "params": { "target": "hero", "side": "self", "amount": 4 }
+        "action": "drawCards",
+        "params": { "count": 1 }
       },
       {
         "trigger": "onCast",
-        "action": "drawCard",
-        "params": { "count": 1 }
+        "action": "healHero",
+        "params": { "side": "self", "amount": 4 }
       }
     ],
     "portrait": "xiuyang.png",
-    "description": "恢复 4 点生命值。摸 1 张牌。"
-  },
-  {
-    "id": "N11",
-    "name": "谋士",
-    "cost": 3,
-    "type": "minion",
-    "faction": "neutral",
-    "rarity": "common",
-    "attack": 2,
-    "health": 3,
-    "tribe": "strategist",
-    "effects": [
-      {
-        "trigger": "battlecry",
-        "action": "drawCard",
-        "params": { "count": 1 }
-      }
-    ],
-    "portrait": "moushi.png",
-    "description": "威名：摸 1 张牌。"
+    "description": "抽 1 张牌，恢复主公 4 点生命。",
+    "flavor": "且作经年休养。"
   }
 ]

@@ -1,8 +1,8 @@
 /**
- * 三国炉石 · 核心类型定义
+ * 三国炉石 · 核心类型定义（v5.5）
  *
- * 这个文件是所有"卡牌 / 对局"概念的源头定义。
- * 配套：03-三国炉石核心玩法策划案-v2.md / 04-三国炉石基础卡牌设计表-v2.md
+ * 配套：docs/09-三国炉石策划终稿-v5.md v5.5 + docs/12-卡牌验收清单-v5.2.md v5.5
+ * v5.5 新增字段：anchorTag / anchorRequirement / linkedEffects / comboFlag / nextTurnManaBoost / onceUsedKey
  */
 
 // ============================================
@@ -25,14 +25,24 @@ export type Keyword =
   | 'poisonous'       // 淬毒
   | 'lifesteal'       // 饮血
   | 'freeze'          // 困阵
+  | 'spellpower'      // 神算（法术伤害 +1）
 
-/** 触发时机 */
+/** 触发时机（v5.5 扩展） */
 export type EffectTrigger =
-  | 'battlecry'       // 威名（打出时）
-  | 'deathrattle'     // 遗志（死亡时）
-  | 'endTurn'         // 回合结束时
-  | 'startTurn'       // 回合开始时
-  | 'onCast'          // 计策施放时（计策牌专用）
+  | 'battlecry'         // 威名（打出时）
+  | 'deathrattle'       // 遗志（死亡时）
+  | 'endTurn'           // 回合结束时
+  | 'startTurn'         // 回合开始时
+  | 'onCast'            // 计策施放时（计策牌专用）
+  | 'onTakeDamage'      // 受击时（v5.5 新增，黄月英 / 救命）
+  | 'weaponAttack'      // 主公用兵器攻击后（v5.5 新增，雌雄双股剑）
+  | 'aura'              // 持续光环（v5.5 新增，未来用）
+
+/** v5.5 锚点标签（吴阵营 anchor 系统） */
+export type AnchorTag = 'anchor_fire' | 'anchor_draw' | 'anchor_heal'
+
+/** v5.5 卡-卡联动 flag */
+export type ComboFlag = 'combo_fire' | 'combo_betrayal'
 
 /** 单个效果定义 */
 export interface CardEffect {
@@ -63,8 +73,29 @@ export interface CardData {
   keywords?: Keyword[]
   effects?: CardEffect[]
 
+  // ============ v5.5 新增 · 锚点联动系统 ============
+  /** 自身是锚点武将（周瑜/鲁肃/大乔） */
+  anchorTag?: AnchorTag
+  /** 需要这种锚点在场才触发联动效果 */
+  anchorRequirement?: AnchorTag
+  /** 锚点联动激活时额外执行的效果 */
+  linkedEffects?: CardEffect[]
+
+  // ============ v5.5 新增 · 卡-卡联动 combo ============
+  /** 打出时设置 combo flag */
+  comboFlagSet?: ComboFlag
+  /** 检查 flag 才触发联动效果 */
+  comboFlagRequirement?: ComboFlag
+  /** combo 联动激活时额外执行的效果 */
+  comboLinkedEffects?: CardEffect[]
+
+  // ============ v5.5 新增 · 一次性效果限制 ============
+  /** 每张每局只触发 1 次的 key（黄月英受击 / 赵云救命） */
+  onceUsedKey?: string
+
   // 视觉与文案
-  portrait?: string           // 立绘文件名（指向 src/assets/portraits/xxx.png）
+  portrait?: string           // 立绘文件名
+  cardvisual?: string         // v5.5 cardvisual 合成版文件名（asset/新增ui组件0605/边框+立绘/）
   description: string         // 卡牌效果文本（玩家可见）
   flavor?: string             // 风味文字（小字斜体）
 }
@@ -75,7 +106,6 @@ export interface CardData {
 
 /**
  * 卡牌实例：基于 CardData 派生，但带运行时状态
- * （比如生命值掉血、攻击力被 buff、关键词被沉默移除等）
  */
 export interface CardInstance {
   instanceId: string          // 唯一实例 ID（区分两张关羽）
@@ -94,6 +124,8 @@ export interface CardInstance {
   attacksThisTurn: number
   hasBeenSilenced: boolean
   summonedThisTurn?: boolean  // rush 限制英雄攻击用
+  frozen?: boolean            // v5.5 冰冻态（W12/W23/W26）
+  cannotAttackThisTurn?: boolean  // v5.5 本回合无法攻击（W18 火油 / W26 画地为牢）
 
   // 阵营归属（场上时记录控制者）
   owner?: 'player' | 'ai'
@@ -104,7 +136,7 @@ export interface CardInstance {
 // ============================================
 
 export interface Hero {
-  name: string                // "刘备" / "曹操" 等
+  name: string                // "刘备" / "孙权" 等
   faction: Faction
   health: number
   maxHealth: number
@@ -127,6 +159,12 @@ export interface PlayerState {
   weapon: CardInstance | null
   fatigue: number             // 疲劳计数器
   heroPowerUsed: boolean
+
+  // ============ v5.5 新增 ============
+  faction: Faction                  // 玩家所选阵营（shu / wu）
+  comboFlagsThisTurn: Set<ComboFlag>  // 本回合已激活的 combo flag
+  onceUsedKeys: Set<string>         // 已用过的 onceUsedKey（每局生效）
+  nextTurnManaBoost: number         // 下回合开始时 mana 临时 +N（屯田 / 暗度陈仓）
 }
 
 export type GamePhase = 'mulligan' | 'main' | 'ended'

@@ -1,0 +1,577 @@
+[
+  {
+    "id": "W01",
+    "name": "周瑜",
+    "cost": 5,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "legendary",
+    "attack": 3,
+    "health": 5,
+    "tribe": "strategist",
+    "keywords": ["spellpower"],
+    "anchorTag": "anchor_fire",
+    "portrait": "周瑜.png",
+    "cardvisual": "周瑜.png",
+    "description": "神算 1。锚点：火系谋略联动。",
+    "flavor": "雄姿英发，谈笑间，樯橹灰飞烟灭。"
+  },
+  {
+    "id": "W02",
+    "name": "鲁肃",
+    "cost": 4,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "epic",
+    "attack": 2,
+    "health": 4,
+    "tribe": "strategist",
+    "keywords": ["taunt"],
+    "anchorTag": "anchor_draw",
+    "portrait": "鲁肃.png",
+    "cardvisual": "鲁肃.png",
+    "description": "镇守。锚点：抽牌谋略联动。",
+    "flavor": "忠厚长者，运筹智士。"
+  },
+  {
+    "id": "W03",
+    "name": "大乔",
+    "cost": 3,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "epic",
+    "attack": 2,
+    "health": 3,
+    "tribe": "strategist",
+    "keywords": ["spellpower"],
+    "anchorTag": "anchor_heal",
+    "portrait": "大乔.png",
+    "cardvisual": "大乔.png",
+    "description": "神算 1。锚点：治疗谋略联动。",
+    "flavor": "江东二乔，国色天香。"
+  },
+  {
+    "id": "W04",
+    "name": "孙策",
+    "cost": 4,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "rare",
+    "attack": 4,
+    "health": 4,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "portrait": "孙策.png",
+    "cardvisual": "孙策.png",
+    "description": "突袭。",
+    "flavor": "小霸王孙伯符。"
+  },
+  {
+    "id": "W05",
+    "name": "甘宁",
+    "cost": 3,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 2,
+    "tribe": "infantry",
+    "keywords": ["rush"],
+    "portrait": "甘宁.png",
+    "cardvisual": "甘宁.png",
+    "description": "突袭。",
+    "flavor": "锦帆贼，江中独行。"
+  },
+  {
+    "id": "W06",
+    "name": "吕蒙",
+    "cost": 5,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "epic",
+    "attack": 3,
+    "health": 4,
+    "tribe": "strategist",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "setNextTurnManaBoost",
+        "params": { "amount": 3, "breakCap": true }
+      }
+    ],
+    "portrait": "吕蒙.png",
+    "cardvisual": "吕蒙.png",
+    "description": "威名（暗度陈仓）：下一回合开始时，你的法力 +3（允许临时破 10 cap，仅当回合）。",
+    "flavor": "白衣渡江，士别三日当刮目相待。"
+  },
+  {
+    "id": "W07",
+    "name": "周泰",
+    "cost": 4,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "common",
+    "attack": 3,
+    "health": 5,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "portrait": "周泰.png",
+    "cardvisual": "周泰.png",
+    "description": "镇守。",
+    "flavor": "幼平赤诚护主。"
+  },
+  {
+    "id": "W08",
+    "name": "吴国水军",
+    "cost": 2,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "common",
+    "attack": 2,
+    "health": 2,
+    "tribe": "infantry",
+    "portrait": "吴国水军.png",
+    "cardvisual": "吴国水军.png",
+    "description": "",
+    "flavor": "战舰百艘，横江而过。"
+  },
+  {
+    "id": "W09",
+    "name": "火烧赤壁",
+    "cost": 7,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "legendary",
+    "anchorRequirement": "anchor_fire",
+    "comboFlagSet": "combo_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 4, "targetType": "minion" }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 2, "targetType": "minion" }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 3 }
+      }
+    ],
+    "portrait": "火烧赤壁.png",
+    "cardvisual": "火烧赤壁.png",
+    "description": "对所有敌方武将造成 4 点伤害。锚点（周瑜）：额外 +2 伤（共 6 伤）+ 本回合归还 3 点法力。",
+    "flavor": "火光烛天，江风助势。"
+  },
+  {
+    "id": "W11",
+    "name": "行舟借势",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "common",
+    "anchorRequirement": "anchor_draw",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "drawCards",
+        "params": { "count": 1 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "drawCards",
+        "params": { "count": 1 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 1 }
+      }
+    ],
+    "portrait": "行舟借势.png",
+    "cardvisual": "行舟借势.png",
+    "description": "抽 1 张牌。锚点（鲁肃）：额外抽 1 张 + 本回合归还 1 费。",
+    "flavor": "顺势而为，水到渠成。"
+  },
+  {
+    "id": "W12",
+    "name": "周郎顾曲",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "anchorRequirement": "anchor_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "freeze",
+        "params": { "targetSelector": "enemyMinion" }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "attackDebuff",
+        "params": { "targetSelector": "enemyMinion", "amount": 1, "duration": "turn" }
+      }
+    ],
+    "portrait": "周郎顾曲.png",
+    "cardvisual": "周郎顾曲.png",
+    "description": "冻结一个敌方武将。锚点（周瑜）：该武将攻击力 -1（本回合）。",
+    "flavor": "曲有误，周郎顾。"
+  },
+  {
+    "id": "W13",
+    "name": "草船借箭",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "anchorRequirement": "anchor_draw",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "drawCards",
+        "params": { "count": 2 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 1 }
+      }
+    ],
+    "portrait": "草船借箭.png",
+    "cardvisual": "草船借箭.png",
+    "description": "对所有敌方武将造成 1 点伤害。锚点（鲁肃）：抽 2 张牌 + 本回合归还 1 费。",
+    "flavor": "雾锁长江，孔明从容。"
+  },
+  {
+    "id": "W14",
+    "name": "苦肉计",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "common",
+    "anchorRequirement": "anchor_draw",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageHero",
+        "params": { "side": "self", "amount": 2 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "drawCards",
+        "params": { "count": 2 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 1 }
+      }
+    ],
+    "portrait": "苦肉计.png",
+    "cardvisual": "苦肉计.png",
+    "description": "对己方英雄造成 2 点伤害。锚点（鲁肃）：抽 2 张牌 + 本回合归还 1 费。",
+    "flavor": "黄盖诈降，自请苦肉。"
+  },
+  {
+    "id": "W15",
+    "name": "运筹帷幄",
+    "cost": 4,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "anchorRequirement": "anchor_draw",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageHero",
+        "params": { "side": "self", "amount": 1 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "drawCards",
+        "params": { "count": 3 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 3 }
+      }
+    ],
+    "portrait": "运筹帷幄.png",
+    "cardvisual": "运筹帷幄.png",
+    "description": "对己方英雄造成 1 点伤害。锚点（鲁肃）：抽 3 张牌 + 本回合归还 3 费。",
+    "flavor": "运筹帷幄之中，决胜千里之外。"
+  },
+  {
+    "id": "W16",
+    "name": "固守待援",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "discover",
+        "params": { "type": "spell", "maxCost": 4 }
+      }
+    ],
+    "portrait": "固守待援.png",
+    "cardvisual": "固守待援.png",
+    "description": "发现一张费用 ≤4 的谋略卡。",
+    "flavor": "深沟高垒，静待王师。"
+  },
+  {
+    "id": "W17",
+    "name": "借东风",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "anchorRequirement": "anchor_heal",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "reduceNextSpellCost",
+        "params": { "amount": 2 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 3 }
+      }
+    ],
+    "portrait": "借东风.png",
+    "cardvisual": "借东风.png",
+    "description": "你下一张谋略 -2 费。锚点（大乔）：本回合归还 3 费。",
+    "flavor": "万事俱备，只欠东风。"
+  },
+  {
+    "id": "W18",
+    "name": "火油",
+    "cost": 1,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "comboFlagSet": "combo_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "cannotAttackThisTurn",
+        "params": { "targetSelector": "enemyMinion" }
+      }
+    ],
+    "portrait": "火油.png",
+    "cardvisual": "火油.png",
+    "description": "使一个敌方武将本回合无法攻击。",
+    "flavor": "未燃之火，蓄势而发。"
+  },
+  {
+    "id": "W19",
+    "name": "赤焰焚营",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "comboFlagRequirement": "combo_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamage",
+        "params": { "amount": 3, "targetSelector": "enemyAny" }
+      }
+    ],
+    "comboLinkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamage",
+        "params": { "amount": 3, "targetSelector": "lastDamageTarget" }
+      }
+    ],
+    "portrait": "赤焰焚营.png",
+    "cardvisual": "赤焰焚营.png",
+    "description": "对一目标造成 3 点伤害。combo（本回合打过火油）：额外 +3 伤（共 6）。",
+    "flavor": "火借风威，烧尽连营。"
+  },
+  {
+    "id": "W20",
+    "name": "反间计",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "comboFlagSet": "combo_betrayal",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "returnToHand",
+        "params": { "targetSelector": "enemyMinion", "maxCost": 3 }
+      }
+    ],
+    "portrait": "反间计.png",
+    "cardvisual": "反间计.png",
+    "description": "将一个 ≤3 费的敌方武将弹回对方手牌。",
+    "flavor": "蒋干盗书，反中其计。"
+  },
+  {
+    "id": "W21",
+    "name": "美人计",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "comboFlagRequirement": "combo_betrayal",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "steal",
+        "params": { "targetSelector": "enemyMinion", "maxCost": 3 }
+      }
+    ],
+    "comboLinkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "steal",
+        "params": { "targetSelector": "enemyMinion", "maxCost": 5 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "refundMana",
+        "params": { "amount": 2 }
+      }
+    ],
+    "portrait": "美人计.png",
+    "cardvisual": "美人计.png",
+    "description": "夺取一个 ≤3 费的敌方武将。combo（本回合打过反间计）：改为 ≤5 费 + 本回合归还 2 费。",
+    "flavor": "貂蝉离间，吕布反目。"
+  },
+  {
+    "id": "W22",
+    "name": "春风化雨",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "common",
+    "anchorRequirement": "anchor_heal",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "healHero",
+        "params": { "side": "self", "amount": 6 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "healHero",
+        "params": { "side": "self", "amount": 3 }
+      },
+      {
+        "trigger": "onCast",
+        "action": "buffAll",
+        "params": { "side": "self", "attack": 0, "health": 1 }
+      }
+    ],
+    "portrait": "春风化雨.png",
+    "cardvisual": "春风化雨.png",
+    "description": "恢复主公 6 点生命。锚点（大乔）：额外回 3 HP（共 9）+ 全友方武将 +0/+1。",
+    "flavor": "春风化雨，泽被万物。"
+  },
+  {
+    "id": "W23",
+    "name": "连环计",
+    "cost": 4,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "epic",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "freezeAll",
+        "params": { "side": "enemy" }
+      }
+    ],
+    "portrait": "连环计.png",
+    "cardvisual": "连环计.png",
+    "description": "冻结所有敌方武将。",
+    "flavor": "环环相扣，无可挣脱。"
+  },
+  {
+    "id": "W24",
+    "name": "古锭刀",
+    "cost": 3,
+    "type": "weapon",
+    "faction": "wu",
+    "rarity": "common",
+    "attack": 2,
+    "durability": 3,
+    "portrait": "gudingdao.png",
+    "cardvisual": "古锭刀.png",
+    "description": "",
+    "flavor": "孙坚旧物。"
+  },
+  {
+    "id": "W25",
+    "name": "程普",
+    "cost": 3,
+    "type": "minion",
+    "faction": "wu",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 2,
+    "tribe": "infantry",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "attackDebuff",
+        "params": { "targetSelector": "enemyMinion", "amount": 1, "duration": "permanent" }
+      }
+    ],
+    "portrait": "程普.png",
+    "cardvisual": "程普.png",
+    "description": "威名：使一个敌方武将攻击力 -1（永久）。",
+    "flavor": "江东老将，督帅之能。"
+  },
+  {
+    "id": "W26",
+    "name": "画地为牢",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "cannotAttackAdjacent",
+        "params": { "targetSelector": "enemyMinion" }
+      }
+    ],
+    "portrait": "画地为牢.png",
+    "cardvisual": "画地为牢.png",
+    "description": "使一个敌方武将本回合无法攻击，且其相邻武将下回合无法攻击。",
+    "flavor": "划地以困之。"
+  }
+]

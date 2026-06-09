@@ -1,108 +1,7 @@
 [
   {
     "id": "S01",
-    "name": "关羽",
-    "cost": 6,
-    "type": "minion",
-    "faction": "shu",
-    "rarity": "legendary",
-    "attack": 5,
-    "health": 6,
-    "tribe": "cavalry",
-    "keywords": ["rush"],
-    "effects": [
-      {
-        "trigger": "battlecry",
-        "action": "equipWeapon",
-        "params": { "weaponId": "WQ1" }
-      }
-    ],
-    "portrait": "guanyu.png",
-    "description": "突袭。威名：装备一把青龙偃月刀。",
-    "flavor": "「美髯公」温酒斩华雄。"
-  },
-  {
-    "id": "S02",
-    "name": "张飞",
-    "cost": 4,
-    "type": "minion",
-    "faction": "shu",
-    "rarity": "epic",
-    "attack": 4,
-    "health": 5,
-    "tribe": "infantry",
-    "keywords": ["taunt"],
-    "effects": [
-      {
-        "trigger": "deathrattle",
-        "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
-      }
-    ],
-    "portrait": "zhangfei.png",
-    "description": "镇守。遗志：对所有敌方武将造成 1 点伤害。",
-    "flavor": "燕人张翼德在此！"
-  },
-  {
-    "id": "S03",
-    "name": "桃园结义",
-    "cost": 3,
-    "type": "spell",
-    "faction": "shu",
-    "rarity": "rare",
-    "effects": [
-      {
-        "trigger": "onCast",
-        "action": "summonToken",
-        "params": { "tokenId": "TK_YIBING", "count": 3, "side": "self" }
-      }
-    ],
-    "portrait": "taoyuan.png",
-    "description": "召唤三个 1/2 的「义兵」（步兵）。",
-    "flavor": "不求同年同月同日生，但愿同年同月同日死。"
-  },
-  {
-    "id": "S04",
-    "name": "仁德之政",
-    "cost": 3,
-    "type": "spell",
-    "faction": "shu",
-    "rarity": "rare",
-    "effects": [
-      {
-        "trigger": "onCast",
-        "action": "buffAll",
-        "params": { "side": "self", "attack": 1, "health": 1 }
-      }
-    ],
-    "portrait": "rende.png",
-    "description": "使所有友方武将获得 +1/+1。",
-    "flavor": "惟贤惟德，能服于人。"
-  },
-  {
-    "id": "S05",
-    "name": "黄忠",
-    "cost": 4,
-    "type": "minion",
-    "faction": "shu",
-    "rarity": "rare",
-    "attack": 3,
-    "health": 4,
-    "tribe": "cavalry",
-    "effects": [
-      {
-        "trigger": "battlecry",
-        "action": "dealDamage",
-        "params": { "amount": 2, "targetSelector": "enemyMinion" }
-      }
-    ],
-    "portrait": "huangzhong.png",
-    "description": "威名：对一个敌方武将造成 2 点伤害。",
-    "flavor": "老将黄忠，请战！"
-  },
-  {
-    "id": "S06",
-    "name": "蜀国步兵",
+    "name": "蜀汉民兵",
     "cost": 1,
     "type": "minion",
     "faction": "shu",
@@ -110,11 +9,27 @@
     "attack": 2,
     "health": 1,
     "tribe": "infantry",
-    "portrait": "soldierofshu.png",
+    "portrait": "蜀汉民兵.png",
+    "cardvisual": "蜀汉民兵.png",
     "description": ""
   },
   {
-    "id": "S07",
+    "id": "S02",
+    "name": "蜀汉弓兵",
+    "cost": 2,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 3,
+    "health": 2,
+    "tribe": "infantry",
+    "portrait": "蜀汉弓兵.png",
+    "cardvisual": "蜀汉弓兵.png",
+    "description": "",
+    "flavor": "百步穿杨。"
+  },
+  {
+    "id": "S03",
     "name": "廖化",
     "cost": 2,
     "type": "minion",
@@ -125,33 +40,398 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "liaohua.png",
-    "description": "镇守。"
+    "description": "镇守。",
+    "flavor": "蜀中无大将，廖化作先锋。"
   },
   {
-    "id": "S08",
-    "name": "关平",
-    "cost": 4,
-    "type": "minion",
-    "faction": "shu",
-    "rarity": "common",
-    "attack": 4,
-    "health": 5,
-    "tribe": "cavalry",
-    "portrait": "guanping.png",
-    "description": ""
-  },
-  {
-    "id": "S09",
-    "name": "马岱",
+    "id": "S04",
+    "name": "御林军",
     "cost": 2,
     "type": "minion",
     "faction": "shu",
     "rarity": "common",
     "attack": 2,
-    "health": 2,
+    "health": 4,
     "tribe": "infantry",
+    "keywords": ["taunt"],
+    "portrait": "蜀汉御林军.png",
+    "cardvisual": "御林军.png",
+    "description": "镇守。",
+    "flavor": "宿卫之责。"
+  },
+  {
+    "id": "S05",
+    "name": "突阵骑",
+    "cost": 2,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 3,
+    "health": 1,
+    "tribe": "cavalry",
     "keywords": ["rush"],
-    "portrait": "madai.png",
+    "portrait": "突骑兵.png",
+    "cardvisual": "突骑兵.png",
     "description": "突袭。"
+  },
+  {
+    "id": "S06",
+    "name": "偏将军",
+    "cost": 3,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 3,
+    "health": 3,
+    "tribe": "infantry",
+    "portrait": "偏将军.png",
+    "cardvisual": "偏将军.png",
+    "description": ""
+  },
+  {
+    "id": "S07",
+    "name": "破虏校尉",
+    "cost": 3,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 2,
+    "health": 2,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "effects": [
+      {
+        "trigger": "deathrattle",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_WUZHU", "count": 1, "side": "self" }
+      }
+    ],
+    "portrait": "破虏校尉.png",
+    "cardvisual": "破虏校尉.png",
+    "description": "突袭。遗志：召唤一个 2/1 的「巫祝」。",
+    "flavor": "破虏将军，誓灭群雄。"
+  },
+  {
+    "id": "S08",
+    "name": "屯田",
+    "cost": 1,
+    "type": "spell",
+    "faction": "shu",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "setNextTurnManaBoost",
+        "params": { "amount": 2 }
+      }
+    ],
+    "portrait": "屯田.png",
+    "cardvisual": "屯田.png",
+    "description": "下一回合开始时，你的法力上限 +2（仅下回合）。",
+    "flavor": "兵马未动，粮草先行。"
+  },
+  {
+    "id": "S09",
+    "name": "魏延",
+    "cost": 5,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "epic",
+    "attack": 5,
+    "health": 4,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "buffMinion",
+        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 2, "permanent": true }
+      }
+    ],
+    "portrait": "魏延.png",
+    "cardvisual": "魏延.png",
+    "description": "突袭。威名：使一个友方武将获得 +2 攻击力（永久）。",
+    "flavor": "脑后有反骨。"
+  },
+  {
+    "id": "S10",
+    "name": "关平",
+    "cost": 3,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 2,
+    "health": 3,
+    "tribe": "infantry",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_YIBING", "count": 1, "side": "self" }
+      }
+    ],
+    "portrait": "guanping.png",
+    "description": "威名：召唤一个 1/1 的「义兵」。",
+    "flavor": "云长之义子。"
+  },
+  {
+    "id": "S11",
+    "name": "严颜",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 3,
+    "tribe": "infantry",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_YIBING", "count": 2, "side": "self" }
+      }
+    ],
+    "portrait": "严颜.png",
+    "cardvisual": "严颜.png",
+    "description": "威名：召唤两个 1/1 的「义兵」。",
+    "flavor": "断头将军。"
+  },
+  {
+    "id": "S12",
+    "name": "黄月英",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "epic",
+    "attack": 2,
+    "health": 4,
+    "tribe": "strategist",
+    "effects": [
+      {
+        "trigger": "onTakeDamage",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_MUNIULIUMA", "count": 1, "side": "self" }
+      }
+    ],
+    "onceUsedKey": "huangyueying_once",
+    "portrait": "黄月英.png",
+    "cardvisual": "黄月英.png",
+    "description": "受击：受到伤害且未死时召唤一个 1/1 的「木牛流马」（每张每局 1 次）。",
+    "flavor": "孔明之妻，巧思过人。"
+  },
+  {
+    "id": "S15",
+    "name": "黄忠",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 2,
+    "health": 3,
+    "tribe": "cavalry",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "dealDamageEqualToAttack",
+        "params": { "targetSelector": "enemyAny" }
+      }
+    ],
+    "portrait": "huangzhong.png",
+    "description": "威名：对一目标造成等于自己攻击力的伤害。",
+    "flavor": "老当益壮。"
+  },
+  {
+    "id": "S16",
+    "name": "马岱",
+    "cost": 4,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 3,
+    "tribe": "cavalry",
+    "keywords": ["rush", "windfury"],
+    "portrait": "madai.png",
+    "description": "突袭。连斩。",
+    "flavor": "锦马超之弟。"
+  },
+  {
+    "id": "S17",
+    "name": "马超",
+    "cost": 5,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "legendary",
+    "attack": 4,
+    "health": 3,
+    "tribe": "cavalry",
+    "keywords": ["charge"],
+    "portrait": "马超.png",
+    "cardvisual": "马超.png",
+    "description": "冲锋。",
+    "flavor": "锦马超，西凉之虎。"
+  },
+  {
+    "id": "S18",
+    "name": "关羽",
+    "cost": 7,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "legendary",
+    "attack": 4,
+    "health": 4,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "dynamicBuffByFriendlyCount",
+        "params": { "self": true, "perFriendly": { "attack": 1, "health": 1 } }
+      }
+    ],
+    "portrait": "guanyu.png",
+    "description": "突袭。威名：场上每个其他友方武将给关羽 +1/+1。",
+    "flavor": "美髯公，温酒斩华雄。"
+  },
+  {
+    "id": "S19",
+    "name": "张飞",
+    "cost": 5,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "epic",
+    "attack": 3,
+    "health": 3,
+    "tribe": "infantry",
+    "keywords": ["taunt"],
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "dynamicBuffByFriendlyCount",
+        "params": { "self": true, "perFriendly": { "attack": 1, "health": 1 } }
+      }
+    ],
+    "portrait": "zhangfei.png",
+    "description": "镇守。威名：场上每个其他友方武将给张飞 +1/+1。",
+    "flavor": "燕人张翼德在此！"
+  },
+  {
+    "id": "S20",
+    "name": "赵云",
+    "cost": 6,
+    "type": "minion",
+    "faction": "shu",
+    "rarity": "legendary",
+    "attack": 3,
+    "health": 3,
+    "tribe": "cavalry",
+    "keywords": ["rush"],
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "dynamicBuffByFriendlyCount",
+        "params": { "self": true, "perFriendly": { "attack": 1, "health": 1 } }
+      },
+      {
+        "trigger": "onTakeDamage",
+        "action": "preventLethalToOne",
+        "params": {}
+      }
+    ],
+    "onceUsedKey": "zhaoyun_once",
+    "portrait": "赵云.png",
+    "cardvisual": "赵云.png",
+    "description": "突袭。威名：场上每个其他友方武将给赵云 +1/+1。受致命伤时留 1 HP（每张每局 1 次）。",
+    "flavor": "七进七出，独闯曹营。"
+  },
+  {
+    "id": "S21",
+    "name": "武勇",
+    "cost": 1,
+    "type": "spell",
+    "faction": "shu",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "grantKeyword",
+        "params": { "targetSelector": "friendlyMinion", "keyword": "rush" }
+      }
+    ],
+    "portrait": "武勇.png",
+    "cardvisual": "武勇.png",
+    "description": "使一个友方武将获得突袭。"
+  },
+  {
+    "id": "S22",
+    "name": "万军取首",
+    "cost": 5,
+    "type": "spell",
+    "faction": "shu",
+    "rarity": "legendary",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "buffMinion",
+        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 1, "health": 1, "permanent": true }
+      },
+      {
+        "trigger": "onCast",
+        "action": "grantExtraAttack",
+        "params": { "targetSelector": "friendlyMinion", "count": 1 }
+      }
+    ],
+    "portrait": "万军取首.png",
+    "cardvisual": "万军取首.png",
+    "description": "使一个友方武将获得 +1/+1，并可于本回合再攻击 1 次。",
+    "flavor": "于百万军中取上将首级，如探囊取物。"
+  },
+  {
+    "id": "S23",
+    "name": "雌雄双股剑",
+    "cost": 3,
+    "type": "weapon",
+    "faction": "shu",
+    "rarity": "rare",
+    "attack": 2,
+    "durability": 2,
+    "effects": [
+      {
+        "trigger": "weaponAttack",
+        "action": "summonToken",
+        "params": { "tokenId": "TK_MINBING", "count": 1, "side": "self" }
+      }
+    ],
+    "portrait": "cixiongshuanggujian.png",
+    "cardvisual": "雌雄双股剑.png",
+    "description": "主公用此武器攻击后召唤一个 1/1 的「民兵」。",
+    "flavor": "玄德双股剑，左手雌右手雄。"
+  },
+  {
+    "id": "S24",
+    "name": "蛇矛",
+    "cost": 4,
+    "type": "weapon",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 3,
+    "durability": 3,
+    "portrait": "shemao.png",
+    "cardvisual": "丈八蛇矛.png",
+    "description": "",
+    "flavor": "丈八蛇矛，翼德专属。"
+  },
+  {
+    "id": "S25",
+    "name": "百锐刀",
+    "cost": 2,
+    "type": "weapon",
+    "faction": "shu",
+    "rarity": "common",
+    "attack": 2,
+    "durability": 2,
+    "portrait": "bairuidao.png",
+    "cardvisual": "百锐刀.png",
+    "description": ""
   }
 ]

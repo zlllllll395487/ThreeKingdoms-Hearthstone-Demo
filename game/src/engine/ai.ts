@@ -24,7 +24,7 @@ export async function takeAITurn(
   // ============================================
   let safety = 0
   while (safety++ < 20) {
-    if (engine.state.phase === 'ended') return
+    if ((engine.state.phase as string) === 'ended') return
     const playable = engine.state.ai.hand.filter((c) =>
       engine.canPlayCard(side, c.instanceId),
     )
@@ -47,7 +47,7 @@ export async function takeAITurn(
     }
     engine.playCard(side, card.instanceId, target)
     await onAfterAction()
-    if (engine.state.phase === 'ended') return
+    if ((engine.state.phase as string) === 'ended') return
   }
 
   // v5.5 出牌 → 攻击阶段缓冲（300ms，让玩家感知阶段切换）
@@ -58,7 +58,7 @@ export async function takeAITurn(
   // ============================================
   safety = 0
   while (safety++ < 20) {
-    if (engine.state.phase === 'ended') return
+    if ((engine.state.phase as string) === 'ended') return
     const attackers = getAttackers(engine, side)
     if (attackers.length === 0) break
     attackers.sort((a, b) => b.attack - a.attack)
@@ -68,7 +68,7 @@ export async function takeAITurn(
     const ok = engine.attack(side, attacker.id, target)
     if (!ok) break
     await onAfterAction()
-    if (engine.state.phase === 'ended') return
+    if ((engine.state.phase as string) === 'ended') return
   }
 
   // v5.5 回合结束前缓冲（让玩家看最终状态）
@@ -135,9 +135,9 @@ function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide)
 }
 
 function scoreSpellEffect(
-  engine: GameEngine,
+  _engine: GameEngine,
   eff: { action: string; params?: Record<string, unknown> },
-  side: PlayerSide,
+  _side: PlayerSide,
   player: { deck: unknown[]; hero: { health: number; maxHealth: number } },
 ): number {
   const p = eff.params ?? {}

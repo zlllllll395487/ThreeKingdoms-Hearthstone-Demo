@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd game && npm install && npm run build",
+  "outputDirectory": "game/dist",
+  "framework": null,
+  "installCommand": "echo 'install handled by buildCommand'",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

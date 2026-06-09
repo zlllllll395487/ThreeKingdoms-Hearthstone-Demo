@@ -98,7 +98,7 @@ const dealDamageHero: ActionFn = (engine, source, params) => {
 }
 
 /** S15 黄忠：对一目标造成等于自己攻击力的伤害 */
-const dealDamageEqualToAttack: ActionFn = (engine, source, params, target) => {
+const dealDamageEqualToAttack: ActionFn = (engine, source, _params, target) => {
   const amount = source.currentAttack
   if (!target) return
   if (target.kind === 'hero') {
@@ -162,7 +162,7 @@ const buffMinion: ActionFn = (engine, source, params, target) => {
 }
 
 /** v5.5 滚雪球公式（S18/S19/S20）：场上每个其他友方武将 → 自身 +N/+N */
-const dynamicBuffByFriendlyCount: ActionFn = (engine, source, params) => {
+const dynamicBuffByFriendlyCount: ActionFn = (engine, source, params, _target) => {
   const player = getPlayer(engine, source.owner!)
   const friendlyCount = player.board.filter((m) => m.instanceId !== source.instanceId).length
   const perFriendly = params.perFriendly as { attack: number; health: number }
@@ -176,6 +176,8 @@ const dynamicBuffByFriendlyCount: ActionFn = (engine, source, params) => {
 
 /** v5.5 S22 万军取首：让一友方武将本回合再攻击 1 次 */
 const grantExtraAttack: ActionFn = (engine, source, params, target) => {
+  void engine // mark used
+
   if (!target || target.kind !== 'minion') return
   const m = engine.findInstance(target.instanceId, target.side)
   if (!m) return
@@ -264,7 +266,7 @@ const addPermanentSpellPower: ActionFn = (engine, source, params) => {
 }
 
 /** W12 周郎顾曲：冻结一个敌方武将 */
-const freeze: ActionFn = (engine, source, params, target) => {
+const freeze: ActionFn = (engine, source, _params, target) => {
   if (!target || target.kind !== 'minion') return
   const m = engine.findInstance(target.instanceId, target.side)
   if (!m) return
@@ -285,7 +287,7 @@ const freezeAll: ActionFn = (engine, source, params) => {
 }
 
 /** W18 火油：使一个敌方武将本回合无法攻击 */
-const cannotAttackThisTurn: ActionFn = (engine, source, params, target) => {
+const cannotAttackThisTurn: ActionFn = (engine, source, _params, target) => {
   if (!target || target.kind !== 'minion') return
   const m = engine.findInstance(target.instanceId, target.side)
   if (!m) return
@@ -294,7 +296,7 @@ const cannotAttackThisTurn: ActionFn = (engine, source, params, target) => {
 }
 
 /** W26 画地为牢：使一个敌方武将本回合无法攻击 + 相邻武将下回合无法攻击 */
-const cannotAttackAdjacent: ActionFn = (engine, source, params, target) => {
+const cannotAttackAdjacent: ActionFn = (engine, source, _params, target) => {
   if (!target || target.kind !== 'minion') return
   const m = engine.findInstance(target.instanceId, target.side)
   if (!m) return

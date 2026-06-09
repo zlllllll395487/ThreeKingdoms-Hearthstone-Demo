@@ -10,7 +10,7 @@
 
 import { create } from 'zustand'
 import { GameEngine, type TargetRef } from '@/engine'
-import type { GameState, PlayerSide } from '@/engine/types'
+import type { GameState } from '@/engine/types'
 import type { LogEntry } from '@/engine/events'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
 import { takeAITurn } from '@/engine/ai'

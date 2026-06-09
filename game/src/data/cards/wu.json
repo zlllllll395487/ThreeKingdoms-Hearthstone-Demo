@@ -63,7 +63,7 @@
     "keywords": ["rush"],
     "portrait": "孙策.png",
     "cardvisual": "孙策.png",
-    "description": "突袭。",
+    "description": "突袭。（登场回合可攻击敌方武将，不可攻击英雄）",
     "flavor": "小霸王孙伯符。"
   },
   {
@@ -79,7 +79,7 @@
     "keywords": ["rush"],
     "portrait": "甘宁.png",
     "cardvisual": "甘宁.png",
-    "description": "突袭。",
+    "description": "突袭。（登场回合可攻击敌方武将，不可攻击英雄）",
     "flavor": "锦帆贼，江中独行。"
   },
   {
@@ -117,7 +117,7 @@
     "keywords": ["taunt"],
     "portrait": "周泰.png",
     "cardvisual": "周泰.png",
-    "description": "镇守。",
+    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
     "flavor": "幼平赤诚护主。"
   },
   {
@@ -433,7 +433,7 @@
     ],
     "portrait": "反间计.png",
     "cardvisual": "反间计.png",
-    "description": "将一个 ≤3 费的敌方武将弹回对方手牌。",
+    "description": "将一个 ≤3 费的敌方武将送回对方手牌。",
     "flavor": "蒋干盗书，反中其计。"
   },
   {

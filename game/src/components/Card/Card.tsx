@@ -8,6 +8,8 @@ interface CardProps {
   card: CardData
   scale?: number
   onClick?: () => void
+  /** 点击立绘是否弹放大预览（Codex 用 true，对战手牌用 false） */
+  enableZoom?: boolean
 }
 
 // ============================================
@@ -51,7 +53,7 @@ const KEYWORD_BADGES: Record<string, string> = {
 // 卡牌组件
 // ============================================
 
-export function Card({ card, scale = 1, onClick }: CardProps) {
+export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps) {
   const [zoomed, setZoomed] = useState(false)
   const portraitUrl = getPortraitUrl(card.portrait)
   const cardVisualFile = getCardVisualFile(card.portrait)
@@ -71,7 +73,7 @@ export function Card({ card, scale = 1, onClick }: CardProps) {
       : null
 
   const handleVisualClick = (e: React.MouseEvent) => {
-    if (!portraitUrl) return
+    if (!enableZoom || !portraitUrl) return
     e.stopPropagation()
     setZoomed(true)
   }

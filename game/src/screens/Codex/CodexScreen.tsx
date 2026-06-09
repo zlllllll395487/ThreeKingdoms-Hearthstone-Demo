@@ -136,7 +136,7 @@ export function CodexScreen() {
         ) : (
           <div className={styles.cardsGrid}>
             {filteredCards.map((card) => (
-              <Card key={card.id} card={card} />
+              <Card key={card.id} card={card} enableZoom />
             ))}
           </div>
         )}

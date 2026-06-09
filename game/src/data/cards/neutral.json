@@ -55,7 +55,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "panfeng.png",
-    "description": "镇守。",
+    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
     "flavor": "吾有上将潘凤，可斩华雄！"
   },
   {
@@ -70,7 +70,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "xingdaorong.png",
-    "description": "镇守。",
+    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
     "flavor": "零陵上将军。"
   },
   {

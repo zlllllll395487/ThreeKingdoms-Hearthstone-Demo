@@ -7,6 +7,7 @@ import { MainMenu } from '@/screens/MainMenu/MainMenu'
 import { CodexScreen } from '@/screens/Codex/CodexScreen'
 import { SubPageScreen } from '@/screens/SubPage/SubPageScreen'
 import { BattleScreen } from '@/screens/Battle/BattleScreen'
+import { FactionSelectScreen } from '@/screens/FactionSelect/FactionSelectScreen'
 import { ResultScreen } from '@/screens/Result/ResultScreen'
 import { DevelopingModal } from '@/components/Modal/DevelopingModal'
 
@@ -78,6 +79,7 @@ function App() {
         {currentScreen === 'signin' && <SubPageScreen screen="signin" />}
         {currentScreen === 'friends' && <SubPageScreen screen="friends" />}
         {currentScreen === 'news' && <SubPageScreen screen="news" />}
+        {currentScreen === 'factionselect' && <FactionSelectScreen />}
         {currentScreen === 'battle' && <BattleScreen />}
         {currentScreen === 'result' && <ResultScreen />}
 

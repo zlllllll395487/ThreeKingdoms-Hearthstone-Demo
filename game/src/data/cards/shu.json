@@ -40,7 +40,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "liaohua.png",
-    "description": "镇守。",
+    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
     "flavor": "蜀中无大将，廖化作先锋。"
   },
   {
@@ -56,7 +56,7 @@
     "keywords": ["taunt"],
     "portrait": "蜀汉御林军.png",
     "cardvisual": "御林军.png",
-    "description": "镇守。",
+    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
     "flavor": "宿卫之责。"
   },
   {
@@ -72,7 +72,7 @@
     "keywords": ["rush"],
     "portrait": "突骑兵.png",
     "cardvisual": "突骑兵.png",
-    "description": "突袭。"
+    "description": "突袭。（登场回合可攻击敌方武将，不可攻击英雄）"
   },
   {
     "id": "S06",
@@ -252,7 +252,7 @@
     "tribe": "cavalry",
     "keywords": ["rush", "windfury"],
     "portrait": "madai.png",
-    "description": "突袭。连斩。",
+    "description": "突袭。连斩。（登场可攻武将；每回合可攻击 2 次）",
     "flavor": "锦马超之弟。"
   },
   {
@@ -268,7 +268,7 @@
     "keywords": ["charge"],
     "portrait": "马超.png",
     "cardvisual": "马超.png",
-    "description": "冲锋。",
+    "description": "冲锋。（登场回合可立即攻击任意目标，含敌方英雄）",
     "flavor": "锦马超，西凉之虎。"
   },
   {

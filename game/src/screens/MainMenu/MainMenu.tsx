@@ -141,7 +141,7 @@ export function MainMenu() {
         {/* 中层：对战主大卡 */}
         <button
           className={styles.cardBattle}
-          onClick={() => navigate('battle')}
+          onClick={() => navigate('factionselect')}
           aria-label="对战"
         >
           {cardBattleUrl && <img src={cardBattleUrl} alt="对战" />}

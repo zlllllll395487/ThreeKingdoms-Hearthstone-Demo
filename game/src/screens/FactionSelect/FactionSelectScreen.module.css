@@ -1,0 +1,218 @@
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  animation: fadeIn 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 80px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  animation: bgBreathe 18s ease-in-out infinite;
+}
+
+@keyframes bgBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.backButton {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  width: 140px;
+  height: 60px;
+  transition: transform 0.15s ease;
+}
+
+.backButton:hover {
+  transform: scale(1.05);
+}
+
+.backButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.backButton span {
+  font-size: 24px;
+  color: #f5e6c2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.title {
+  position: relative;
+  z-index: 2;
+  font-size: 56px;
+  font-weight: 800;
+  color: #f5e6c2;
+  letter-spacing: 16px;
+  margin: 0 0 60px;
+  text-shadow:
+    0 0 30px rgba(255, 200, 80, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.9);
+  font-family: 'AlibabaPuHuiTi-3-105-Heavy', sans-serif;
+}
+
+.cards {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 120px;
+  margin-bottom: 80px;
+  align-items: center;
+}
+
+.factionCard {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 480px;
+  height: 720px;
+  position: relative;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  filter: brightness(0.85) saturate(0.85);
+}
+
+.factionCard:hover {
+  transform: translateY(-12px) scale(1.03);
+  filter: brightness(1) saturate(1);
+}
+
+.factionCard.selected {
+  transform: translateY(-20px) scale(1.06);
+  filter: brightness(1.1) saturate(1.15);
+}
+
+.factionCardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.8));
+}
+
+.selectedGlow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 200, 80, 0.4) 0%,
+    rgba(255, 150, 40, 0.15) 50%,
+    transparent 75%
+  );
+  pointer-events: none;
+  z-index: -1;
+  animation: glowPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.placeholderShu,
+.placeholderWu {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 240px;
+  font-weight: 900;
+  color: #f5e6c2;
+  border: 3px solid #8b6f47;
+  border-radius: 16px;
+  background: rgba(40, 26, 18, 0.6);
+}
+
+.placeholderShu { color: #4a9d5e; }
+.placeholderWu  { color: #c93a3a; }
+
+.startButton {
+  position: relative;
+  z-index: 2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 360px;
+  height: 110px;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.startButton:hover:not(:disabled) {
+  transform: scale(1.06);
+  filter: brightness(1.15);
+}
+
+.startButton:disabled,
+.startButton[data-disabled='true'] {
+  cursor: not-allowed;
+  filter: grayscale(0.7) brightness(0.5);
+  opacity: 0.6;
+}
+
+.startButtonImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.7));
+}
+
+.startText {
+  font-size: 40px;
+  font-weight: 800;
+  color: #f5e6c2;
+  letter-spacing: 8px;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.9);
+}
+
+.preview {
+  position: relative;
+  z-index: 2;
+  margin-top: 30px;
+  font-size: 24px;
+  color: #d4c098;
+  letter-spacing: 4px;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  animation: previewFadeIn 0.3s ease-out;
+}
+
+@keyframes previewFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

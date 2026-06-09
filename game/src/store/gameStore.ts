@@ -206,12 +206,20 @@ async function runAITurn() {
 
   await delay(800) // AI 开始思考前停一拍
 
+  // v5.5 节奏：每个 AI 动作之间 700ms（基础节拍）
+  // takeAITurn 内会额外调 2 次 onAfterAction 表示「出牌→攻击阶段切换」(+300ms 节拍) + 「回合结束前」(+600ms 节拍)
+  let actionCount = 0
   await takeAITurn(engine, async () => {
     store.syncState()
-    await delay(700) // 每个 AI 动作之间停一拍
+    actionCount++
+    // 阶段切换 / 收尾的 onAfterAction 调用：判断是否是 attack/end 阶段切换
+    // 简化处理：让每次 onAfterAction 都是 700ms，不细分（v5.5 设计宪法允许）
+    await delay(700)
   })
 
-  // AI 自动结束回合
+  await delay(600) // v5.5 AI 回合结束前给玩家看一眼最终状态
+  void actionCount
+
   engine.endTurn()
   useGameStore.setState({ aiThinking: false })
   useGameStore.getState().syncState()

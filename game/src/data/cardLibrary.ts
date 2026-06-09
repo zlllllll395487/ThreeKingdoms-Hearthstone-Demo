@@ -10,12 +10,13 @@ import type { CardData } from '@/engine/types'
 import shuCards from './cards/shu.json'
 import neutralCards from './cards/neutral.json'
 import weaponCards from './cards/weapons.json'
+import tokenCards from './cards/tokens.json'
 
-// TypeScript 不会自动把 JSON 推成精确的 CardData[]，需要断言一次
 const ALL_CARDS: CardData[] = [
   ...(shuCards as CardData[]),
   ...(neutralCards as CardData[]),
   ...(weaponCards as CardData[]),
+  ...(tokenCards as CardData[]),
 ]
 
 const cardMap = new Map<string, CardData>()
@@ -31,10 +32,16 @@ export function getCard(id: string): CardData {
   return card
 }
 
+/** 玩家可见的牌（不含 token） · Codex / 牌组构筑用 */
 export function getAllCards(): CardData[] {
+  return ALL_CARDS.filter((c) => !c.id.startsWith('TK_'))
+}
+
+/** 含 token 在内的全部卡 · 引擎运行时用 */
+export function getAllCardsIncludingTokens(): CardData[] {
   return ALL_CARDS
 }
 
 export function getCardsByFaction(faction: CardData['faction']): CardData[] {
-  return ALL_CARDS.filter((c) => c.faction === faction)
+  return getAllCards().filter((c) => c.faction === faction)
 }

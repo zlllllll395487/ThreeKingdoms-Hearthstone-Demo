@@ -1,0 +1,757 @@
+/* BattleScreen · 1920×1080 HS 风分区布局
+   - 顶中：AI 手牌(扇)、AI 头像、AI 战场
+   - 顶右：AI 法力(X/X + 水晶)、AI 牌组角标
+   - 中央：分隔 + 回合切换提示（淡出动画）
+   - 底中：玩家战场、玩家头像、玩家手牌(大扇)
+   - 底右：玩家法力、玩家牌组角标
+   - 右中：结束回合按钮独立悬浮
+   - 左上：退出按钮独立小角
+*/
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-serif);
+  color: var(--color-paper);
+}
+
+.loadingScreen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: var(--color-paper);
+  font-family: var(--font-kai);
+  font-size: 32px;
+  letter-spacing: 8px;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.bgVignette {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 30%,
+    rgba(0, 0, 0, 0.35) 80%,
+    rgba(0, 0, 0, 0.65) 100%
+  );
+  pointer-events: none;
+}
+
+/* ============================================
+   左上 · 退出按钮（小尺寸不挡 AI 头像）
+   ============================================ */
+
+.quitFixed {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 30;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.quitFixed img {
+  height: 36px;
+  width: auto;
+  display: block;
+}
+
+.quitFixed:hover {
+  transform: translateX(-3px) scale(1.06);
+  filter: drop-shadow(0 6px 14px rgba(212, 160, 23, 0.6));
+}
+
+/* ============================================
+   AI 手牌（顶中小扇）
+   ============================================ */
+
+.aiHandRow {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.cardBack {
+  width: 80px;
+  height: 110px;
+  margin-left: -24px;
+  border-radius: 6px;
+  overflow: hidden;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+.cardBack:first-child {
+  margin-left: 0;
+}
+
+.cardBack img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  user-select: none;
+}
+
+/* ============================================
+   AI 头像（左上 · 退出按钮下方）
+   ============================================ */
+
+.aiHeroBox {
+  position: absolute;
+  top: 80px;
+  left: 24px;
+  z-index: 5;
+}
+
+/* ============================================
+   AI 法力（顶右）
+   ============================================ */
+
+.aiManaBox {
+  position: absolute;
+  top: 32px;
+  right: 130px;
+  z-index: 5;
+}
+
+/* ============================================
+   AI 牌组（顶右角小角标）
+   ============================================ */
+
+.aiDeckBadge,
+.playerDeckBadge {
+  position: absolute;
+  width: 56px;
+  height: 80px;
+  z-index: 5;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.7));
+}
+
+.aiDeckBadge {
+  top: 32px;
+  right: 32px;
+}
+
+.playerDeckBadge {
+  bottom: 32px;
+  right: 32px;
+}
+
+.aiDeckBadge img,
+.playerDeckBadge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+}
+
+.aiDeckBadge span,
+.playerDeckBadge span {
+  position: absolute;
+  bottom: -6px;
+  right: -8px;
+  background: linear-gradient(180deg, #2a1f15, #110a04);
+  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 14px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(212, 160, 23, 0.7);
+}
+
+/* ============================================
+   战场区（双方各 7 槽位 + minion 行）
+   ============================================ */
+
+.boardZone {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1100px;
+  height: 170px;
+  z-index: 4;
+}
+
+.boardAi {
+  top: 290px;
+}
+
+.boardPlayer {
+  top: 540px;
+}
+
+/* 7 槽位虚线圆背景 · 始终在底层 */
+.slotRow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.slot {
+  width: 110px;
+  height: 150px;
+  border: 2px dashed rgba(212, 160, 23, 0.18);
+  border-radius: 12px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(212, 160, 23, 0.06) 0%,
+    transparent 70%
+  );
+  transition: opacity 0.3s ease;
+}
+
+.slot[data-occupied='true'] {
+  opacity: 0;
+}
+
+/* minion 行 · 落在槽位上方 */
+.minionRow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 1;
+}
+
+/* 死亡淡出 minion */
+.dyingMinion {
+  pointer-events: none;
+  animation: minionFadeOut 0.4s ease-out forwards;
+}
+
+@keyframes minionFadeOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(15deg);
+    filter: brightness(0.3) blur(2px);
+  }
+}
+
+/* ============================================
+   英雄展示
+   ============================================ */
+
+.playerHeroBox {
+  position: absolute;
+  bottom: 80px;
+  left: 24px;
+  z-index: 5;
+}
+
+.heroDisplay {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: default;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.75));
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+
+.heroPortraitWrap {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(180deg, #2a1f15, #110a04);
+}
+
+.heroPortrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+.heroPortraitPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-kai);
+  font-size: 56px;
+  color: var(--color-gold);
+}
+
+.heroHealth {
+  position: absolute;
+  bottom: -10px;
+  right: -16px;
+  width: 56px;
+  height: 52px;
+  background-color: transparent;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 20px;
+  color: #fff5d8;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.9);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+  z-index: 2;
+}
+
+.heroHealth span {
+  position: relative;
+  z-index: 1;
+  /* 心形顶部偏上视觉中心，文字向上 4px 居于心形几何中心偏上 */
+  margin-top: -6px;
+}
+
+.heroHealthDamaged {
+  animation: damagePulse 0.5s ease-out;
+}
+
+@keyframes damagePulse {
+  0% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+.heroAttack {
+  position: absolute;
+  bottom: -4px;
+  left: -10px;
+  background: linear-gradient(180deg, #5a3a18, #2e1e08);
+  color: #fff5d8;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 16px;
+  border: 1.5px solid rgba(255, 220, 100, 0.7);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+  z-index: 2;
+}
+
+.heroArmor {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: linear-gradient(180deg, #3d8b5c, #1e4a30);
+  color: #fff5d8;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 13px;
+  border: 1.5px solid rgba(120, 220, 130, 0.7);
+  z-index: 2;
+}
+
+.heroWeapon {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--color-gold);
+  background: rgba(20, 12, 8, 0.92);
+  padding: 3px 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(212, 160, 23, 0.6);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.heroSelected .heroPortraitWrap {
+  box-shadow: 0 0 0 3px rgba(255, 220, 100, 1), 0 0 24px rgba(255, 220, 100, 0.85);
+}
+
+.heroCanAttack {
+  cursor: pointer;
+}
+.heroCanAttack .heroPortraitWrap {
+  box-shadow: 0 0 0 3px rgba(120, 220, 130, 0.85), 0 0 12px rgba(120, 220, 130, 0.5);
+}
+.heroCanAttack:hover {
+  transform: translateY(-3px);
+}
+
+.heroTargetable {
+  cursor: crosshair;
+}
+.heroTargetable .heroPortraitWrap {
+  animation: heroTargetPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes heroTargetPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(220, 60, 50, 0.85), 0 0 12px rgba(220, 60, 50, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 100, 80, 1), 0 0 24px rgba(255, 100, 80, 0.9);
+  }
+}
+
+/* ============================================
+   法力水晶（X/X + 水晶横排）
+   ============================================ */
+
+.manaDisplay {
+  width: 360px;
+  height: 157px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+}
+
+.manaCounter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.manaCounter span {
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 22px;
+  color: #ffd060;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 8px rgba(70, 140, 240, 0.6);
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.manaCrystals {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.manaCrystal {
+  height: 28px;
+  width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+.manaCrystalFallback {
+  width: 14px;
+  height: 28px;
+  background: linear-gradient(180deg, #1e5fc8, #0a2860);
+  clip-path: polygon(50% 0, 100% 35%, 100% 65%, 50% 100%, 0 65%, 0 35%);
+}
+.manaCrystalFallback[data-full='false'] {
+  background: linear-gradient(180deg, #3a3a42, #1c1c20);
+}
+
+.playerManaBox {
+  position: absolute;
+  bottom: 32px;
+  right: 130px;
+  z-index: 5;
+}
+
+/* ============================================
+   中央 · 回合切换提示（key 重挂触发淡出）
+   ============================================ */
+
+.turnIndicator {
+  position: absolute;
+  top: 460px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: 720px;
+  height: 176px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.7));
+  animation: turnIndicatorPopFade 1.5s ease-out forwards;
+}
+
+/* 对局结束 · 纯文字胜负 */
+.endedText {
+  position: absolute;
+  top: 460px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  font-family: var(--font-kai);
+  font-size: 64px;
+  letter-spacing: 24px;
+  color: #ffd060;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 1), 0 0 32px rgba(212, 160, 23, 0.85);
+  pointer-events: none;
+  animation: endedTextPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes endedTextPop {
+  from { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes turnIndicatorPopFade {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.95);
+  }
+}
+
+/* ============================================
+   结束回合按钮（右中独立悬浮）
+   ============================================ */
+
+.endTurnFixed {
+  position: absolute;
+  top: 50%;
+  right: 32px;
+  transform: translateY(-50%);
+  z-index: 8;
+  width: 130px;
+  height: 130px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.endTurnFixed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.endTurnFixed:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.08);
+  filter: drop-shadow(0 0 20px rgba(255, 200, 80, 0.95));
+}
+
+.endTurnFixed:active:not(:disabled) {
+  transform: translateY(-50%) scale(0.96);
+}
+
+.endTurnFixed:disabled {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.7)) brightness(0.55) saturate(0.4);
+  cursor: not-allowed;
+}
+
+/* ============================================
+   玩家手牌（底部大扇 + hover 让位）
+   ============================================ */
+
+.playerHand {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9;
+  pointer-events: none;
+  padding-bottom: 0;
+}
+
+.handSlot {
+  pointer-events: auto;
+  margin: 0 -36px;
+  transform: rotate(var(--rot)) translateY(var(--lift));
+  transform-origin: center bottom;
+  transition: transform 0.22s ease, filter 0.22s ease;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.75));
+  cursor: pointer;
+}
+
+.handSlot:hover {
+  transform: translateY(-72px) scale(1.3) rotate(0deg) !important;
+  filter: drop-shadow(0 14px 28px rgba(212, 160, 23, 0.8))
+    drop-shadow(0 0 16px rgba(255, 220, 100, 0.6));
+  z-index: 100 !important;
+}
+
+/* 邻卡让位（左侧让位 -30px、右侧让位 +30px）*/
+.handSlot:has(~ .handSlot:hover) {
+  transform: rotate(var(--rot)) translate(-30px, calc(var(--lift) - 6px));
+}
+
+.handSlot:hover ~ .handSlot {
+  transform: rotate(var(--rot)) translate(30px, calc(var(--lift) - 6px));
+}
+
+.handSlotSelected {
+  transform: translateY(-80px) scale(1.32) rotate(0deg) !important;
+  filter: drop-shadow(0 16px 32px rgba(255, 220, 100, 1))
+    drop-shadow(0 0 20px rgba(255, 220, 100, 0.85)) !important;
+  z-index: 101 !important;
+}
+
+.handSlotUnplayable {
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.7)) brightness(0.5) saturate(0.35);
+  cursor: not-allowed;
+}
+
+.handSlotUnplayable:hover {
+  transform: rotate(var(--rot)) translate(0, calc(var(--lift) - 12px)) !important;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.7)) brightness(0.65) saturate(0.5);
+}
+
+/* ============================================
+   提示
+   ============================================ */
+
+.aiThinkingHint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 50;
+  width: 560px;
+  height: 142px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 16px rgba(212, 160, 23, 0.4));
+  animation: thinkingPulse 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes thinkingPulse {
+  0%, 100% { opacity: 0.92; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+.targetHint {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  background: linear-gradient(180deg, rgba(220, 60, 50, 0.95), rgba(140, 30, 25, 0.95));
+  color: #fff5d8;
+  font-family: var(--font-kai);
+  font-size: 18px;
+  letter-spacing: 4px;
+  padding: 10px 28px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(255, 200, 80, 0.7);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* ============================================
+   长按详情弹窗（全屏 portal · scale 2 显示 Card）
+   ============================================ */
+
+.detailOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 2, 0.88);
+  backdrop-filter: blur(6px);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  animation: detailFadeIn 0.18s ease-out;
+}
+
+.detailCardWrap {
+  pointer-events: none;
+  filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.9))
+    drop-shadow(0 0 32px rgba(212, 160, 23, 0.45));
+  animation: detailPopIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.detailHint {
+  margin-top: 32px;
+  font-family: var(--font-kai);
+  font-size: 16px;
+  letter-spacing: 6px;
+  color: rgba(245, 230, 200, 0.6);
+  user-select: none;
+}
+
+@keyframes detailFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes detailPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -1,20 +1,35 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useUIStore } from '@/store/uiStore'
+import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 
 /**
- * 战后结算界面 · 占位版（带胜利/失败背景 + L2 动效）
- *
- * 真正功能在 W2-W4 实装：
- *   - 真实战绩展示（伤害、击杀、回合数等）
- *   - 经验 / 金币奖励
- *   - 「再来一局」流程
- *
- * Demo 阶段：随机显示胜/负，给用户感受切换
+ * 战后结算界面 · 读取 gameStore.state.winner 显示真实胜负
  */
 export function ResultScreen() {
   const navigate = useUIStore((s) => s.navigate)
-  const [isVictory] = useState(() => Math.random() > 0.5)
+  const state = useGameStore((s) => s.state)
+  const startGame = useGameStore((s) => s.startGame)
+  const endGame = useGameStore((s) => s.endGame)
+
+  // 优先读真实战斗结果；没结果则随机（如直接跳转测试）
+  const winner = state?.winner
+  const [isVictory] = useState(() => {
+    if (winner === 'player') return true
+    if (winner === 'ai') return false
+    return Math.random() > 0.5
+  })
+
+  // 战绩信息（如有真实战斗）
+  const stats = useMemo(() => {
+    if (!state) return null
+    return {
+      turn: state.turn,
+      playerHp: Math.max(0, state.player.hero.health),
+      aiHp: Math.max(0, state.ai.hero.health),
+    }
+  }, [state])
+
   const bgUrl = getUiAssetUrl(
     isVictory ? 'win_background.png' : 'defeat_background.png'
   )
@@ -23,6 +38,17 @@ export function ResultScreen() {
   )
   const btnBackMenuUrl = getUiAssetUrl('btn_back_menu.png')
   const btnBattleAgainUrl = getUiAssetUrl('btn_battle_again.png')
+
+  const handleAgain = () => {
+    endGame()
+    startGame()
+    navigate('battle')
+  }
+
+  const handleQuit = () => {
+    endGame()
+    navigate('mainmenu')
+  }
 
   return (
     <div
@@ -172,7 +198,9 @@ export function ResultScreen() {
           animation: 'resultFadeIn 1s ease-out 1s both',
         }}
       >
-        战绩、经验、奖励等详细信息将在 W4 实装
+        {stats
+          ? `历经 ${stats.turn} 回合 · 你 ${stats.playerHp} HP · 对手 ${stats.aiHp} HP`
+          : '战绩、经验、奖励等详细信息将在 W4 实装'}
       </p>
 
       <div
@@ -188,12 +216,12 @@ export function ResultScreen() {
         <ResultButton
           iconUrl={btnBackMenuUrl}
           altText="返回主菜单"
-          onClick={() => navigate('mainmenu')}
+          onClick={handleQuit}
         />
         <ResultButton
           iconUrl={btnBattleAgainUrl}
           altText="再战一场"
-          onClick={() => navigate('battle')}
+          onClick={handleAgain}
           highlight
         />
       </div>

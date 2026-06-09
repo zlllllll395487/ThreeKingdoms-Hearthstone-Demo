@@ -93,6 +93,7 @@ export interface CardInstance {
   exhausted: boolean          // 召唤失调（本回合不能攻击）
   attacksThisTurn: number
   hasBeenSilenced: boolean
+  summonedThisTurn?: boolean  // rush 限制英雄攻击用
 
   // 阵营归属（场上时记录控制者）
   owner?: 'player' | 'ai'

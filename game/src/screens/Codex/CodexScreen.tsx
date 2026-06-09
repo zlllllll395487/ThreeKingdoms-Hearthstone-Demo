@@ -1,15 +1,28 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { Card } from '@/components/Card/Card'
 import { getAllCards } from '@/data/cardLibrary'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import styles from './CodexScreen.module.css'
 
-type CodexTab = 'shu' | 'neutral' | 'weapon'
+type CodexTab = 'shu' | 'wei' | 'wu' | 'qun' | 'neutral' | 'weapon'
+
+const TAB_ORDER: CodexTab[] = ['shu', 'wei', 'wu', 'qun', 'neutral', 'weapon']
+
+const TAB_STAMP_FILES: Record<CodexTab, string> = {
+  shu: 'tab_shu.png',
+  wei: 'tab_wei.png',
+  wu: 'tab_wu.png',
+  qun: 'tab_qun.png',
+  neutral: 'tab_neutral.png',
+  weapon: 'tab_weapon.png',
+}
 
 const TAB_LABELS: Record<CodexTab, string> = {
   shu: '蜀',
+  wei: '魏',
+  wu: '吴',
+  qun: '群',
   neutral: '中立',
   weapon: '兵器',
 }
@@ -17,46 +30,36 @@ const TAB_LABELS: Record<CodexTab, string> = {
 /**
  * 图鉴页 · 浏览所有卡牌
  *
- * 设计：
- *   - Tab 切换（蜀 / 中立 / 兵器）
- *   - 复用 Card 组件
- *   - 不做编辑功能（M0 只浏览）
+ * - 6 圆印章 Tab（蜀/魏/吴/群/中立/兵器）
+ * - 印章 PNG 自带文字，CSS 不再渲染文字标签
+ * - 暂无卡牌的 Tab 显示「暂无卡牌」
  */
 export function CodexScreen() {
   const navigate = useUIStore((s) => s.navigate)
   const [activeTab, setActiveTab] = useState<CodexTab>('shu')
-  const bgUrl = getUiAssetUrl('codex_background.png')
-  const btnTabUrl = getUiAssetUrl('btn_tab.png')
-
   const allCards = getAllCards()
 
   // 按 Tab 过滤
   const filteredCards = allCards.filter((c) => {
     if (activeTab === 'weapon') return c.type === 'weapon'
-    if (activeTab === 'shu') return c.faction === 'shu' && c.type !== 'weapon'
-    if (activeTab === 'neutral')
-      return c.faction === 'neutral' && c.type !== 'weapon'
-    return false
+    if (c.type === 'weapon') return false
+    return c.faction === activeTab
   })
 
   return (
-    <div
-      className={styles.container}
-      style={{
-        '--btn-tab-bg': btnTabUrl ? `url(${btnTabUrl})` : 'none',
-      } as CSSProperties}
-    >
+    <div className={styles.container}>
       <div
         className={styles.background}
-        style={
-          bgUrl
+        style={(() => {
+          const bgUrl = getUiAssetUrl('codex_background.png')
+          return bgUrl
             ? {
                 backgroundImage: `url(${bgUrl})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }
             : undefined
-        }
+        })()}
       />
       <div className={styles.vignette} />
 
@@ -94,29 +97,23 @@ export function CodexScreen() {
         <span className={styles.count}>共 {allCards.length} 张</span>
       </header>
 
-      {/* Tab 切换 */}
+      {/* Tab 切换 · 6 圆印章 */}
       <nav className={styles.tabBar}>
-        {(Object.keys(TAB_LABELS) as CodexTab[]).map((tab) => (
-          <button
-            key={tab}
-            className={`${styles.tab} ${
-              activeTab === tab ? styles.tabActive : ''
-            }`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {TAB_LABELS[tab]}
-            <span
-              style={{
-                fontSize: '11px',
-                marginLeft: '8px',
-                opacity: 0.6,
-                letterSpacing: 0,
-              }}
+        {TAB_ORDER.map((tab) => {
+          const stampUrl = getUiAssetUrl(TAB_STAMP_FILES[tab])
+          return (
+            <button
+              key={tab}
+              className={`${styles.tab} ${
+                activeTab === tab ? styles.tabActive : ''
+              }`}
+              onClick={() => setActiveTab(tab)}
+              aria-label={TAB_LABELS[tab]}
             >
-              ({getCountForTab(tab)})
-            </span>
-          </button>
-        ))}
+              {stampUrl && <img src={stampUrl} alt={TAB_LABELS[tab]} />}
+            </button>
+          )
+        })}
       </nav>
 
       {/* 卡牌网格 */}
@@ -133,21 +130,4 @@ export function CodexScreen() {
       </main>
     </div>
   )
-}
-
-// ============================================
-// 工具：每个 Tab 的数量
-// ============================================
-
-function getCountForTab(tab: CodexTab): number {
-  const allCards = getAllCards()
-  if (tab === 'weapon') return allCards.filter((c) => c.type === 'weapon').length
-  if (tab === 'shu')
-    return allCards.filter((c) => c.faction === 'shu' && c.type !== 'weapon')
-      .length
-  if (tab === 'neutral')
-    return allCards.filter(
-      (c) => c.faction === 'neutral' && c.type !== 'weapon'
-    ).length
-  return 0
 }

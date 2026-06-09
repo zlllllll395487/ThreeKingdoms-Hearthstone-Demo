@@ -68,8 +68,16 @@ function App() {
         {currentScreen === 'storymode' && <SubPageScreen screen="storymode" />}
         {currentScreen === 'quest' && <SubPageScreen screen="quest" />}
         {currentScreen === 'shop' && <SubPageScreen screen="shop" />}
-        {currentScreen === 'settings' && <SubPageScreen screen="settings" />}
         {currentScreen === 'event' && <SubPageScreen screen="event" />}
+        {currentScreen === 'recruit' && <SubPageScreen screen="recruit" />}
+        {currentScreen === 'decks' && <SubPageScreen screen="decks" />}
+        {currentScreen === 'serverselect' && <SubPageScreen screen="serverselect" />}
+        {currentScreen === 'account' && <SubPageScreen screen="account" />}
+        {currentScreen === 'accountdetails' && <SubPageScreen screen="accountdetails" />}
+        {currentScreen === 'mail' && <SubPageScreen screen="mail" />}
+        {currentScreen === 'signin' && <SubPageScreen screen="signin" />}
+        {currentScreen === 'friends' && <SubPageScreen screen="friends" />}
+        {currentScreen === 'news' && <SubPageScreen screen="news" />}
         {currentScreen === 'battle' && <BattleScreen />}
         {currentScreen === 'result' && <ResultScreen />}
 

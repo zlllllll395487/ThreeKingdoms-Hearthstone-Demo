@@ -1,16 +1,19 @@
 /* ============================================
-   卡牌视觉 v6 · 基于 4 张稀有度边框 + 名字横幅 + 数值组件
-   尺寸：240×360（5:7.5 比例匹配边框 PNG）
+   卡牌视觉 v7 · 4 张稀有度边框（内置名带）+ 数值组件
+   尺寸：240×370（适配新 frame ~0.65 比例）
    ============================================ */
 
 .card {
   position: relative;
   width: 240px;
-  height: 360px;
+  height: 370px;
   cursor: pointer;
   transition: transform 0.3s ease-out, filter 0.3s ease-out;
   flex-shrink: 0;
   filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+  /* 注意：不要加 transform: translateZ(0) 或 will-change: transform，
+     否则父 canvas transform: scale 会通过 GPU 合成器双线性缩放卡牌纹理，
+     导致立绘大幅模糊。让它和父级在同一 paint layer 里直接缩放更清晰 */
 }
 
 .card:hover {
@@ -25,33 +28,35 @@
 }
 
 /* ============================================
-   立绘层（最底） · 占上方约 60%
+   卡牌完整图层 · 立绘+边框+空名带+空parchment 一体烤入，铺满整张卡
    ============================================ */
 
-.portraitArea {
+.cardVisual {
   position: absolute;
-  top: 4%;
-  left: 7%;
-  right: 7%;
-  height: 62%;
-  overflow: hidden;
-  border-radius: 4px;
-  z-index: 1;
-}
-
-.portraitImage {
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: 50% 22%;  /* 头肩部 · 略微下挪让脸更居中 */
+  z-index: 1;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+.cardVisualImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: auto;
+  -webkit-image-rendering: high-quality;
   transition: transform 0.4s ease-out;
+  display: block;
+  user-select: none;
 }
 
-.card:hover .portraitImage {
-  transform: scale(1.08);
+.card:hover .cardVisualImg {
+  transform: scale(1.04);
 }
 
-.portraitPlaceholder {
+.cardVisualPlaceholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -69,25 +74,12 @@
 }
 
 /* ============================================
-   边框层 · 覆盖整张卡（含底部羊皮纸面板）
-   ============================================ */
-
-.frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ============================================
    描述区 · 边框底部羊皮纸面板上
    ============================================ */
 
 .descArea {
   position: absolute;
-  bottom: 5%;
+  bottom: 11%;
   left: 11%;
   right: 11%;
   height: 23%;
@@ -122,16 +114,20 @@
 }
 
 /* ============================================
-   名字横幅 · 叠在边框底部面板的顶端
+   名字（叠在边框内置名带上）· v6 三组分离
+   方案变化追踪：
+   - v5：默认 61% / epic+legendary 58%（差 3%）→ 传说太低，史诗更低
+   - v6：rare+common 61% / legendary 56%（再上 2%）/ epic 53%（再上 5%）
    ============================================ */
 
 .nameBanner {
   position: absolute;
-  top: 60%;
+  /* 默认 = 绿黄组 = rare + common */
+  top: 61%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 92%;
-  height: 36px;
+  width: 70%;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,41 +135,36 @@
   pointer-events: none;
 }
 
-.nameBannerImg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+/* 传说 · 与史诗同高 */
+.card[data-rarity="legendary"] .nameBanner {
+  top: 56%;
+}
+
+/* 史诗 · 文字（v6 53% → v7 56%，下移 3%） */
+.card[data-rarity="epic"] .nameBanner {
+  top: 56%;
 }
 
 .nameText {
   position: relative;
   z-index: 1;
   font-family: var(--font-kai);
-  font-size: 16px;
+  font-size: 19px;
   font-weight: bold;
-  color: var(--color-ink);
-  letter-spacing: 4px;
-  text-shadow: 0 1px 0 rgba(255, 230, 150, 0.5);
+  color: var(--color-paper);
+  letter-spacing: 2px;
+  text-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    0 0 6px rgba(212, 160, 23, 0.4);
   white-space: nowrap;
 }
 
 /* ============================================
-   关键词图标排 · 在名字横幅下方
+   关键词图标排 · 暂时隐藏（避免挤占名字位置）
    ============================================ */
 
 .keywordRow {
-  position: absolute;
-  top: 67%;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  gap: 3px;
-  z-index: 3;
-  pointer-events: none;
+  display: none;
 }
 
 .keywordIcon {
@@ -189,8 +180,8 @@
 
 .costGem {
   position: absolute;
-  top: -8px;
-  left: -8px;
+  top: 6px;
+  left: 6px;
   width: 56px;
   height: 56px;
   z-index: 5;
@@ -226,4 +217,58 @@
   z-index: 5;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
   pointer-events: none;
+}
+
+/* ============================================
+   立绘点击放大 · 全屏高清查看（绕过父级 canvas 缩放）
+   ============================================ */
+
+.zoomOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 4, 2, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  cursor: zoom-out;
+  padding: 40px;
+  animation: zoomFadeIn 0.2s ease-out;
+  backdrop-filter: blur(6px);
+}
+
+.zoomImage {
+  max-width: 75vw;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.85),
+    0 0 0 2px rgba(212, 160, 23, 0.4),
+    0 0 40px rgba(212, 160, 23, 0.25);
+}
+
+.zoomCaption {
+  margin-top: 24px;
+  font-family: var(--font-kai);
+  font-size: 28px;
+  letter-spacing: 8px;
+  color: var(--color-paper);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+  user-select: none;
+}
+
+.zoomHint {
+  margin-top: 8px;
+  font-family: var(--font-serif);
+  font-size: 13px;
+  letter-spacing: 2px;
+  color: rgba(245, 230, 200, 0.55);
+  user-select: none;
+}
+
+@keyframes zoomFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

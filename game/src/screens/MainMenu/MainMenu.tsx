@@ -1,21 +1,17 @@
+import { useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import styles from './MainMenu.module.css'
 
 /**
  * 主菜单 · 商业化 Hub 布局
- *
- * 顶左：玩家头像 + 名称等级
- * 顶右：3 货币图（含背景 + 数字 + 加号都是 PNG 自带）+ 更多按钮
- * 左侧栏：3 圆按钮（邮件 / 日历 / 好友）
- * 中央：留空（背景透出）
- * 右侧：动作卡叠层（剧情模式在最上 + 对战 + 限时活动），背靠议事台底板
- * 左下：桃园活动横幅 + 聊天/世界公告框（聊天图标 + 跑马灯）
- * 底部：5 Tab（卡组 / 任务 / 图鉴 / 商城 / 设置）
  */
 export function MainMenu() {
   const navigate = useUIStore((s) => s.navigate)
   const showModal = useUIStore((s) => s.showModal)
+  const [showSwitchModal, setShowSwitchModal] = useState(false)
+  const [showChatModal, setShowChatModal] = useState(false)
+  const [showResourceModal, setShowResourceModal] = useState(false)
 
   const bgUrl = getUiAssetUrl('menu_background.png')
   const playerUiBlockUrl = getUiAssetUrl('player_ui_block.png')
@@ -33,15 +29,18 @@ export function MainMenu() {
   const cardStoryUrl = getUiAssetUrl('card_story.png')
   const cardBattleUrl = getUiAssetUrl('card_battle.png')
   const cardEventUrl = getUiAssetUrl('card_event.png')
-  const panelUrl = getUiAssetUrl('mainmenu_panel.png')
 
-  const bannerEventUrl = getUiAssetUrl('banner_event.png')
+  const btnSwitchBgUrl = getUiAssetUrl('btn_switch_bg.png')
+  const modalSwitchBgUrl = getUiAssetUrl('modal_switch_bg.png')
+  const modalChatUrl = getUiAssetUrl('modal_chat.png')
+  const modalResourceUrl = getUiAssetUrl('modal_resource.png')
+  const btnBackUrl = getUiAssetUrl('btn_back.png')
 
   const tabDeckUrl = getUiAssetUrl('tab_deck.png')
+  const tabRecruitUrl = getUiAssetUrl('tab_recruit.png')
   const tabQuestUrl = getUiAssetUrl('tab_quest.png')
-  const tabCodexUrl = getUiAssetUrl('tab_codex.png')
   const tabShopUrl = getUiAssetUrl('tab_shop.png')
-  const tabSettingsUrl = getUiAssetUrl('tab_settings.png')
+  const tabCodexUrl = getUiAssetUrl('tab_codex.png')
 
   const dev = (label: string) => () => showModal(label)
 
@@ -61,8 +60,15 @@ export function MainMenu() {
         }
       />
       <div className={styles.vignette} />
-      <div className={styles.candleGlowLeft} />
-      <div className={styles.candleGlowRight} />
+
+      <div className={`${styles.candleGlow} ${styles.candleGlowOilLamp}`} />
+      <div className={`${styles.candleGlow} ${styles.candleGlowFarCity}`} />
+
+      <div className={styles.smokeWrap}>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className={styles.smokeWisp} />
+        ))}
+      </div>
 
       <div className={styles.particles}>
         {Array.from({ length: 9 }).map((_, i) => (
@@ -72,7 +78,11 @@ export function MainMenu() {
 
       {/* ============ 顶部 · 玩家信息 + 货币 + 更多 ============ */}
       <div className={styles.topBar}>
-        <div className={styles.playerBlock}>
+        <button
+          className={styles.playerBlock}
+          onClick={() => navigate('accountdetails')}
+          aria-label="账号详情"
+        >
           {playerUiBlockUrl && (
             <img
               src={playerUiBlockUrl}
@@ -80,18 +90,33 @@ export function MainMenu() {
               className={styles.playerBlockImg}
             />
           )}
-        </div>
+        </button>
 
         <div className={styles.topRight}>
           <div className={styles.currencyBar}>
             {coinSilverUrl && (
-              <img src={coinSilverUrl} alt="银傅" className={styles.currencyImg} />
+              <img
+                src={coinSilverUrl}
+                alt="银傅"
+                className={styles.currencyImg}
+                onClick={() => setShowResourceModal(true)}
+              />
             )}
             {coinJadeUrl && (
-              <img src={coinJadeUrl} alt="玉玦" className={styles.currencyImg} />
+              <img
+                src={coinJadeUrl}
+                alt="玉玦"
+                className={styles.currencyImg}
+                onClick={() => setShowResourceModal(true)}
+              />
             )}
             {coinGemUrl && (
-              <img src={coinGemUrl} alt="珠宝" className={styles.currencyImg} />
+              <img
+                src={coinGemUrl}
+                alt="珠宝"
+                className={styles.currencyImg}
+                onClick={() => setShowResourceModal(true)}
+              />
             )}
           </div>
           <button
@@ -106,15 +131,13 @@ export function MainMenu() {
 
       {/* ============ 左侧栏 · 3 图标 ============ */}
       <div className={styles.sideNav}>
-        <SideButton iconUrl={iconMailUrl} onClick={dev('邮件')} badge="3" label="邮件" />
-        <SideButton iconUrl={iconCalendarUrl} onClick={dev('每日签到')} label="签到" />
-        <SideButton iconUrl={iconFriendsUrl} onClick={dev('好友')} label="好友" />
+        <SideButton iconUrl={iconMailUrl} onClick={() => navigate('mail')} badge="3" label="邮件" />
+        <SideButton iconUrl={iconCalendarUrl} onClick={() => navigate('signin')} label="签到" />
+        <SideButton iconUrl={iconFriendsUrl} onClick={() => navigate('friends')} label="好友" />
       </div>
 
-      {/* ============ 右侧动作卡叠层 ============ */}
+      {/* ============ 右侧动作卡叠层（无 war-room 底盘） ============ */}
       <div className={styles.actionStack}>
-        {panelUrl && <img src={panelUrl} alt="" className={styles.actionPanel} />}
-
         {/* 中层：对战主大卡 */}
         <button
           className={styles.cardBattle}
@@ -143,55 +166,107 @@ export function MainMenu() {
         </div>
       </div>
 
-      {/* ============ 左下：桃园活动横幅（单独，缩小） ============ */}
+      {/* ============ 左下专属容器：切换背景按钮 + 跑马灯（悬浮） ============ */}
       <div className={styles.bottomLeft}>
         <button
-          className={styles.eventBanner}
-          onClick={() => navigate('event')}
-          aria-label="桃园结义"
+          className={styles.switchBgBtn}
+          onClick={() => setShowSwitchModal(true)}
+          aria-label="切换背景"
         >
-          {bannerEventUrl && <img src={bannerEventUrl} alt="桃园结义" />}
+          {btnSwitchBgUrl && <img src={btnSwitchBgUrl} alt="切换背景" />}
         </button>
-      </div>
 
-      {/* ============ 底部中间：长公告卷轴 ============ */}
-      <div className={styles.newsScroll}>
-        <button
-          className={styles.newsScrollIconBtn}
-          onClick={dev('世界聊天')}
-          aria-label="世界聊天"
+        <div
+          className={styles.newsScroll}
+          onClick={() => setShowChatModal((prev) => !prev)}
+          role="button"
+          tabIndex={0}
+          aria-label="打开世界聊天"
         >
           {iconChatUrl && (
             <img src={iconChatUrl} alt="" className={styles.newsScrollIcon} />
           )}
-        </button>
-        <div className={styles.newsScrollText}>
-          <span className={styles.newsScrollMarquee}>
-            【世界】蜀汉招贤纳士中 · 凡有才者皆可请缨 · 新区桃园结义火热开放
-          </span>
+          <div className={styles.newsScrollText}>
+            <span className={styles.newsScrollMarquee}>
+              【世界】蜀汉招贤纳士中 · 凡有才者皆可请缨 · 新区桃园结义火热开放
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* ============ 底部 5 Tab ============ */}
+      {/* ============ 右下 5 Tab（悬浮，紧凑 Button Group） ============ */}
       <div className={styles.tabBar}>
-        <button className={styles.tab} onClick={dev('卡组管理')}>
+        <button className={styles.tab} onClick={() => navigate('decks')} aria-label="卡组">
           {tabDeckUrl && <img src={tabDeckUrl} alt="卡组" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('codex')}>
-          {tabCodexUrl && <img src={tabCodexUrl} alt="图鉴" />}
+        <button className={styles.tab} onClick={() => navigate('recruit')} aria-label="招募">
+          {tabRecruitUrl && <img src={tabRecruitUrl} alt="招募" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('quest')}>
+        <button className={styles.tab} onClick={() => navigate('quest')} aria-label="任务">
           {tabQuestUrl && <img src={tabQuestUrl} alt="任务" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('shop')}>
+        <button className={styles.tab} onClick={() => navigate('shop')} aria-label="商城">
           {tabShopUrl && <img src={tabShopUrl} alt="商城" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('settings')}>
-          {tabSettingsUrl && <img src={tabSettingsUrl} alt="设置" />}
+        <button className={styles.tab} onClick={() => navigate('codex')} aria-label="图鉴">
+          {tabCodexUrl && <img src={tabCodexUrl} alt="图鉴" />}
         </button>
       </div>
 
       <div className={styles.versionTag}>v0.1.0 · DEMO W1</div>
+
+      {/* 切换背景模态 · 全屏图片 + 返回按钮 */}
+      {showSwitchModal && (
+        <div className={styles.switchModalOverlay}>
+          {modalSwitchBgUrl && (
+            <img
+              src={modalSwitchBgUrl}
+              alt="切换页面"
+              className={styles.switchModalImg}
+            />
+          )}
+          <button
+            className={styles.switchModalBack}
+            onClick={() => setShowSwitchModal(false)}
+            aria-label="返回主菜单"
+          >
+            {btnBackUrl ? (
+              <img src={btnBackUrl} alt="返回" />
+            ) : (
+              <span>‹ 返回</span>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* 聊天扩展面板 · 左下角浮窗（非全屏，参考真实游戏聊天 widget） */}
+      {showChatModal && modalChatUrl && (
+        <div className={styles.chatModalPanel}>
+          <img src={modalChatUrl} alt="世界聊天" />
+        </div>
+      )}
+
+      {/* 资源详情模态 · 居中浮窗，点击右上 X 关闭 */}
+      {showResourceModal && modalResourceUrl && (
+        <div
+          className={styles.resourceModalOverlay}
+          onClick={() => setShowResourceModal(false)}
+        >
+          <div
+            className={styles.resourceModalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img src={modalResourceUrl} alt="资源详情" />
+            <button
+              className={styles.resourceModalClose}
+              onClick={() => setShowResourceModal(false)}
+              aria-label="关闭"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

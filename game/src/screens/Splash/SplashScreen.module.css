@@ -80,55 +80,72 @@
   overflow: hidden;
 }
 
+/* 落叶基底 · 用图片替换 CSS 渐变，秋叶感暖色光晕 */
 .petal {
   position: absolute;
-  top: -8%;
-  width: 14px;
-  height: 18px;
-  background: radial-gradient(
-    ellipse at 35% 40%,
-    rgba(255, 215, 220, 0.95) 0%,
-    rgba(240, 150, 160, 0.85) 50%,
-    rgba(180, 80, 90, 0.7) 100%
-  );
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  top: -10%;
+  width: 56px;
+  height: 56px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   opacity: 0;
-  filter: drop-shadow(0 0 4px rgba(255, 180, 200, 0.5));
-  animation: petalFall 12s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(180, 90, 40, 0.5))
+    drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  animation: petalFall 16s linear infinite;
+  transform-origin: center center;
 }
 
-.petal:nth-child(1)  { left: 4%;  animation-delay: 0s;    animation-duration: 11s; }
-.petal:nth-child(2)  { left: 13%; animation-delay: 2s;    animation-duration: 13s; }
-.petal:nth-child(3)  { left: 21%; animation-delay: 4s;    animation-duration: 10s; width: 12px; height: 14px; }
-.petal:nth-child(4)  { left: 30%; animation-delay: 6.5s;  animation-duration: 14s; }
-.petal:nth-child(5)  { left: 40%; animation-delay: 1.2s;  animation-duration: 12s; width: 16px; height: 20px; }
-.petal:nth-child(6)  { left: 48%; animation-delay: 3.5s;  animation-duration: 11s; }
-.petal:nth-child(7)  { left: 57%; animation-delay: 5.8s;  animation-duration: 13s; width: 12px; height: 14px; }
-.petal:nth-child(8)  { left: 66%; animation-delay: 8.2s;  animation-duration: 10s; }
-.petal:nth-child(9)  { left: 75%; animation-delay: 0.6s;  animation-duration: 14s; width: 16px; height: 20px; }
-.petal:nth-child(10) { left: 84%; animation-delay: 7s;    animation-duration: 12s; }
-.petal:nth-child(11) { left: 92%; animation-delay: 9.5s;  animation-duration: 11s; width: 12px; height: 14px; }
-.petal:nth-child(12) { left: 35%; animation-delay: 10.8s; animation-duration: 13s; }
+/* 7 张落叶循环（data-leaf=1..7）*/
+.petal[data-leaf='1'] { background-image: url('@/assets/ui/leaf_1.png'); }
+.petal[data-leaf='2'] { background-image: url('@/assets/ui/leaf_2.png'); }
+.petal[data-leaf='3'] { background-image: url('@/assets/ui/leaf_3.png'); }
+.petal[data-leaf='4'] { background-image: url('@/assets/ui/leaf_4.png'); }
+.petal[data-leaf='5'] { background-image: url('@/assets/ui/leaf_5.png'); }
+.petal[data-leaf='6'] { background-image: url('@/assets/ui/leaf_6.png'); }
+.petal[data-leaf='7'] { background-image: url('@/assets/ui/leaf_7.png'); }
+
+/* 14 片错峰 · 不同位置 / 速度 / 大小，避免整齐排列 */
+.petal:nth-child(1)  { left: 3%;  animation-delay: 0s;    animation-duration: 14s; width: 60px; height: 60px; }
+.petal:nth-child(2)  { left: 11%; animation-delay: 3.2s;  animation-duration: 17s; width: 44px; height: 44px; }
+.petal:nth-child(3)  { left: 19%; animation-delay: 6.5s;  animation-duration: 13s; width: 38px; height: 38px; }
+.petal:nth-child(4)  { left: 26%; animation-delay: 1.8s;  animation-duration: 18s; width: 52px; height: 52px; }
+.petal:nth-child(5)  { left: 33%; animation-delay: 9.4s;  animation-duration: 15s; width: 48px; height: 48px; }
+.petal:nth-child(6)  { left: 41%; animation-delay: 4.6s;  animation-duration: 16s; width: 36px; height: 36px; }
+.petal:nth-child(7)  { left: 48%; animation-delay: 11.2s; animation-duration: 19s; width: 56px; height: 56px; }
+.petal:nth-child(8)  { left: 55%; animation-delay: 7.8s;  animation-duration: 14s; width: 42px; height: 42px; }
+.petal:nth-child(9)  { left: 63%; animation-delay: 2.4s;  animation-duration: 17s; width: 50px; height: 50px; }
+.petal:nth-child(10) { left: 70%; animation-delay: 13s;   animation-duration: 16s; width: 38px; height: 38px; }
+.petal:nth-child(11) { left: 78%; animation-delay: 5.7s;  animation-duration: 18s; width: 46px; height: 46px; }
+.petal:nth-child(12) { left: 85%; animation-delay: 8.9s;  animation-duration: 15s; width: 54px; height: 54px; }
+.petal:nth-child(13) { left: 92%; animation-delay: 0.9s;  animation-duration: 13s; width: 40px; height: 40px; }
+.petal:nth-child(14) { left: 38%; animation-delay: 14.6s; animation-duration: 17s; width: 48px; height: 48px; }
 
 @keyframes petalFall {
   0% {
-    top: -8%;
+    top: -10%;
     opacity: 0;
-    transform: translateX(0) rotate(0deg);
+    transform: translateX(0) rotate(-15deg) scale(0.92);
   }
-  8% {
-    opacity: 0.85;
+  6% {
+    opacity: 0.92;
+  }
+  25% {
+    transform: translateX(46px) rotate(140deg) scale(1);
   }
   50% {
-    transform: translateX(36px) rotate(180deg);
+    transform: translateX(-32px) rotate(280deg) scale(0.95);
   }
-  92% {
-    opacity: 0.7;
+  75% {
+    transform: translateX(56px) rotate(440deg) scale(1.04);
+  }
+  94% {
+    opacity: 0.72;
   }
   100% {
-    top: 108%;
+    top: 110%;
     opacity: 0;
-    transform: translateX(-24px) rotate(360deg);
+    transform: translateX(-40px) rotate(620deg) scale(0.9);
   }
 }
 
@@ -192,23 +209,25 @@
 
 .toolButtons {
   position: absolute;
-  top: 56px;
-  right: 56px;
+  top: 32px;
+  right: 32px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 22px;
   z-index: 5;
 }
 
 .toolBtn {
   position: relative;
-  width: 76px;
-  height: 76px;
+  width: 92px;
+  height: 92px;
   padding: 0;
   background: transparent;
   border: none;
   cursor: pointer;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  filter:
+    drop-shadow(0 6px 0 rgba(0, 0, 0, 0.85))
+    drop-shadow(0 0 14px rgba(0, 0, 0, 0.6));
   transition: transform 0.2s ease, filter 0.2s ease;
 }
 
@@ -235,12 +254,12 @@
 .center {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 48%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 56px;
+  gap: 40px;
   z-index: 3;
   width: 560px;
 }
@@ -268,7 +287,7 @@
 
 .logo {
   position: relative;
-  width: 520px;
+  width: 460px;
   height: auto;
   filter:
     drop-shadow(0 0 24px rgba(0, 0, 0, 0.9))
@@ -278,7 +297,7 @@
 
 .titleFallback {
   position: relative;
-  font-family: var(--font-kai);
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
   font-size: 108px;
   color: var(--color-gold);
   letter-spacing: 24px;
@@ -333,7 +352,7 @@
 }
 
 .enterText {
-  font-family: var(--font-kai);
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
   font-size: 36px;
   color: var(--color-gold);
   letter-spacing: 18px;
@@ -356,34 +375,24 @@
 
 .enterButton[data-locked='true'] {
   cursor: not-allowed;
-  filter: grayscale(0.85) brightness(0.55) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+  opacity: 0.78;
+  filter:
+    brightness(0.85)
+    saturate(0.7)
+    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
   animation: none;
 }
 
 .enterButton[data-locked='true']:hover {
   transform: none;
-  filter: grayscale(0.85) brightness(0.55) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
+  filter:
+    brightness(0.85)
+    saturate(0.7)
+    drop-shadow(0 4px 10px rgba(0, 0, 0, 0.85));
 }
 
 .enterHint {
-  font-family: var(--font-serif);
-  font-size: 12px;
-  letter-spacing: 4px;
-  color: rgba(255, 180, 100, 0.85);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
-  animation: hintPulse 1.6s ease-in-out infinite;
-  transition: visibility 0s linear 0.2s, opacity 0.2s ease-out;
-}
-
-.enterHint[data-hidden='true'] {
-  visibility: hidden;
-  opacity: 0;
-  animation: none;
-}
-
-@keyframes hintPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+  display: none;
 }
 
 /* ============================================
@@ -435,14 +444,14 @@
 }
 
 .serverLabel {
-  font-family: var(--font-serif);
+  font-family: 'ZCOOL QingKe HuangYou', 'Noto Serif SC', serif;
   font-size: 14px;
   letter-spacing: 3px;
   color: var(--color-paper);
 }
 
 .serverName {
-  font-family: var(--font-kai);
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
   font-size: 15px;
   letter-spacing: 2px;
   color: var(--color-gold);
@@ -458,7 +467,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-family: var(--font-serif);
+  font-family: 'ZCOOL QingKe HuangYou', 'Noto Serif SC', serif;
   font-size: 20px;
   letter-spacing: 3px;
   color: rgba(245, 235, 215, 0.92);
@@ -479,34 +488,44 @@
 }
 
 .checkbox {
-  width: 24px;
-  height: 24px;
-  border: 1.5px solid rgba(212, 160, 23, 0.85);
-  background: rgba(8, 4, 2, 0.65);
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid rgba(180, 140, 60, 0.75);
+  background:
+    linear-gradient(145deg, #2a2520 0%, #1a1612 60%, #0e0b08 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(120, 100, 60, 0.25),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.6),
+    0 2px 4px rgba(0, 0, 0, 0.7);
+  border-radius: 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
-  border-radius: 3px;
   flex-shrink: 0;
 }
 
 .checkbox:hover {
   border-color: rgba(255, 220, 100, 1);
-  box-shadow: 0 0 8px rgba(212, 160, 23, 0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(120, 100, 60, 0.25),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.6),
+    0 0 12px rgba(212, 160, 23, 0.7);
 }
 
 .checkboxChecked {
-  background: var(--color-gold);
-  border-color: var(--color-gold);
+  border-color: rgba(127, 255, 138, 0.7);
 }
 
 .checkmark {
-  color: #1a1410;
-  font-size: 18px;
-  font-weight: bold;
+  color: #7fff8a;
+  font-size: 20px;
+  font-weight: 900;
   line-height: 1;
+  text-shadow:
+    0 0 6px rgba(127, 255, 138, 0.85),
+    0 0 12px rgba(127, 255, 138, 0.5);
 }
 
 .agreementLink {
@@ -524,24 +543,76 @@
 }
 
 /* ============================================
-   底部法务文字（白色 + 暗底，干净排版）
+   底部法务文字 · 80px 渐变托底层 + 提亮文字
    ============================================ */
+
+.legalMask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.72) 50%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+  z-index: 3;
+  pointer-events: none;
+}
 
 .legalText {
   position: absolute;
-  bottom: 28px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   width: 80%;
   max-width: 1400px;
   text-align: center;
-  font-family: var(--font-serif);
+  font-family: 'ZCOOL QingKe HuangYou', 'Noto Serif SC', serif;
   font-size: 18px;
-  letter-spacing: 4px;
-  color: rgba(255, 250, 240, 0.82);
+  letter-spacing: 5px;
+  color: rgba(220, 215, 205, 0.92);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 1);
   z-index: 4;
   line-height: 1.7;
+}
+
+/* ============================================
+   Toast 提示（未勾选协议时弹出，2.5s 自动消失）
+   ============================================ */
+
+.toast {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  padding: 14px 32px;
+  background:
+    linear-gradient(180deg, rgba(20, 12, 8, 0.92) 0%, rgba(8, 4, 2, 0.96) 100%);
+  border: 1px solid rgba(212, 160, 23, 0.7);
+  border-radius: 4px;
+  color: rgba(255, 240, 210, 0.95);
+  font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
+  font-size: 18px;
+  letter-spacing: 4px;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  white-space: nowrap;
+  animation:
+    toastIn 0.3s ease-out,
+    toastOut 0.4s ease-in 2.1s forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translate(-50%, -10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translate(-50%, 0); }
+  to { opacity: 0; transform: translate(-50%, -10px); }
 }
 
 /* ============================================

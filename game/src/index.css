@@ -1,5 +1,50 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Long+Cang&family=ZCOOL+QingKe+HuangYou&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+QingKe+HuangYou&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
+
+/* ============================================
+   自托管字体 · 阿里巴巴普惠体 3.0（4 档）+ 杨任东竹石体（fallback Ma Shan Zheng）
+   ============================================ */
+
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('./assets/fonts/AlibabaPuHuiTi-3-55-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('./assets/fonts/AlibabaPuHuiTi-3-75-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('./assets/fonts/AlibabaPuHuiTi-3-85-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alibaba PuHuiTi';
+  src: url('./assets/fonts/AlibabaPuHuiTi-3-105-Heavy.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 杨任东竹石体 · 用户提供前以 Ma Shan Zheng 兜底
+   后续放入 game/src/assets/fonts/YangRenzhiZhushi.woff2 即生效 */
+@font-face {
+  font-family: 'Yang Renzi Zhushi';
+  src: local('Yang Renzi Zhushi'),
+       local('YangRenzhiZhushi'),
+       url('./assets/fonts/YangRenzhiZhushi.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* ============================================
    三国炉石 · 全局主题
@@ -30,11 +75,14 @@
   --color-rarity-epic: #7b3da8;
   --color-rarity-legendary: #d4a017;
 
-  /* 字体 · 古风三件套 + 兜底 */
-  --font-kai: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', '楷体', serif;             /* 楷书书法大标题 */
-  --font-display: 'Long Cang', 'Ma Shan Zheng', 'STKaiti', serif;             /* 飘逸装饰 */
-  --font-serif: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', serif; /* 古朴正文 */
-  --font-numeric: 'ZCOOL QingKe HuangYou', 'Noto Serif SC', sans-serif;       /* 数字（费用/攻血） */
+  /* 字体 · 全屏字体系统（除 Splash 外）
+     标题层 · 金石碑刻 / 立碑感（杨任东竹石体，未提供时 fallback Ma Shan Zheng）*/
+  --font-title:    'Yang Renzi Zhushi', 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
+  --font-kai:      var(--font-title);  /* 兼容旧引用 */
+  --font-display:  'Alibaba PuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;  /* UI 强调 */
+  --font-serif:    'Alibaba PuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;  /* 正文默认 */
+  --font-numeric:  'Alibaba PuHuiTi', 'Yang Renzi Zhushi', sans-serif;                /* 数字 */
+  --font-body:     'Alibaba PuHuiTi', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', sans-serif;
 }
 
 /* ============================================
@@ -50,6 +98,7 @@ html, body, #root {
 
 body {
   font-family: var(--font-serif);
+  font-weight: 600;  /* 默认走阿里普惠体 75 SemiBold */
   background: linear-gradient(135deg, #1a1a1a 0%, #2c3a4d 100%);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;

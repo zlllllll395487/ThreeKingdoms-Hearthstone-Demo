@@ -1,0 +1,149 @@
+.token {
+  position: relative;
+  width: 110px;
+  height: 150px;
+  background: linear-gradient(180deg, #3a2a18 0%, #1a1410 100%);
+  border: 2px solid rgba(212, 160, 23, 0.55);
+  border-radius: 8px;
+  padding: 0;
+  cursor: default;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  transition: transform 0.18s ease, filter 0.18s ease, border-color 0.18s ease;
+  overflow: visible;
+}
+
+/* 稀有度 → 边框色变 */
+.token[data-rarity='rare'] { border-color: rgba(110, 170, 210, 0.7); }
+.token[data-rarity='epic'] { border-color: rgba(160, 120, 200, 0.75); }
+.token[data-rarity='legendary'] { border-color: rgba(255, 180, 60, 0.95); box-shadow: 0 0 12px rgba(255, 180, 60, 0.4); }
+
+/* 选中：金色发光描边 + 上浮 */
+.selected {
+  border-color: rgba(255, 220, 100, 1);
+  box-shadow: 0 0 18px rgba(255, 220, 100, 0.85);
+  transform: translateY(-8px);
+}
+
+/* 可作为攻击目标：脉冲红光 */
+.targetable {
+  cursor: crosshair;
+  animation: targetPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes targetPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(220, 60, 50, 0.6); }
+  50% { box-shadow: 0 0 22px rgba(255, 100, 80, 0.95); }
+}
+
+/* 可主动攻击：绿色暗示 */
+.canAttack {
+  cursor: pointer;
+  border-color: rgba(120, 220, 130, 0.85);
+  box-shadow: 0 0 10px rgba(120, 220, 130, 0.45);
+}
+
+.canAttack:hover {
+  transform: translateY(-4px) scale(1.04);
+}
+
+/* 嘲讽锁定：非 taunt 单位变灰不可点 */
+.dimmed {
+  filter: brightness(0.45) saturate(0.4) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.portraitWrap {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  height: 92px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #1a1410;
+}
+
+.portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+  user-select: none;
+  pointer-events: none;
+}
+
+.portraitPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-paper);
+  font-family: var(--font-kai);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.nameBar {
+  position: absolute;
+  bottom: 28px;
+  left: 4px;
+  right: 4px;
+  text-align: center;
+  font-family: var(--font-kai);
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--color-paper);
+  letter-spacing: 2px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 4px rgba(212, 160, 23, 0.5);
+  background: linear-gradient(180deg, transparent, rgba(20, 12, 8, 0.85) 50%, rgba(20, 12, 8, 0.95));
+  padding: 6px 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keywords {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 2;
+}
+
+.kwIcon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.7));
+}
+
+.attackOrb {
+  position: absolute;
+  bottom: -8px;
+  left: -8px;
+  width: 44px;
+  height: 44px;
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+
+.healthOrb {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  width: 44px;
+  height: 44px;
+  z-index: 3;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+}
+
+.healthDamaged {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 6px rgba(220, 50, 40, 0.85));
+}

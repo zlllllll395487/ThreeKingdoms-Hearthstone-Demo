@@ -49,26 +49,92 @@
   50% { opacity: 0.85; }
 }
 
-.candleGlowLeft,
-.candleGlowRight {
+.candleGlow {
   position: absolute;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, rgba(255, 180, 50, 0.22) 0%, transparent 70%);
   border-radius: 50%;
-  z-index: 2;
   pointer-events: none;
   mix-blend-mode: screen;
+  z-index: 2;
+  transform: translate(-50%, -50%);
 }
 
-.candleGlowLeft { left: 4%; top: 30%; animation: candleFlicker 3.7s ease-in-out infinite; }
-.candleGlowRight { right: 4%; top: 30%; animation: candleFlicker 4.3s ease-in-out infinite 1.2s; }
+.candleGlowOilLamp {
+  left: 30%;
+  top: 50%;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 180, 60, 0.7) 0%,
+    rgba(255, 150, 40, 0.35) 35%,
+    transparent 70%
+  );
+  animation: candleFlicker 3.7s ease-in-out infinite;
+}
+
+.candleGlowFarCity {
+  left: 80%;
+  top: 32%;
+  width: 130px;
+  height: 130px;
+  opacity: 0.6;
+  background: radial-gradient(
+    circle,
+    rgba(255, 200, 100, 0.45) 0%,
+    transparent 65%
+  );
+  animation: candleFlicker 5.2s ease-in-out infinite 1.8s;
+}
 
 @keyframes candleFlicker {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  20% { opacity: 0.7; transform: scale(1.02); }
-  60% { opacity: 0.65; transform: scale(1.04); }
-  80% { opacity: 0.85; transform: scale(1.01); }
+  0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  20% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.04); }
+  60% { opacity: 0.65; transform: translate(-50%, -50%) scale(1.08); }
+  80% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.02); }
+}
+
+/* 香炉烟雾 · 5 缕错峰升起 · 起点在香炉口（canvas 50% 处） */
+.smokeWrap {
+  position: absolute;
+  left: 42%;
+  bottom: 50%;
+  width: 120px;
+  height: 280px;
+  pointer-events: none;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.smokeWisp {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(
+    circle,
+    rgba(240, 240, 250, 0.55) 0%,
+    rgba(200, 200, 220, 0.25) 50%,
+    transparent 80%
+  );
+  border-radius: 50%;
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: smokeRise 7s ease-in infinite;
+}
+
+.smokeWisp:nth-child(1) { animation-delay: 0s;   left: 50%; }
+.smokeWisp:nth-child(2) { animation-delay: 1.4s; left: 42%; }
+.smokeWisp:nth-child(3) { animation-delay: 2.8s; left: 58%; }
+.smokeWisp:nth-child(4) { animation-delay: 4.2s; left: 46%; }
+.smokeWisp:nth-child(5) { animation-delay: 5.6s; left: 54%; }
+
+@keyframes smokeRise {
+  0%   { opacity: 0;    transform: translate(-50%, 0)     scale(0.5); }
+  15%  { opacity: 0.85; }
+  60%  { opacity: 0.55; }
+  100% { opacity: 0;    transform: translate(-130%, -280px) scale(3.4); }
 }
 
 /* ============================================
@@ -77,23 +143,41 @@
 
 .topBar {
   position: absolute;
-  top: 28px;
+  top: 12px;
   left: 32px;
   right: 32px;
   z-index: 5;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   pointer-events: none;
 }
 
 .topBar > * { pointer-events: auto; }
 
-/* 玩家信息块 · 单张 PNG（包含头像 + 名称 + 等级） */
+/* 玩家信息块 · 1.68x 提权（1.2 × 1.4，比 v8 再放大 40%）+ 可点击 */
 .playerBlock {
   display: flex;
   align-items: center;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7));
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transform: scale(1.68);
+  transform-origin: top left;
+  filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.playerBlock:hover {
+  transform: scale(1.74);
+  filter:
+    drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7))
+    drop-shadow(0 0 16px rgba(212, 160, 23, 0.6));
+}
+
+.playerBlock:active {
+  transform: scale(1.62);
 }
 
 .playerBlockImg {
@@ -103,24 +187,23 @@
   display: block;
 }
 
-/* 顶右区：货币 + 更多 */
+/* 顶右区：货币 + 更多 · 整体下移让出顶部空间 */
 .topRight {
   display: flex;
   align-items: center;
   gap: 12px;
-  align-self: flex-start;
-  transform: translateY(-14px);
+  transform: translateY(28px);
 }
 
 /* 货币条 · 3 张 PNG 已自带背景+数字+加号，直接展示 */
 .currencyBar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 18px;
 }
 
 .currencyImg {
-  height: 56px;
+  height: 72px;
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.75));
@@ -135,8 +218,8 @@
 
 /* 更多按钮 */
 .moreBtn {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   padding: 0;
   background: transparent;
   border: none;
@@ -162,12 +245,12 @@
 
 .sideNav {
   position: absolute;
-  left: 36px;
-  top: 250px;
+  left: 56px;
+  top: 240px;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
 }
 
 .sideBtn {
@@ -223,31 +306,19 @@
 
 .actionStack {
   position: absolute;
-  right: 32px;
+  right: 16px;
   top: 14%;
   z-index: 4;
   width: 1000px;
   height: 600px;
 }
 
-.actionPanel {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.92;
-  filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.75));
-  pointer-events: none;
-  transform: scale(1.2) translateY(50px);
-}
-
-/* 顶层：剧情模式（右上小，与对战卡顶部重叠） */
+/* 顶层：剧情模式（右上小，与对战卡顶部重叠）· 缩 20% + 整体下移 */
 .cardStory {
   position: absolute;
-  top: 8%;
+  top: 14%;
   right: 8%;
-  width: 56%;
+  width: 45%;
   cursor: pointer;
   transition: transform 0.25s ease, filter 0.25s ease;
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.75));
@@ -266,12 +337,12 @@
   filter: drop-shadow(0 16px 32px rgba(212, 160, 23, 0.75));
 }
 
-/* 中层：对战主大卡（中心大） */
+/* 中层：对战主大卡（中心大）· 缩 20% + 右移 + 整体下移 */
 .cardBattle {
   position: absolute;
-  top: 14%;
-  left: 4%;
-  width: 86%;
+  top: 22%;
+  left: 14%;
+  width: 69%;
   background: transparent;
   border: none;
   padding: 0;
@@ -310,12 +381,12 @@
   transform: scale(1.01);
 }
 
-/* 底层：限时活动（右下，与对战卡右下重叠） */
+/* 底层：限时活动（右下，与对战卡右下重叠）· 缩 20% + 整体下移 */
 .cardEvent {
   position: absolute;
-  bottom: 0%;
+  bottom: -8%;
   right: 4%;
-  width: 50%;
+  width: 40%;
   background: transparent;
   border: none;
   padding: 0;
@@ -342,71 +413,88 @@
 }
 
 /* ============================================
-   左下：桃园活动横幅 + 聊天 / 世界公告框
+   左下专属容器：桃园 banner + 跑马灯（悬浮，无托盘）
    ============================================ */
 
 .bottomLeft {
   position: absolute;
-  left: 24px;
-  bottom: 40px;
+  left: 32px;
+  bottom: 24px;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  width: 260px;
+  align-items: flex-start;
+  gap: 12px;
 }
 
-.eventBanner {
-  width: 100%;
+/* 切换背景按钮 · 100×100，取代原桃园 banner */
+.switchBgBtn {
+  width: 100px;
+  height: 100px;
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.7));
-  transition: transform 0.25s, filter 0.25s;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+  transition: transform 0.2s, filter 0.2s;
 }
 
-.eventBanner img {
+.switchBgBtn img {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
-.eventBanner:hover {
-  transform: translateY(-4px);
-  filter: drop-shadow(0 14px 26px rgba(212, 160, 23, 0.6));
+.switchBgBtn:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 12px rgba(212, 160, 23, 0.7));
 }
 
-/* 底部长公告卷轴 · 米色羊皮纸 · 横跨底部中间 */
+.switchBgBtn:active {
+  transform: scale(0.95);
+}
+
+/* 跑马灯/聊天条 · 整条可点击，深色透明渐变托底 */
 .newsScroll {
-  position: absolute;
-  bottom: 40px;
-  left: 300px;
-  width: 700px;
+  width: 680px;
   height: 80px;
-  z-index: 4;
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 0 24px 0 16px;
-  background:
-    linear-gradient(180deg,
-      rgba(245, 230, 200, 0.94) 0%,
-      rgba(220, 200, 165, 0.96) 50%,
-      rgba(195, 175, 138, 0.98) 100%);
-  border: 2px solid rgba(120, 80, 30, 0.85);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 15, 10, 0.78) 0%,
+    rgba(40, 30, 20, 0.65) 100%
+  );
+  border: none;
   border-radius: 6px;
   box-shadow:
-    inset 0 0 24px rgba(140, 100, 50, 0.35),
-    inset 0 1px 0 rgba(255, 240, 210, 0.5),
-    0 8px 18px rgba(0, 0, 0, 0.7);
+    inset 0 1px 0 rgba(255, 220, 160, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: filter 0.2s, box-shadow 0.2s;
+}
+
+.newsScroll:hover {
+  filter: brightness(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 160, 0.12),
+    0 8px 22px rgba(212, 160, 23, 0.4);
+}
+
+.newsScroll:active {
+  filter: brightness(0.95);
 }
 
 .newsScroll::before {
   content: '';
   position: absolute;
   inset: 4px;
-  border: 1px solid rgba(120, 80, 30, 0.35);
+  border: 1px solid rgba(212, 160, 23, 0.18);
   border-radius: 4px;
   pointer-events: none;
 }
@@ -424,10 +512,12 @@
 }
 
 .newsScrollIcon {
-  width: 100%;
-  height: 100%;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
   object-fit: contain;
   display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
 .newsScrollIconBtn:hover {
@@ -449,10 +539,10 @@
   font-family: var(--font-serif);
   font-size: 16px;
   letter-spacing: 3px;
-  color: rgba(60, 35, 18, 0.95);
+  color: rgba(245, 235, 210, 0.95);
   white-space: nowrap;
   animation: marquee 24s linear infinite;
-  text-shadow: 0 1px 2px rgba(255, 240, 210, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
   font-weight: 600;
 }
 
@@ -462,7 +552,7 @@
 }
 
 /* ============================================
-   底部 5 Tab
+   右下 5 Tab · 紧凑悬浮 Button Group（无托盘）
    ============================================ */
 
 .tabBar {
@@ -471,17 +561,19 @@
   right: 32px;
   z-index: 5;
   display: flex;
-  gap: 6px;
   align-items: flex-end;
+  gap: 12px;
 }
 
 .tab {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 140px;
+  height: 150px;
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.75));
+  filter:
+    drop-shadow(0 8px 0 rgba(0, 0, 0, 0.8))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
   background: transparent;
   border: none;
   padding: 0;
@@ -494,12 +586,14 @@
 }
 
 .tab:hover {
-  transform: translateY(-8px) scale(1.05);
-  filter: drop-shadow(0 12px 18px rgba(212, 160, 23, 0.7));
+  transform: translateY(-6px) scale(1.04);
+  filter:
+    drop-shadow(0 12px 0 rgba(0, 0, 0, 0.85))
+    drop-shadow(0 8px 18px rgba(212, 160, 23, 0.6));
 }
 
 .tab:active {
-  transform: translateY(-4px) scale(0.98);
+  transform: translateY(-2px) scale(0.98);
 }
 
 /* ============================================
@@ -508,10 +602,10 @@
 
 .versionTag {
   position: absolute;
-  bottom: 12px;
-  right: 24px;
+  bottom: 4px;
+  right: 32px;
   color: var(--color-paper);
-  opacity: 0.5;
+  opacity: 0.45;
   font-size: 11px;
   letter-spacing: 2px;
   font-family: var(--font-serif);
@@ -557,4 +651,165 @@
   10% { opacity: 0.9; }
   90% { opacity: 0.8; }
   100% { bottom: 102%; opacity: 0; transform: translateX(30px) scale(1); }
+}
+
+/* ============================================
+   切换背景模态 · 全屏图片 + 返回按钮
+   ============================================ */
+
+.switchModalOverlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 1000;
+  animation: switchModalFadeIn 0.25s ease-out;
+}
+
+.switchModalImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  animation: switchModalScaleIn 0.4s ease-out;
+}
+
+.switchModalBack {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 1001;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.switchModalBack img {
+  height: 56px;
+  width: auto;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+}
+
+.switchModalBack:hover {
+  transform: translateX(-3px) scale(1.05);
+  filter: drop-shadow(0 8px 18px rgba(212, 160, 23, 0.6));
+}
+
+.switchModalBack:active {
+  transform: translateX(0) scale(0.96);
+}
+
+@keyframes switchModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes switchModalScaleIn {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================
+   聊天扩展面板 · 左下角浮窗（非全屏）
+   ============================================ */
+
+.chatModalPanel {
+  position: absolute;
+  bottom: 130px;
+  left: 32px;
+  width: 480px;
+  z-index: 60;
+  filter: drop-shadow(0 12px 32px rgba(0, 0, 0, 0.7));
+  animation: chatModalSlideIn 0.25s ease-out;
+  pointer-events: none;
+}
+
+.chatModalPanel img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  border-radius: 6px;
+}
+
+@keyframes chatModalSlideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   资源详情模态 · 居中浮窗 + 右上 X 关闭
+   ============================================ */
+
+.resourceModalOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: resourceModalFadeIn 0.22s ease-out;
+}
+
+.resourceModalContent {
+  position: relative;
+  width: 45%;
+  filter: drop-shadow(0 16px 48px rgba(0, 0, 0, 0.7));
+  animation: resourceModalScaleIn 0.3s ease-out;
+}
+
+.resourceModalContent img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+}
+
+.resourceModalClose {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(20, 12, 8, 0.92) 0%, rgba(8, 4, 2, 0.96) 100%);
+  border: 1.5px solid rgba(212, 160, 23, 0.85);
+  color: var(--color-paper);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+  transition: transform 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.resourceModalClose:hover {
+  transform: rotate(90deg) scale(1.08);
+  color: var(--color-gold);
+  box-shadow: 0 8px 22px rgba(212, 160, 23, 0.5);
+}
+
+.resourceModalClose:active {
+  transform: rotate(90deg) scale(0.94);
+}
+
+@keyframes resourceModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes resourceModalScaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }

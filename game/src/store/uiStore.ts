@@ -22,14 +22,25 @@ export type Screen =
   | 'storymode'   // 剧情模式（子页面）
   | 'quest'       // 任务（子页面）
   | 'shop'        // 商城（子页面）
-  | 'settings'    // 设置（子页面）
   | 'event'       // 限定活动 · 桃园结义（子页面）
-  | 'battle'      // 对战（W2-W4 实装）
-  | 'result'      // 战后结算（W2-W4 实装）
+  | 'recruit'     // 招募（子页面）
+  | 'decks'       // 卡组编组（子页面）
+  | 'serverselect' // 服务器选择（splash 入口子页面）
+  | 'account'     // 账号信息（splash 账号设置入口）
+  | 'accountdetails' // 账号详情（主菜单玩家块入口）
+  | 'mail'        // 邮件（主菜单侧栏入口）
+  | 'signin'      // 每日签到（主菜单侧栏入口）
+  | 'friends'     // 好友（主菜单侧栏入口）
+  | 'news'        // 游戏动态（splash 工具按钮入口）
+  | 'battle'      // 对战
+  | 'result'      // 战后结算
 
 interface UIStore {
   // 当前屏幕
   currentScreen: Screen
+
+  // 上一个屏幕（用于子页面返回）
+  previousScreen: Screen | null
 
   // 弹窗内容（null = 无弹窗）
   modalMessage: string | null
@@ -77,19 +88,24 @@ function saveIntroSeen(value: boolean) {
 // Store 主体
 // ============================================
 
-export const useUIStore = create<UIStore>((set) => {
+export const useUIStore = create<UIStore>((set, get) => {
   const introSeen = loadIntroSeen()
   return {
-    // 首次启动：先放 intro 视频；看过/跳过之后或刷新页面：直接进 splash「进入游戏」
-    currentScreen: introSeen ? 'splash' : 'intro',
+    // 暂时跳过 intro 开屏动画，所有启动直接进 splash「进入游戏」
+    // 如需恢复 intro：currentScreen: introSeen ? 'splash' : 'intro'
+    currentScreen: 'splash',
+    previousScreen: null,
     modalMessage: null,
     introSeen,
 
-    navigate: (to) =>
+    navigate: (to) => {
+      const cur = get().currentScreen
       set({
+        previousScreen: cur,
         currentScreen: to,
         modalMessage: null, // 切屏时关闭所有弹窗
-      }),
+      })
+    },
 
     showModal: (message) => set({ modalMessage: message }),
     closeModal: () => set({ modalMessage: null }),

@@ -143,15 +143,16 @@
 }
 
 .count {
-  font-family: var(--font-serif);
+  font-family: var(--font-display);
+  font-weight: 700;
   color: var(--color-paper);
-  opacity: 0.6;
+  opacity: 0.85;
   letter-spacing: 4px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 /* ============================================
-   Tab 切换栏
+   Tab 切换栏 · 6 圆印章
    ============================================ */
 
 .tabBar {
@@ -159,49 +160,37 @@
   z-index: 2;
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 16px;
   padding: 20px 0;
   background: rgba(0, 0, 0, 0.2);
 }
 
 .tab {
-  position: relative;
-  background-image: var(--btn-tab-bg);
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  width: 96px;
+  height: 96px;
+  background: transparent;
   border: none;
-  color: var(--color-paper);
-  font-family: var(--font-kai);
-  font-size: 22px;
-  letter-spacing: 6px;
-  padding: 36px 12px 56px;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.25s;
-  width: 110px;
-  height: 168px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) brightness(0.7) saturate(0.7);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95);
-  margin: 0 4px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) brightness(0.75) saturate(0.7);
+  transition: transform 0.25s, filter 0.25s;
+}
+
+.tab img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .tab:hover {
-  filter: drop-shadow(0 6px 18px rgba(212, 160, 23, 0.6)) brightness(0.9) saturate(0.9);
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.05);
+  filter: drop-shadow(0 8px 18px rgba(212, 160, 23, 0.5)) brightness(0.92) saturate(0.9);
 }
 
 .tabActive {
-  filter: drop-shadow(0 10px 28px rgba(212, 160, 23, 1)) brightness(1.15) saturate(1.25);
-  color: var(--color-gold);
-  font-weight: bold;
-  transform: translateY(-6px);
-  text-shadow:
-    0 0 16px rgba(255, 220, 80, 1),
-    0 2px 4px rgba(0, 0, 0, 0.95);
+  filter: drop-shadow(0 10px 24px rgba(212, 160, 23, 0.9)) brightness(1.15) saturate(1.2);
+  transform: translateY(-6px) scale(1.08);
 }
 
 /* ============================================

@@ -5,13 +5,6 @@ import styles from './SplashScreen.module.css'
 
 /**
  * 进入游戏 lobby 页（intro 之后展示）
- *
- * 商业化标准登录页：
- * - 顶部 / 底部黑色渐变托底，让 UI 从原画剥离
- * - 右上 3 工具按钮：账号设置 / 游戏动态 / 修复工具（带金边深色底盘）
- * - 中央：Logo（带径向暗化遮罩）+ 进入游戏主 CTA + 区服选择 + 协议勾选
- * - 底部：游戏防沉迷公益提示文字
- * - 未勾选协议时主按钮置灰；点击时震动提示
  */
 export function SplashScreen() {
   const navigate = useUIStore((s) => s.navigate)
@@ -42,6 +35,7 @@ export function SplashScreen() {
 
       <div className={styles.topMask} />
       <div className={styles.bottomMask} />
+      <div className={styles.legalMask} />
       <div className={styles.vignette} />
 
       {/* 7 个灯笼晕点 · 对照 splash 背景图实际灯笼位置 */}
@@ -53,10 +47,10 @@ export function SplashScreen() {
       <div className={`${styles.lanternGlow} ${styles.lanternGlow6}`} />
       <div className={`${styles.lanternGlow} ${styles.lanternGlow7}`} />
 
-      {/* 12 片花瓣飘落 */}
+      {/* 14 片落叶飘落（循环复用 7 张落叶图） */}
       <div className={styles.petals}>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className={styles.petal} />
+        {Array.from({ length: 14 }).map((_, i) => (
+          <div key={i} className={styles.petal} data-leaf={(i % 7) + 1} />
         ))}
       </div>
 
@@ -64,14 +58,14 @@ export function SplashScreen() {
       <div className={styles.toolButtons}>
         <button
           className={styles.toolBtn}
-          onClick={() => showModal('账号设置')}
+          onClick={() => navigate('account')}
           aria-label="账号设置"
         >
           {iconAccount && <img src={iconAccount} alt="" />}
         </button>
         <button
           className={styles.toolBtn}
-          onClick={() => showModal('游戏动态')}
+          onClick={() => navigate('news')}
           aria-label="游戏动态"
         >
           {iconNews && <img src={iconNews} alt="" />}
@@ -112,15 +106,12 @@ export function SplashScreen() {
               <span className={styles.enterText}>进 入 游 戏</span>
             )}
           </button>
-          <span className={styles.enterHint} data-hidden={agreed}>
-            请先勾选并同意协议
-          </span>
         </div>
 
         <div className={styles.complianceBlock}>
           <button
             className={styles.serverPill}
-            onClick={() => showModal('切换区服')}
+            onClick={() => navigate('serverselect')}
           >
             {pillServerUrl ? (
               <img

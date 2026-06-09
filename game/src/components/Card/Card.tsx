@@ -1,4 +1,6 @@
-import type { CardData, Rarity } from '@/engine/types'
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
+import type { CardData } from '@/engine/types'
 import { getPortraitUrl, getUiAssetUrl } from '@/data/assetLoader'
 import styles from './Card.module.css'
 
@@ -12,25 +14,20 @@ interface CardProps {
 // 资源映射
 // ============================================
 
-const FRAME_NAMES: Record<Rarity, string> = {
-  common: 'frame_common.png',
-  rare: 'frame_rare.png',
-  epic: 'frame_epic.png',
-  legendary: 'frame_legendary.png',
-}
-
-/** 按卡名长度选名字横幅 */
-function pickNameBanner(name: string): string {
-  const len = [...name].length // 兼容多字节
-  if (len <= 2) return 'name_short.png'
-  if (len <= 4) return 'name_medium.png'
-  return 'name_long.png'
-}
-
 /** 数值球文件名（1-10） */
 function getNumberImage(prefix: 'cost' | 'attack' | 'health', n: number): string {
   const clamped = Math.max(1, Math.min(10, n))
   return `${prefix}_${clamped}.png`
+}
+
+/**
+ * 从立绘文件名派生卡牌完整图文件名
+ * 例：portrait="guanyu.png" → "cardvisual_guanyu.png"
+ */
+function getCardVisualFile(portraitFile: string | undefined): string | null {
+  if (!portraitFile) return null
+  const base = portraitFile.replace(/\.png$/i, '')
+  return `cardvisual_${base}.png`
 }
 
 /** 关键词 → 图标文件名 */
@@ -55,9 +52,10 @@ const KEYWORD_BADGES: Record<string, string> = {
 // ============================================
 
 export function Card({ card, scale = 1, onClick }: CardProps) {
+  const [zoomed, setZoomed] = useState(false)
   const portraitUrl = getPortraitUrl(card.portrait)
-  const frameUrl = getUiAssetUrl(FRAME_NAMES[card.rarity])
-  const nameBannerUrl = getUiAssetUrl(pickNameBanner(card.name))
+  const cardVisualFile = getCardVisualFile(card.portrait)
+  const cardVisualUrl = cardVisualFile ? getUiAssetUrl(cardVisualFile) : null
 
   // 数值球
   const costUrl = getUiAssetUrl(getNumberImage('cost', card.cost))
@@ -72,80 +70,103 @@ export function Card({ card, scale = 1, onClick }: CardProps) {
       ? getUiAssetUrl(getNumberImage('health', healthValue))
       : null
 
+  const handleVisualClick = (e: React.MouseEvent) => {
+    if (!portraitUrl) return
+    e.stopPropagation()
+    setZoomed(true)
+  }
+
   return (
-    <div
-      className={styles.card}
-      data-rarity={card.rarity}
-      data-type={card.type}
-      style={{ transform: `scale(${scale})` }}
-      onClick={onClick}
-    >
-      {/* 立绘层（最底，被边框覆盖） */}
-      <div className={styles.portraitArea}>
-        {portraitUrl ? (
-          <img
-            src={portraitUrl}
-            alt={card.name}
-            className={styles.portraitImage}
-            loading="lazy"
-          />
-        ) : (
-          <div className={styles.portraitPlaceholder}>
-            <span>{card.name}</span>
+    <>
+      <div
+        className={styles.card}
+        data-rarity={card.rarity}
+        data-type={card.type}
+        style={{ transform: `scale(${scale})` }}
+        onClick={onClick}
+      >
+        {/* 卡牌完整图（立绘 + 边框 + 空名带 + 空 parchment 一体烤入）· 点击放大原版立绘 */}
+        <div className={styles.cardVisual} onClick={handleVisualClick}>
+          {cardVisualUrl ? (
+            <img
+              src={cardVisualUrl}
+              alt={card.name}
+              className={styles.cardVisualImg}
+              loading="lazy"
+            />
+          ) : (
+            <div className={styles.cardVisualPlaceholder}>
+              <span>{card.name}</span>
+            </div>
+          )}
+        </div>
+
+        {/* 描述文字（在边框底部 parchment 上） */}
+        <div className={styles.descArea}>
+          {card.description && (
+            <p className={styles.descText}>{card.description}</p>
+          )}
+          {card.flavor && <p className={styles.flavorText}>「{card.flavor}」</p>}
+        </div>
+
+        {/* 名字（叠在边框内置名带上） */}
+        <div className={styles.nameBanner}>
+          <span className={styles.nameText}>{card.name}</span>
+        </div>
+
+        {/* 关键词图标（描述区上方一行） */}
+        {card.keywords && card.keywords.length > 0 && (
+          <div className={styles.keywordRow}>
+            {card.keywords
+              .filter((kw) => KEYWORD_BADGES[kw])
+              .map((kw) => {
+                const url = getUiAssetUrl(KEYWORD_BADGES[kw])
+                return url ? (
+                  <img
+                    key={kw}
+                    src={url}
+                    alt={kw}
+                    className={styles.keywordIcon}
+                  />
+                ) : null
+              })}
           </div>
         )}
-      </div>
 
-      {/* 边框层 */}
-      {frameUrl && <img src={frameUrl} alt="" className={styles.frame} />}
+        {/* 费用宝石（左上） */}
+        {costUrl && <img src={costUrl} alt="" className={styles.costGem} />}
 
-      {/* 描述文字（在边框底部面板上） */}
-      <div className={styles.descArea}>
-        {card.description && (
-          <p className={styles.descText}>{card.description}</p>
+        {/* 攻击力球（左下，仅武将/兵器） */}
+        {attackUrl && (
+          <img src={attackUrl} alt="" className={styles.attackOrb} />
         )}
-        {card.flavor && <p className={styles.flavorText}>「{card.flavor}」</p>}
-      </div>
 
-      {/* 名字横幅（叠在边框底部面板顶端） */}
-      <div className={styles.nameBanner}>
-        {nameBannerUrl && (
-          <img src={nameBannerUrl} alt="" className={styles.nameBannerImg} />
+        {/* 血量/耐久球（右下，仅武将/兵器） */}
+        {healthUrl && (
+          <img src={healthUrl} alt="" className={styles.healthOrb} />
         )}
-        <span className={styles.nameText}>{card.name}</span>
       </div>
 
-      {/* 关键词图标（描述区上方一行） */}
-      {card.keywords && card.keywords.length > 0 && (
-        <div className={styles.keywordRow}>
-          {card.keywords
-            .filter((kw) => KEYWORD_BADGES[kw])
-            .map((kw) => {
-              const url = getUiAssetUrl(KEYWORD_BADGES[kw])
-              return url ? (
-                <img
-                  key={kw}
-                  src={url}
-                  alt={kw}
-                  className={styles.keywordIcon}
-                />
-              ) : null
-            })}
-        </div>
-      )}
-
-      {/* 费用宝石（左上） */}
-      {costUrl && <img src={costUrl} alt="" className={styles.costGem} />}
-
-      {/* 攻击力球（左下，仅武将/兵器） */}
-      {attackUrl && (
-        <img src={attackUrl} alt="" className={styles.attackOrb} />
-      )}
-
-      {/* 血量/耐久球（右下，仅武将/兵器） */}
-      {healthUrl && (
-        <img src={healthUrl} alt="" className={styles.healthOrb} />
-      )}
-    </div>
+      {/* 立绘高清放大 · 渲染到 document.body 绕过父级 canvas 的 transform: scale */}
+      {zoomed &&
+        portraitUrl &&
+        createPortal(
+          <div
+            className={styles.zoomOverlay}
+            onClick={() => setZoomed(false)}
+            role="dialog"
+            aria-label={`${card.name} 立绘`}
+          >
+            <img
+              src={portraitUrl}
+              alt={card.name}
+              className={styles.zoomImage}
+            />
+            <div className={styles.zoomCaption}>{card.name}</div>
+            <div className={styles.zoomHint}>点击任意处关闭</div>
+          </div>,
+          document.body,
+        )}
+    </>
   )
 }

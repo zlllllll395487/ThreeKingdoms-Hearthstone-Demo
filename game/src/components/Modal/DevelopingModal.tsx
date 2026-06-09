@@ -72,17 +72,42 @@ export function DevelopingModal() {
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transform: 'translate(-50%, -10%)',
-            fontFamily: 'var(--font-kai)',
-            fontSize: '20px',
-            letterSpacing: '6px',
-            color: 'var(--color-ink, #1a1410)',
-            textShadow: '0 1px 2px rgba(255, 240, 210, 0.6)',
+            transform: 'translate(-50%, -50%)',
+            fontFamily: 'var(--font-title)',
+            color: '#1a0e08',
+            textAlign: 'center',
             pointerEvents: 'none',
             whiteSpace: 'nowrap',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '14px',
           }}
         >
-          {message}
+          <div
+            style={{
+              fontSize: '44px',
+              letterSpacing: '8px',
+              fontWeight: 400,
+              fontFamily: 'var(--font-title)',
+              textShadow:
+                '0 2px 4px rgba(255, 240, 200, 0.5), 0 1px 0 rgba(140, 100, 50, 0.4)',
+            }}
+          >
+            {message}
+          </div>
+          <div
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: '20px',
+              letterSpacing: '5px',
+              color: '#5c3a1e',
+              textShadow: '0 1px 2px rgba(255, 240, 210, 0.4)',
+            }}
+          >
+            功能开发中 · 敬请期待
+          </div>
         </div>
       </div>
 

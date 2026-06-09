@@ -530,7 +530,7 @@
     "durability": 3,
     "portrait": "gudingdao.png",
     "cardvisual": "古锭刀.png",
-    "description": "",
+    "description": "装备至主公。攻击力 = 单次伤害；耐久 = 剩余可挥砍次数。",
     "flavor": "孙坚旧物。"
   },
   {

@@ -57,31 +57,37 @@ export function FactionSelectScreen() {
       <h1 className={styles.title}>选择你的阵营</h1>
 
       <div className={styles.cards}>
-        <button
-          className={`${styles.factionCard} ${selected === 'shu' ? styles.selected : ''}`}
-          onClick={() => setSelected('shu')}
-          aria-label="选择蜀阵营"
-        >
-          {shuCardUrl ? (
-            <img src={shuCardUrl} alt="蜀" className={styles.factionCardImg} />
-          ) : (
-            <div className={styles.placeholderShu}>蜀</div>
-          )}
-          {selected === 'shu' && <div className={styles.selectedGlow} />}
-        </button>
+        <div className={styles.factionSlot} data-selected={selected === 'shu'}>
+          <button
+            className={`${styles.factionCard} ${selected === 'shu' ? styles.selected : ''}`}
+            onClick={() => setSelected('shu')}
+            aria-label="选择蜀阵营"
+          >
+            {shuCardUrl ? (
+              <img src={shuCardUrl} alt="蜀" className={styles.factionCardImg} />
+            ) : (
+              <div className={styles.placeholderShu}>蜀</div>
+            )}
+            {selected === 'shu' && <div className={styles.selectedGlow} />}
+          </button>
+          <div className={styles.factionLabel}>蜀</div>
+        </div>
 
-        <button
-          className={`${styles.factionCard} ${selected === 'wu' ? styles.selected : ''}`}
-          onClick={() => setSelected('wu')}
-          aria-label="选择吴阵营"
-        >
-          {wuCardUrl ? (
-            <img src={wuCardUrl} alt="吴" className={styles.factionCardImg} />
-          ) : (
-            <div className={styles.placeholderWu}>吴</div>
-          )}
-          {selected === 'wu' && <div className={styles.selectedGlow} />}
-        </button>
+        <div className={styles.factionSlot} data-selected={selected === 'wu'}>
+          <button
+            className={`${styles.factionCard} ${selected === 'wu' ? styles.selected : ''}`}
+            onClick={() => setSelected('wu')}
+            aria-label="选择吴阵营"
+          >
+            {wuCardUrl ? (
+              <img src={wuCardUrl} alt="吴" className={styles.factionCardImg} />
+            ) : (
+              <div className={styles.placeholderWu}>吴</div>
+            )}
+            {selected === 'wu' && <div className={styles.selectedGlow} />}
+          </button>
+          <div className={styles.factionLabel}>吴</div>
+        </div>
       </div>
 
       <button

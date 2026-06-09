@@ -404,7 +404,7 @@
     ],
     "portrait": "cixiongshuanggujian.png",
     "cardvisual": "雌雄双股剑.png",
-    "description": "主公用此武器攻击后召唤一个 1/1 的「民兵」。",
+    "description": "装备至主公（攻击力 = 单次伤害，耐久 = 剩余可挥砍次数）。主公用此武器攻击后召唤一个 1/1 的「民兵」。",
     "flavor": "玄德双股剑，左手雌右手雄。"
   },
   {
@@ -418,7 +418,7 @@
     "durability": 3,
     "portrait": "shemao.png",
     "cardvisual": "丈八蛇矛.png",
-    "description": "",
+    "description": "装备至主公。攻击力 = 单次伤害；耐久 = 剩余可挥砍次数。",
     "flavor": "丈八蛇矛，翼德专属。"
   },
   {
@@ -432,6 +432,7 @@
     "durability": 2,
     "portrait": "bairuidao.png",
     "cardvisual": "百锐刀.png",
-    "description": ""
+    "description": "装备至主公。攻击力 = 单次伤害；耐久 = 剩余可挥砍次数。",
+    "flavor": "炉中锻造，百锐成钢。"
   }
 ]

@@ -113,7 +113,7 @@ export function BattleScreen() {
     return <div className={styles.loadingScreen}>正在排兵布阵…</div>
   }
 
-  const bgUrl = getUiAssetUrl('battle_background_v3.png')
+  const bgUrl = getUiAssetUrl('battle_bg_portrait.png')
   const cardbackUrl = getUiAssetUrl('cardback.png')
   const heroPlayerUrl = getUiAssetUrl('hero_player.png')
   const heroAiUrl = getUiAssetUrl('hero_ai.png')

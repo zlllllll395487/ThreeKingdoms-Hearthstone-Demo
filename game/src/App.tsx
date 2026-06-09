@@ -19,8 +19,9 @@ import { DevelopingModal } from '@/components/Modal/DevelopingModal'
  * 比例统一、不变形、不丢内容。
  */
 
-const DESIGN_WIDTH = 1920
-const DESIGN_HEIGHT = 1080
+// v5.5 竖屏 portrait 画布（对战 / 主菜单 / 图鉴 等所有 screen 共用）
+const DESIGN_WIDTH = 1080
+const DESIGN_HEIGHT = 1920
 
 function App() {
   const currentScreen = useUIStore((s) => s.currentScreen)

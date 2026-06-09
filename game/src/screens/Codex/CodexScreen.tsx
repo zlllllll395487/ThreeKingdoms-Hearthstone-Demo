@@ -39,12 +39,25 @@ export function CodexScreen() {
   const [activeTab, setActiveTab] = useState<CodexTab>('shu')
   const allCards = getAllCards()
 
-  // 按 Tab 过滤
-  const filteredCards = allCards.filter((c) => {
-    if (activeTab === 'weapon') return c.type === 'weapon'
-    if (c.type === 'weapon') return false
-    return c.faction === activeTab
-  })
+  // 按 Tab 过滤 + 按品质排序（传说 → 史诗 → 稀有 → 普通，同品质按费用升序）
+  const RARITY_ORDER: Record<string, number> = {
+    legendary: 0,
+    epic: 1,
+    rare: 2,
+    common: 3,
+  }
+  const filteredCards = allCards
+    .filter((c) => {
+      if (activeTab === 'weapon') return c.type === 'weapon'
+      if (c.type === 'weapon') return false
+      return c.faction === activeTab
+    })
+    .sort((a, b) => {
+      const ra = RARITY_ORDER[a.rarity] ?? 99
+      const rb = RARITY_ORDER[b.rarity] ?? 99
+      if (ra !== rb) return ra - rb
+      return a.cost - b.cost
+    })
 
   return (
     <div className={styles.container}>

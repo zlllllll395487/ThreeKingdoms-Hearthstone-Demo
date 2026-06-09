@@ -32,6 +32,8 @@ export type Screen =
   | 'signin'      // 每日签到（主菜单侧栏入口）
   | 'friends'     // 好友（主菜单侧栏入口）
   | 'news'        // 游戏动态（splash 工具按钮入口）
+  | 'factionselect' // v5.5 阵营选择
+  | 'tutorial'    // v5.5 教程弹窗（独立屏 / 或弹窗）
   | 'battle'      // 对战
   | 'result'      // 战后结算
 

@@ -10,7 +10,7 @@ import { MinionToken } from './components/MinionToken'
 import styles from './BattleScreen.module.css'
 
 const BOARD_MAX = 7
-const LONG_PRESS_MS = 400
+const DOUBLE_CLICK_MS = 300 // v5.5 UX 双击检测窗口
 
 /**
  * 对战界面 · 玩家 vs AI（HS 风分区布局）
@@ -56,32 +56,29 @@ export function BattleScreen() {
   // 回合切换提示：用 key 触发动画重挂
   const turnKey = state ? `${state.turn}-${state.activePlayer}` : 'init'
 
-  // 长按查看详情
+  // v5.5 UX: 单击选中 / 双击详情（替代长按）
   const [detailViewCard, setDetailViewCard] = useState<CardInstance | null>(null)
-  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const longPressTriggered = useRef(false)
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastClickedCardRef = useRef<string | null>(null)
 
-  const startLongPress = (card: CardInstance) => {
-    longPressTriggered.current = false
-    if (longPressTimer.current) clearTimeout(longPressTimer.current)
-    longPressTimer.current = setTimeout(() => {
+  /** v5.5 双击检测：300ms 内同一张卡再次 click = 详情，否则单击 = 选中 */
+  const handleCardClickV55 = (card: CardInstance, onSingleClick: () => void) => {
+    if (clickTimerRef.current && lastClickedCardRef.current === card.instanceId) {
+      // 双击触发：取消挂起的单击 + 弹详情
+      clearTimeout(clickTimerRef.current)
+      clickTimerRef.current = null
+      lastClickedCardRef.current = null
       setDetailViewCard(card)
-      longPressTriggered.current = true
-      longPressTimer.current = null
-    }, LONG_PRESS_MS)
-  }
-
-  const cancelLongPress = (onClickFallback?: () => void) => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current)
-      longPressTimer.current = null
-      // 短按 = 单击
-      onClickFallback?.()
-    } else if (longPressTriggered.current) {
-      // 长按状态下抬手 → 关闭详情
-      setDetailViewCard(null)
-      longPressTriggered.current = false
+      return
     }
+    // 第一次 click：设 300ms 计时器等待第二次
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current)
+    lastClickedCardRef.current = card.instanceId
+    clickTimerRef.current = setTimeout(() => {
+      onSingleClick()
+      clickTimerRef.current = null
+      lastClickedCardRef.current = null
+    }, DOUBLE_CLICK_MS)
   }
 
   // 死亡淡出队列：跟踪上一帧战场，新一帧消失的 minion 留 0.4s 淡出
@@ -401,20 +398,10 @@ export function BattleScreen() {
                 ['--idx' as string]: i,
                 zIndex: 10 + i,
               }}
-              onMouseDown={(e) => {
+              onClick={(e) => {
                 e.stopPropagation()
-                if (e.button !== 0) return // 只响应左键
-                startLongPress(card)
-              }}
-              onMouseUp={(e) => {
-                e.stopPropagation()
-                cancelLongPress(() => handleHandCardClick(card.instanceId))
-              }}
-              onMouseLeave={() => {
-                if (longPressTimer.current) {
-                  clearTimeout(longPressTimer.current)
-                  longPressTimer.current = null
-                }
+                // v5.5 UX: 单击=选中 / 双击=详情
+                handleCardClickV55(card, () => handleHandCardClick(card.instanceId))
               }}
             >
               <Card card={card.data} scale={0.55} />
@@ -441,16 +428,13 @@ export function BattleScreen() {
         createPortal(
           <div
             className={styles.detailOverlay}
-            onMouseUp={() => {
-              setDetailViewCard(null)
-              longPressTriggered.current = false
-            }}
+            onClick={() => setDetailViewCard(null)}
             onContextMenu={(e) => e.preventDefault()}
           >
             <div className={styles.detailCardWrap}>
               <Card card={detailViewCard.data} scale={2} />
             </div>
-            <div className={styles.detailHint}>松开关闭</div>
+            <div className={styles.detailHint}>点击任意处关闭</div>
           </div>,
           document.body,
         )}

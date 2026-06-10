@@ -65,6 +65,26 @@ export function buildRandomDeck(
   return shuffle(picked).map((c) => instantiate(c, owner))
 }
 
+/** v5.5 §19.3.1 按卡 ID 列表构造一副牌组（阵营隔离 · 替代 buildRandomDeck）
+ *
+ * 用法：传入 SHU_DECK / WU_DECK 的 ID 字符串数组
+ * 每个 ID 实例化一张 CardInstance，最终 shuffle 一次返回
+ * 找不到的 ID 会跳过（防御性 · 不抛错）
+ */
+export function buildDeckFromIds(
+  pool: CardData[],
+  ids: string[],
+  owner: PlayerSide,
+): CardInstance[] {
+  const map = new Map(pool.map((c) => [c.id, c]))
+  const cards: CardData[] = []
+  for (const id of ids) {
+    const c = map.get(id)
+    if (c) cards.push(c)
+  }
+  return shuffle(cards).map((c) => instantiate(c, owner))
+}
+
 /** 从牌组顶抽一张到手牌；若牌组空触发疲劳 */
 export function drawCard(player: PlayerState): CardInstance | null {
   if (player.deck.length === 0) {

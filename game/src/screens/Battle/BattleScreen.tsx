@@ -488,7 +488,7 @@ export function BattleScreen() {
                 handleCardClickV55(card, () => handleHandCardClick(card.instanceId))
               }}
             >
-              <Card card={card.data} scale={0.55} />
+              <Card card={card.data} scale={0.75} />
             </div>
           )
         })}

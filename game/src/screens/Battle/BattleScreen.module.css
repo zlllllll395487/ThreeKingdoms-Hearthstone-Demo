@@ -202,8 +202,8 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  width: 1020px;
-  height: 200px;
+  width: 1060px;        /* §19.3.2 1020 → 1060（容纳放大后的槽 + gap）*/
+  height: 230px;        /* §19.3.2 200 → 230（slot 高度增加 30）*/
   z-index: 4;
   transition: background 0.25s ease, box-shadow 0.25s ease;
   border-radius: 16px;
@@ -262,14 +262,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;            /* §19.3.2 12 → 10（让位给放大的 slot）*/
   z-index: 0;
   pointer-events: none;
 }
 
 .slot {
-  width: 130px;
-  height: 180px;
+  width: 145px;          /* §19.3.2 130 → 145 */
+  height: 210px;         /* §19.3.2 180 → 210 */
   border: 2px dashed rgba(212, 160, 23, 0.18);
   border-radius: 12px;
   background: radial-gradient(
@@ -291,7 +291,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;            /* §19.3.2 12 → 10 */
   z-index: 1;
 }
 
@@ -728,7 +728,7 @@
 
 .handSlot {
   pointer-events: auto;
-  margin: 0 -42px;
+  margin: 0 -52px;       /* §19.3.2 -42 → -52（手牌放大后需要更多重叠避免出界）*/
   transform: rotate(var(--rot)) translateY(var(--lift));
   transform-origin: center bottom;
   transition: transform 0.22s ease, filter 0.22s ease;
@@ -737,7 +737,7 @@
 }
 
 .handSlot:hover {
-  transform: translateY(-90px) scale(1.35) rotate(0deg) !important;
+  transform: translateY(-110px) scale(1.45) rotate(0deg) !important;  /* §19.3.2 抬升 90→110 scale 1.35→1.45 */
   filter: drop-shadow(0 14px 28px rgba(212, 160, 23, 0.8))
     drop-shadow(0 0 16px rgba(255, 220, 100, 0.6));
   z-index: 100 !important;
@@ -745,15 +745,15 @@
 
 /* 邻卡让位 */
 .handSlot:has(~ .handSlot:hover) {
-  transform: rotate(var(--rot)) translate(-36px, calc(var(--lift) - 6px));
+  transform: rotate(var(--rot)) translate(-44px, calc(var(--lift) - 6px));
 }
 
 .handSlot:hover ~ .handSlot {
-  transform: rotate(var(--rot)) translate(36px, calc(var(--lift) - 6px));
+  transform: rotate(var(--rot)) translate(44px, calc(var(--lift) - 6px));
 }
 
 .handSlotSelected {
-  transform: translateY(-100px) scale(1.38) rotate(0deg) !important;
+  transform: translateY(-120px) scale(1.48) rotate(0deg) !important;  /* §19.3.2 抬升 100→120 scale 1.38→1.48 */
   filter: drop-shadow(0 16px 32px rgba(255, 220, 100, 1))
     drop-shadow(0 0 20px rgba(255, 220, 100, 0.85)) !important;
   z-index: 101 !important;

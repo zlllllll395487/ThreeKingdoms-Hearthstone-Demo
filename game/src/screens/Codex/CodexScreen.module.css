@@ -102,30 +102,9 @@
   background: rgba(0, 0, 0, 0.3);
 }
 
+/* §19.7.14 · 仅保留定位，size + hover 由 BackButton 共用样式接管 */
 .backButton {
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.75));
-  transition: transform 0.18s ease, filter 0.18s ease;
-}
-
-.backButtonImg {
-  height: 52px;
-  width: auto;
-  display: block;
-  user-select: none;
-  pointer-events: none;
-}
-
-.backButton:hover {
-  transform: translateY(-2px) scale(1.05);
-  filter: drop-shadow(0 8px 16px rgba(212, 160, 23, 0.85));
-}
-
-.backButton:active {
-  transform: translateY(1px) scale(0.97);
+  /* nothing — flex 默认排在 header 左侧 */
 }
 
 .title {

@@ -75,14 +75,16 @@
   --color-rarity-epic: #7b3da8;
   --color-rarity-legendary: #d4a017;
 
-  /* 字体 · 全屏字体系统（除 Splash 外）
-     标题层 · 金石碑刻 / 立碑感（杨任东竹石体，未提供时 fallback Ma Shan Zheng）*/
+  /* 字体 · 全屏字体系统（§19.7.9 验收：杨任东竹石体 / 楷书风做全局基底）
+     杨任东竹石体（local）→ Ma Shan Zheng（Google Fonts）→ STKaiti/KaiTi（Win 内置）→ serif */
   --font-title:    'Yang Renzi Zhushi', 'Ma Shan Zheng', 'STKaiti', 'KaiTi', serif;
   --font-kai:      var(--font-title);  /* 兼容旧引用 */
-  --font-display:  'Alibaba PuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;  /* UI 强调 */
-  --font-serif:    'Alibaba PuHuiTi', 'PingFang SC', 'Microsoft YaHei', sans-serif;  /* 正文默认 */
-  --font-numeric:  'Alibaba PuHuiTi', 'Yang Renzi Zhushi', sans-serif;                /* 数字 */
-  --font-body:     'Alibaba PuHuiTi', 'Noto Serif SC', 'Source Han Serif SC', 'STSong', sans-serif;
+  /* §19.7.9 · display / serif / body 全部基底换成 title 链，PuHuiTi 退到最后 */
+  --font-display:  var(--font-title);
+  --font-serif:    var(--font-title);
+  --font-body:     var(--font-title);
+  /* 数字保留阿里普惠体（楷书数字不够清晰）*/
+  --font-numeric:  'Alibaba PuHuiTi', 'Yang Renzi Zhushi', sans-serif;
 }
 
 /* ============================================
@@ -97,8 +99,9 @@ html, body, #root {
 }
 
 body {
-  font-family: var(--font-serif);
-  font-weight: 600;  /* 默认走阿里普惠体 75 SemiBold */
+  font-family: var(--font-title);
+  /* §19.7.9 · 楷书风字体多为单字重，weight 600 会模糊 → 改 400 自然 */
+  font-weight: 400;
   background: linear-gradient(135deg, #1a1a1a 0%, #2c3a4d 100%);
   color: var(--color-ink);
   -webkit-font-smoothing: antialiased;

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
+import { BackButton } from '@/components/BackButton/BackButton'
 import styles from './FactionSelectScreen.module.css'
 
 type Faction = 'shu' | 'wu'
@@ -94,17 +95,13 @@ export function FactionSelectScreen() {
       )}
       <div className={styles.vignette} />
 
-      <button
-        className={styles.backButton}
+      <BackButton
         onClick={() => navigate('mainmenu')}
-        aria-label="返回主菜单"
+        ariaLabel="返回主菜单"
+        className={styles.backButton}
       >
-        {btnBackUrl ? (
-          <img src={btnBackUrl} alt="返回" />
-        ) : (
-          <span>‹ 返回</span>
-        )}
-      </button>
+        返回
+      </BackButton>
 
       <h1 className={styles.title}>选择对战阵营</h1>
 

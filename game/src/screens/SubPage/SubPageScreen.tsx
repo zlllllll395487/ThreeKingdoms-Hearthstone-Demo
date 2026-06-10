@@ -1,5 +1,6 @@
 import { useUIStore } from '@/store/uiStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
+import { BackButton } from '@/components/BackButton/BackButton'
 import styles from './SubPageScreen.module.css'
 import type { Screen } from '@/store/uiStore'
 
@@ -50,17 +51,12 @@ export function SubPageScreen({ screen }: SubPageScreenProps) {
       {bgUrl && <img src={bgUrl} alt="" className={styles.bg} />}
 
       {/* 左上角返回按钮 */}
-      <button
-        className={styles.backBtn}
+      <BackButton
         onClick={() => navigate(backTarget)}
-        aria-label="返回"
+        className={styles.backBtn}
       >
-        {btnBackUrl ? (
-          <img src={btnBackUrl} alt="返回" />
-        ) : (
-          <span>‹ 返回</span>
-        )}
-      </button>
+        返回
+      </BackButton>
     </div>
   )
 }

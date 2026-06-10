@@ -1,0 +1,62 @@
+/* §19.7.14 · 共用返回/退出按钮样式 */
+
+.btn {
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.btnShort {
+  background-image: url('/src/assets/ui/modal_btn_short_on.png');
+  width: 180px;
+  height: 70px;
+}
+
+.btnLong {
+  background-image: url('/src/assets/ui/modal_btn_long_on.png');
+  width: 320px;
+  height: 70px;
+}
+
+.text {
+  font-family: var(--font-kai);
+  font-size: 22px;
+  font-weight: bold;
+  color: #3a1a08;
+  letter-spacing: 8px;
+  /* 按钮中央略偏左为视觉中心补偿（字距导致重心右偏）*/
+  padding-left: 8px;
+  padding-right: 0;
+  text-shadow:
+    0 1px 0 rgba(255, 245, 220, 0.8),
+    0 0 6px rgba(255, 200, 100, 0.35);
+  pointer-events: none;
+  user-select: none;
+}
+
+.btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  filter: drop-shadow(0 8px 16px rgba(212, 160, 23, 0.85));
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  background-image: url('/src/assets/ui/modal_btn_short_off.png');
+  cursor: not-allowed;
+  filter: brightness(0.85) saturate(0.7);
+  transform: none;
+}
+.btnLong:disabled {
+  background-image: url('/src/assets/ui/modal_btn_long_off.png');
+}

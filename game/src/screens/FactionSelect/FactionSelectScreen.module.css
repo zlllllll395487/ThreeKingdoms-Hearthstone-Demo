@@ -43,36 +43,12 @@
 }
 
 /* 返回按钮 · 左上角 */
+/* §19.7.14 · 仅保留定位，其余 BackButton 共用样式 */
 .backButton {
   position: absolute;
   top: 28px;
   left: 32px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
   z-index: 10;
-  width: 160px;
-  height: 64px;
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-
-.backButton:hover {
-  transform: translateX(-3px) scale(1.06);
-  filter: drop-shadow(0 0 10px rgba(212, 160, 23, 0.6));
-}
-
-.backButton img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.backButton span {
-  font-family: var(--font-kai);
-  font-size: 28px;
-  color: #ffe18a;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
 /* 主标题 */

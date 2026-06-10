@@ -225,17 +225,13 @@ export function MainMenu() {
               className={styles.switchModalImg}
             />
           )}
-          <button
-            className={styles.switchModalBack}
+          <BackButton
             onClick={() => setShowSwitchModal(false)}
-            aria-label="返回主菜单"
+            className={styles.switchModalBack}
+            ariaLabel="关闭"
           >
-            {btnBackUrl ? (
-              <img src={btnBackUrl} alt="返回" />
-            ) : (
-              <span>‹ 返回</span>
-            )}
-          </button>
+            关闭
+          </BackButton>
         </div>
       )}
 

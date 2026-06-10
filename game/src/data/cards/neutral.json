@@ -18,7 +18,7 @@
       }
     ],
     "portrait": "pangtong.png",
-    "description": "神算 1。威名：随机将一张谋略加入你的手牌。",
+    "description": "神算 1。战吼：随机将一张谋略牌加入你的手牌。",
     "flavor": "凤雏，与卧龙齐名。"
   },
   {
@@ -40,7 +40,7 @@
       }
     ],
     "portrait": "liru.png",
-    "description": "神算 1。威名：本局法术伤害 +1。",
+    "description": "神算 1。战吼：本局对战中你的法术伤害提升 1 点。",
     "flavor": "毒士李儒。"
   },
   {
@@ -104,7 +104,7 @@
     ],
     "portrait": "jinchuangyao.png",
     "cardvisual": "金疮药.png",
-    "description": "恢复主公 5 点生命。",
+    "description": "为你的主公恢复 5 点生命值。",
     "flavor": "军中常备。"
   },
   {
@@ -127,7 +127,7 @@
       }
     ],
     "portrait": "xiuyang.png",
-    "description": "抽 1 张牌，恢复主公 4 点生命。",
+    "description": "抽 1 张牌，并为你的主公恢复 4 点生命值。",
     "flavor": "且作经年休养。"
   }
 ]

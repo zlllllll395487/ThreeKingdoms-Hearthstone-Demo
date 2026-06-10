@@ -1,0 +1,5 @@
+.sprite {
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.35));
+}

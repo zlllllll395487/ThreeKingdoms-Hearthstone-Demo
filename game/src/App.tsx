@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useUIStore } from '@/store/uiStore'
+import { useUIStore, type Screen } from '@/store/uiStore'
 import { SplashScreen } from '@/screens/Splash/SplashScreen'
 import { IntroVideo } from '@/screens/Intro/IntroVideo'
 import { LoadingScreen } from '@/screens/Loading/LoadingScreen'
@@ -14,30 +14,38 @@ import { DevelopingModal } from '@/components/Modal/DevelopingModal'
 /**
  * App · 根组件
  *
- * 固定 1920×1080（16:9）设计画布，自动按窗口大小等比缩放，
- * 多余空间显示为黑色 letterbox。确保所有界面在任何分辨率下
- * 比例统一、不变形、不丢内容。
+ * v5.5.1 · per-screen canvas：
+ * - Battle 屏：竖屏 1080×1920（炉石手游 portrait 体验）
+ * - 其他所有屏：横屏 1920×1080（PC hub 体验）
+ *
+ * canvas 在进入 / 离开 Battle 时切换尺寸，scale 重算适配窗口。
  */
 
-// v5.5 竖屏 portrait 画布（对战 / 主菜单 / 图鉴 等所有 screen 共用）
-const DESIGN_WIDTH = 1080
-const DESIGN_HEIGHT = 1920
+const PORTRAIT_SCREENS = new Set<Screen>(['battle'])
+const PORTRAIT_W = 1080
+const PORTRAIT_H = 1920
+const LANDSCAPE_W = 1920
+const LANDSCAPE_H = 1080
 
 function App() {
   const currentScreen = useUIStore((s) => s.currentScreen)
   const [scale, setScale] = useState(1)
 
-  // 监听窗口大小，等比缩放设计画布
+  const isPortrait = PORTRAIT_SCREENS.has(currentScreen)
+  const designWidth = isPortrait ? PORTRAIT_W : LANDSCAPE_W
+  const designHeight = isPortrait ? PORTRAIT_H : LANDSCAPE_H
+
+  // 窗口大小变化 / canvas 尺寸切换 → 重算 scale
   useEffect(() => {
     function updateScale() {
-      const sx = window.innerWidth / DESIGN_WIDTH
-      const sy = window.innerHeight / DESIGN_HEIGHT
+      const sx = window.innerWidth / designWidth
+      const sy = window.innerHeight / designHeight
       setScale(Math.min(sx, sy))
     }
     updateScale()
     window.addEventListener('resize', updateScale)
     return () => window.removeEventListener('resize', updateScale)
-  }, [])
+  }, [designWidth, designHeight])
 
   return (
     <div
@@ -51,11 +59,11 @@ function App() {
         overflow: 'hidden',
       }}
     >
-      {/* 固定设计画布 · 居中 + 等比缩放 */}
+      {/* 设计画布 · 居中 + 等比缩放 · 按当前屏 portrait/landscape 切换尺寸 */}
       <div
         style={{
-          width: `${DESIGN_WIDTH}px`,
-          height: `${DESIGN_HEIGHT}px`,
+          width: `${designWidth}px`,
+          height: `${designHeight}px`,
           transform: `scale(${scale})`,
           transformOrigin: 'center center',
           position: 'relative',

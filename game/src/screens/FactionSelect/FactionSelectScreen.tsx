@@ -12,10 +12,13 @@ const HERO_BY_FACTION: Record<Faction, string> = {
 }
 
 /**
- * 阵营选择 · 玩家和 AI 各自独立选阵营（允许同阵营对战）
+ * 阵营选择屏 · 横屏 1920×1080
  *
- * 流程：
- *   MainMenu「对战」→ FactionSelectScreen → 选玩家阵营 + AI 阵营 → 「确认」→ BattleScreen
+ * 玩家 + AI 阵营独立双选（允许蜀 vs 蜀 / 吴 vs 吴）
+ *
+ * 布局：左半屏选玩家阵营，右半屏选 AI 阵营，底部确认按钮
+ *
+ * 流程：MainMenu「对战」→ FactionSelectScreen → 选 2 阵营 → 「确认」→ BattleScreen
  */
 export function FactionSelectScreen() {
   const navigate = useUIStore((s) => s.navigate)
@@ -29,53 +32,57 @@ export function FactionSelectScreen() {
   const btnStartUrl = getUiAssetUrl('btn_start_battle_v2.png')
   const btnBackUrl = getUiAssetUrl('btn_back.png')
 
+  const bothSelected = !!playerFaction && !!aiFaction
+
   const handleStart = () => {
     if (!playerFaction || !aiFaction) return
     startGame({ playerFaction, aiFaction })
     navigate('battle')
   }
 
-  const renderFactionPair = (
+  const renderFactionColumn = (
     role: 'player' | 'ai',
+    title: string,
     selected: Faction | null,
     setSelected: (f: Faction) => void,
   ) => (
-    <div className={styles.cards}>
-      <div className={styles.factionSlot} data-selected={selected === 'shu'}>
-        <button
-          className={`${styles.factionCard} ${selected === 'shu' ? styles.selected : ''}`}
-          onClick={() => setSelected('shu')}
-          aria-label={`${role === 'player' ? '玩家' : 'AI'}选择蜀阵营`}
-        >
-          {shuCardUrl ? (
-            <img src={shuCardUrl} alt="蜀" className={styles.factionCardImg} />
-          ) : (
-            <div className={styles.placeholderShu}>蜀</div>
-          )}
-          {selected === 'shu' && <div className={styles.selectedGlow} />}
-        </button>
-        <div className={styles.factionLabel}>蜀</div>
-      </div>
+    <div className={styles.column}>
+      <h2 className={styles.columnTitle}>{title}</h2>
+      <div className={styles.cards}>
+        <div className={styles.factionSlot} data-selected={selected === 'shu'}>
+          <button
+            className={`${styles.factionCard} ${selected === 'shu' ? styles.selected : ''}`}
+            onClick={() => setSelected('shu')}
+            aria-label={`${role === 'player' ? '玩家' : 'AI'}选择蜀阵营`}
+          >
+            {shuCardUrl ? (
+              <img src={shuCardUrl} alt="蜀" className={styles.factionCardImg} />
+            ) : (
+              <div className={styles.placeholderShu}>蜀</div>
+            )}
+            {selected === 'shu' && <div className={styles.selectedGlow} />}
+          </button>
+          <div className={styles.factionLabel}>蜀</div>
+        </div>
 
-      <div className={styles.factionSlot} data-selected={selected === 'wu'}>
-        <button
-          className={`${styles.factionCard} ${selected === 'wu' ? styles.selected : ''}`}
-          onClick={() => setSelected('wu')}
-          aria-label={`${role === 'player' ? '玩家' : 'AI'}选择吴阵营`}
-        >
-          {wuCardUrl ? (
-            <img src={wuCardUrl} alt="吴" className={styles.factionCardImg} />
-          ) : (
-            <div className={styles.placeholderWu}>吴</div>
-          )}
-          {selected === 'wu' && <div className={styles.selectedGlow} />}
-        </button>
-        <div className={styles.factionLabel}>吴</div>
+        <div className={styles.factionSlot} data-selected={selected === 'wu'}>
+          <button
+            className={`${styles.factionCard} ${selected === 'wu' ? styles.selected : ''}`}
+            onClick={() => setSelected('wu')}
+            aria-label={`${role === 'player' ? '玩家' : 'AI'}选择吴阵营`}
+          >
+            {wuCardUrl ? (
+              <img src={wuCardUrl} alt="吴" className={styles.factionCardImg} />
+            ) : (
+              <div className={styles.placeholderWu}>吴</div>
+            )}
+            {selected === 'wu' && <div className={styles.selectedGlow} />}
+          </button>
+          <div className={styles.factionLabel}>吴</div>
+        </div>
       </div>
     </div>
   )
-
-  const bothSelected = !!playerFaction && !!aiFaction
 
   return (
     <div className={styles.container}>
@@ -99,16 +106,21 @@ export function FactionSelectScreen() {
         )}
       </button>
 
-      <div className={styles.centerStack}>
-        <section className={styles.pickSection}>
-          <h2 className={styles.title}>选择你的阵营</h2>
-          {renderFactionPair('player', playerFaction, setPlayerFaction)}
-        </section>
+      <h1 className={styles.title}>选择对战阵营</h1>
 
-        <section className={styles.pickSection}>
-          <h2 className={styles.title}>选择对手阵营</h2>
-          {renderFactionPair('ai', aiFaction, setAiFaction)}
-        </section>
+      <div className={styles.columnsRow}>
+        {renderFactionColumn('player', '你的阵营', playerFaction, setPlayerFaction)}
+        <div className={styles.vsDivider}>VS</div>
+        {renderFactionColumn('ai', '对手阵营', aiFaction, setAiFaction)}
+      </div>
+
+      <div className={styles.bottomBar}>
+        {bothSelected && (
+          <p className={styles.preview}>
+            你: {HERO_BY_FACTION[playerFaction]}　vs　对手:{' '}
+            {HERO_BY_FACTION[aiFaction]}
+          </p>
+        )}
 
         <button
           className={styles.startButton}
@@ -126,13 +138,6 @@ export function FactionSelectScreen() {
           )}
           <span className={styles.startText}>确 认</span>
         </button>
-
-        {bothSelected && (
-          <p className={styles.preview}>
-            你: {HERO_BY_FACTION[playerFaction]}　vs　对手:{' '}
-            {HERO_BY_FACTION[aiFaction]}
-          </p>
-        )}
       </div>
     </div>
   )

@@ -1,4 +1,6 @@
-/* FactionSelect · 1080×1920 竖屏双选 */
+/* FactionSelect · 横屏 1920×1080 双栏布局
+   左栏选玩家阵营 / 中央 VS 分隔 / 右栏选 AI 阵营 / 底部确认按钮
+*/
 
 .container {
   position: relative;
@@ -34,31 +36,17 @@
   background: radial-gradient(
     ellipse at center,
     transparent 50%,
-    rgba(0, 0, 0, 0.6) 100%
+    rgba(0, 0, 0, 0.62) 100%
   );
   pointer-events: none;
   z-index: 1;
 }
 
-/* 整体内容垂直居中 */
-.centerStack {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  padding: 30px 0;
-  box-sizing: border-box;
-}
-
+/* 返回按钮 · 左上角 */
 .backButton {
   position: absolute;
   top: 28px;
-  left: 28px;
+  left: 32px;
   background: none;
   border: none;
   cursor: pointer;
@@ -66,11 +54,12 @@
   z-index: 10;
   width: 160px;
   height: 64px;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease;
 }
 
 .backButton:hover {
   transform: translateX(-3px) scale(1.06);
+  filter: drop-shadow(0 0 10px rgba(212, 160, 23, 0.6));
 }
 
 .backButton img {
@@ -86,28 +75,63 @@
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
 }
 
-.pickSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-}
-
+/* 主标题 */
 .title {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
   font-family: var(--font-kai);
-  font-size: 44px;
+  font-size: 56px;
   color: #ffe18a;
-  letter-spacing: 14px;
+  letter-spacing: 22px;
   margin: 0;
   text-shadow:
-    0 0 22px rgba(255, 215, 100, 0.6),
-    0 0 8px rgba(255, 215, 100, 0.4),
+    0 0 28px rgba(255, 215, 100, 0.65),
+    0 0 10px rgba(255, 215, 100, 0.45),
     0 3px 8px rgba(0, 0, 0, 0.95);
 }
 
+/* 双栏行 · 居中铺满 */
+.columnsRow {
+  position: absolute;
+  top: 160px;
+  left: 0;
+  right: 0;
+  height: 760px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  z-index: 2;
+  padding: 0 80px;
+  box-sizing: border-box;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  flex: 0 0 auto;
+}
+
+.columnTitle {
+  font-family: var(--font-kai);
+  font-size: 38px;
+  color: #ffe18a;
+  letter-spacing: 12px;
+  margin: 0;
+  text-shadow:
+    0 0 18px rgba(255, 215, 100, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+/* 左右两张卡牌（蜀 / 吴） */
 .cards {
   display: flex;
-  gap: 60px;
+  gap: 36px;
   align-items: flex-start;
 }
 
@@ -115,6 +139,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 12px;
 }
 
 .factionCard {
@@ -122,8 +147,8 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  width: 260px;
-  height: 400px;
+  width: 280px;
+  height: 500px;
   position: relative;
   transition: transform 0.25s ease, filter 0.25s ease;
   filter: brightness(0.82) saturate(0.85);
@@ -136,24 +161,24 @@
 
 .factionCard.selected {
   transform: translateY(-14px) scale(1.05);
-  filter: brightness(1.08) saturate(1.15);
+  filter: brightness(1.1) saturate(1.18);
 }
 
 .factionCardImg {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.85));
 }
 
 .selectedGlow {
   position: absolute;
-  inset: -14px;
-  border-radius: 16px;
+  inset: -16px;
+  border-radius: 18px;
   background: radial-gradient(
     ellipse at center,
-    rgba(255, 215, 100, 0.5) 0%,
-    rgba(255, 160, 40, 0.18) 50%,
+    rgba(255, 215, 100, 0.55) 0%,
+    rgba(255, 160, 40, 0.2) 50%,
     transparent 75%
   );
   pointer-events: none;
@@ -162,26 +187,26 @@
 }
 
 @keyframes glowPulse {
-  0%, 100% { opacity: 0.65; transform: scale(1); }
-  50%      { opacity: 1;    transform: scale(1.05); }
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.05); }
 }
 
 .factionLabel {
   font-family: var(--font-kai);
-  font-size: 42px;
+  font-size: 38px;
   color: #ffe18a;
   letter-spacing: 6px;
   text-shadow:
     0 0 14px rgba(255, 215, 100, 0.55),
     0 2px 6px rgba(0, 0, 0, 0.95);
-  transition: text-shadow 0.25s ease, color 0.25s ease;
+  transition: color 0.25s ease, text-shadow 0.25s ease;
 }
 
 .factionSlot[data-selected='true'] .factionLabel {
   color: #fff5c8;
   text-shadow:
-    0 0 24px rgba(255, 220, 120, 0.9),
-    0 0 10px rgba(255, 220, 120, 0.7),
+    0 0 26px rgba(255, 220, 120, 0.95),
+    0 0 12px rgba(255, 220, 120, 0.7),
     0 2px 6px rgba(0, 0, 0, 0.95);
 }
 
@@ -193,12 +218,64 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-kai);
-  font-size: 150px;
+  font-size: 180px;
   font-weight: 900;
   color: #ffe18a;
   border: 3px solid #8b6f47;
   border-radius: 14px;
   background: rgba(40, 26, 18, 0.6);
+}
+
+/* 中央 VS 分隔 */
+.vsDivider {
+  font-family: var(--font-kai);
+  font-size: 100px;
+  font-weight: bold;
+  color: rgba(255, 215, 100, 0.85);
+  letter-spacing: 12px;
+  flex: 0 0 auto;
+  text-shadow:
+    0 0 32px rgba(255, 215, 100, 0.7),
+    0 0 12px rgba(255, 100, 80, 0.5),
+    0 4px 10px rgba(0, 0, 0, 0.95);
+  animation: vsPulse 2.2s ease-in-out infinite;
+  align-self: center;
+}
+
+@keyframes vsPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.06); }
+}
+
+/* 底部 · 预览文字 + 确认按钮 */
+.bottomBar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 0 38px;
+}
+
+.preview {
+  font-family: var(--font-kai);
+  font-size: 28px;
+  color: #ffeec0;
+  letter-spacing: 8px;
+  text-shadow:
+    0 0 14px rgba(255, 215, 100, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.92);
+  margin: 0;
+  animation: previewFadeIn 0.3s ease-out;
+}
+
+@keyframes previewFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .startButton {
@@ -207,9 +284,8 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  width: 320px;
-  height: 100px;
-  margin-top: 10px;
+  width: 360px;
+  height: 110px;
   transition: transform 0.2s ease, filter 0.2s ease;
   display: flex;
   align-items: center;
@@ -234,7 +310,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.78));
   pointer-events: none;
 }
 
@@ -242,29 +318,12 @@
   position: relative;
   z-index: 1;
   font-family: var(--font-kai);
-  font-size: 48px;
+  font-size: 52px;
   font-weight: bold;
   color: #fff5c8;
-  letter-spacing: 16px;
-  padding-left: 16px;
+  letter-spacing: 18px;
+  padding-left: 18px;
   text-shadow:
-    0 0 18px rgba(255, 215, 100, 0.8),
+    0 0 20px rgba(255, 215, 100, 0.85),
     0 3px 8px rgba(0, 0, 0, 0.95);
-}
-
-.preview {
-  margin-top: 6px;
-  font-family: var(--font-kai);
-  font-size: 26px;
-  color: #ffeec0;
-  letter-spacing: 6px;
-  text-shadow:
-    0 0 12px rgba(255, 215, 100, 0.4),
-    0 2px 6px rgba(0, 0, 0, 0.9);
-  animation: previewFadeIn 0.3s ease-out;
-}
-
-@keyframes previewFadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
 }

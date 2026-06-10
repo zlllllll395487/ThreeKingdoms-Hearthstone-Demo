@@ -141,28 +141,21 @@
    顶部 · 左：玩家信息 ⊙ 右：3 货币 + 更多
    ============================================ */
 
-/* ============================================
-   顶部账号横幅 · 全宽 1080，高 180
-   玩家信息撑左侧 + 货币嵌右上角
-   ============================================ */
 .topBar {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 180px;
+  top: 12px;
+  left: 32px;
+  right: 32px;
   z-index: 5;
   display: flex;
-  justify-content: flex-start;
-  align-items: center;
+  justify-content: space-between;
+  align-items: flex-start;
   pointer-events: none;
-  padding: 12px 24px 0;
-  box-sizing: border-box;
 }
 
 .topBar > * { pointer-events: auto; }
 
-/* 玩家信息块 · 横向铺到屏幕上半 */
+/* 玩家信息块 · 1.68x 提权（1.2 × 1.4，比 v8 再放大 40%）+ 可点击 */
 .playerBlock {
   display: flex;
   align-items: center;
@@ -170,59 +163,80 @@
   border: none;
   padding: 0;
   cursor: pointer;
+  transform: scale(1.68);
+  transform-origin: top left;
   filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
   transition: transform 0.18s ease, filter 0.18s ease;
 }
 
 .playerBlock:hover {
+  transform: scale(1.74);
   filter:
     drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7))
     drop-shadow(0 0 16px rgba(212, 160, 23, 0.6));
-  transform: scale(1.015);
 }
 
 .playerBlock:active {
-  transform: scale(0.99);
+  transform: scale(1.62);
 }
 
-/* 账号 UI 横幅，宽度约 720（≈ 屏幕 67%） */
 .playerBlockImg {
-  width: 720px;
+  width: 320px;
   height: auto;
-  max-height: 168px;
   object-fit: contain;
   display: block;
 }
 
-/* 顶右区：货币嵌在账号横幅右上角 */
+/* 顶右区：货币 + 更多 · 整体下移让出顶部空间 */
 .topRight {
-  position: absolute;
-  top: 14px;
-  right: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
-  pointer-events: auto;
+  transform: translateY(28px);
 }
 
+/* 货币条 · 3 张 PNG 已自带背景+数字+加号，直接展示 */
 .currencyBar {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 18px;
 }
 
 .currencyImg {
-  height: 56px;
+  height: 72px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.75));
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
 }
 
 .currencyImg:hover {
-  transform: translateY(-2px) scale(1.05);
-  filter: drop-shadow(0 5px 12px rgba(212, 160, 23, 0.7));
+  transform: translateY(-2px) scale(1.04);
+  filter: drop-shadow(0 6px 14px rgba(212, 160, 23, 0.7));
+}
+
+/* 更多按钮 */
+.moreBtn {
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.moreBtn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.moreBtn:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 12px rgba(212, 160, 23, 0.9));
 }
 
 /* ============================================
@@ -231,12 +245,12 @@
 
 .sideNav {
   position: absolute;
-  left: 32px;
-  top: 220px;
+  left: 56px;
+  top: 240px;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .sideBtn {
@@ -290,31 +304,26 @@
    右侧动作卡叠层（war-room 底板 + 3 真图卡）
    ============================================ */
 
-/* 3 模式卡 · 垂直居中（约 y=600~1100），整体微微靠右（left:42%） */
-/* ============================================
-   C v2 · 3 模式卡区 · 占中央 51% 屏幕高度
-   ============================================ */
-
 .actionStack {
   position: absolute;
-  top: 260px;
-  left: 30px;
-  right: 30px;
-  height: 980px;
+  right: 16px;
+  top: 14%;
   z-index: 4;
+  width: 1000px;
+  height: 600px;
 }
 
-/* 剧情卡 · 左上斜 -12° · 270px 宽 */
+/* 顶层：剧情模式（右上小，与对战卡顶部重叠）· 缩 20% + 整体下移 */
 .cardStory {
   position: absolute;
-  top: 60px;
-  left: 40px;
-  width: 270px;
+  top: 14%;
+  right: 8%;
+  width: 45%;
   cursor: pointer;
   transition: transform 0.25s ease, filter 0.25s ease;
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.78));
-  transform: rotate(-12deg);
-  z-index: 4;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.75));
+  transform: rotate(18deg);
+  z-index: 6;
 }
 
 .cardStory img {
@@ -324,25 +333,25 @@
 }
 
 .cardStory:hover {
-  transform: rotate(-12deg) translateY(-10px) scale(1.04);
+  transform: rotate(18deg) translateY(-8px) scale(1.04);
   filter: drop-shadow(0 16px 32px rgba(212, 160, 23, 0.75));
 }
 
-/* 对战主大卡 · 正中央 · 480px 宽 · 自带呼吸光 */
+/* 中层：对战主大卡（中心大）· 缩 20% + 右移 + 整体下移 */
 .cardBattle {
   position: absolute;
-  top: 160px;
-  left: 50%;
-  transform: translateX(-50%) rotate(-1deg);
-  width: 480px;
+  top: 22%;
+  left: 14%;
+  width: 69%;
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  z-index: 6;
-  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.88));
+  z-index: 3;
+  filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.85));
   transition: transform 0.25s ease, filter 0.25s ease;
   animation: battleCardBreathe 3s ease-in-out infinite;
+  transform: rotate(-1deg);
 }
 
 .cardBattle img {
@@ -353,37 +362,37 @@
 
 @keyframes battleCardBreathe {
   0%, 100% {
-    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.88))
+    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.85))
             drop-shadow(0 0 0 rgba(212, 160, 23, 0));
   }
   50% {
-    filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.88))
-            drop-shadow(0 0 36px rgba(255, 215, 100, 0.75));
+    filter: drop-shadow(0 14px 32px rgba(0, 0, 0, 0.85))
+            drop-shadow(0 0 28px rgba(212, 160, 23, 0.6));
   }
 }
 
 .cardBattle:hover {
-  transform: translateX(-50%) scale(1.04) translateY(-6px) rotate(-1deg);
-  filter: drop-shadow(0 22px 48px rgba(255, 215, 100, 0.9));
+  transform: scale(1.04) translateY(-4px);
+  filter: drop-shadow(0 18px 40px rgba(212, 160, 23, 0.85));
   animation: none;
 }
 
 .cardBattle:active {
-  transform: translateX(-50%) scale(1.01) rotate(-1deg);
+  transform: scale(1.01);
 }
 
-/* 限时活动卡 · 右下斜 +12° · 270px 宽 */
+/* 底层：限时活动（右下，与对战卡右下重叠）· 缩 20% + 整体下移 */
 .cardEvent {
   position: absolute;
-  bottom: 80px;
-  right: 40px;
-  width: 270px;
+  bottom: -8%;
+  right: 4%;
+  width: 40%;
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
   z-index: 4;
-  transform: rotate(12deg);
+  transform: rotate(3deg);
   filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.8));
   transition: transform 0.25s ease, filter 0.25s ease;
 }
@@ -395,144 +404,23 @@
 }
 
 .cardEvent:hover {
-  transform: rotate(12deg) translateY(-8px) scale(1.04);
+  transform: rotate(3deg) translateY(-6px) scale(1.04);
   filter: drop-shadow(0 16px 30px rgba(212, 160, 23, 0.7));
 }
 
 .cardEvent:active {
-  transform: rotate(12deg) scale(1.0);
-}
-
-/* ============================================
-   C v2 · 招募 Banner · 紧贴模式区下方填补中部
-   ============================================ */
-
-.recruitBanner {
-  position: absolute;
-  top: 1290px;
-  left: 30px;
-  right: 30px;
-  height: 170px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 16px 22px;
-  background: linear-gradient(
-    90deg,
-    rgba(60, 40, 28, 0.88) 0%,
-    rgba(40, 26, 16, 0.88) 100%
-  );
-  border: 2px solid rgba(212, 160, 23, 0.6);
-  border-radius: 10px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 220, 160, 0.15),
-    0 6px 16px rgba(0, 0, 0, 0.7);
-  cursor: pointer;
-  transition: transform 0.2s, filter 0.2s, border-color 0.2s;
-}
-
-.recruitBanner:hover {
-  transform: scale(1.012);
-  filter: brightness(1.08);
-  border-color: rgba(255, 215, 100, 0.85);
-}
-
-.recruitBanner:active {
-  transform: scale(0.998);
-}
-
-.recruitPortrait {
-  width: 130px;
-  height: 130px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #8a4a2a, #4a2818);
-  border: 2px solid var(--color-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-kai);
-  font-size: 64px;
-  font-weight: bold;
-  color: #ffe18a;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.recruitText {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.recruitTitle {
-  font-family: var(--font-kai);
-  font-size: 32px;
-  font-weight: bold;
-  color: #ffe18a;
-  letter-spacing: 4px;
-  text-shadow:
-    0 0 12px rgba(255, 215, 100, 0.45),
-    0 2px 6px rgba(0, 0, 0, 0.95);
-}
-
-.recruitSubtitle {
-  font-family: var(--font-serif);
-  font-size: 18px;
-  color: rgba(245, 230, 200, 0.85);
-  letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
-}
-
-.recruitCta {
-  flex-shrink: 0;
-  padding: 12px 22px;
-  background: linear-gradient(180deg, #ffe18a, #d4a017);
-  color: #2a1f15;
-  font-family: var(--font-kai);
-  font-size: 22px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  border: 1.5px solid #b8860b;
-  border-radius: 6px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 4px 10px rgba(0, 0, 0, 0.55);
-}
-
-.recruitDots {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-}
-
-.recruitDots span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(212, 160, 23, 0.4);
-}
-
-.dotActive {
-  background: var(--color-gold) !important;
-  box-shadow: 0 0 8px rgba(255, 215, 100, 0.7);
+  transform: rotate(3deg) scale(1.0);
 }
 
 /* ============================================
    左下专属容器：桃园 banner + 跑马灯（悬浮，无托盘）
    ============================================ */
 
-/* C v2 · 左下角悬浮 switchBgBtn · 放在 ticker 上方 */
 .bottomLeft {
   position: absolute;
-  left: 28px;
-  bottom: 440px; /* ticker 50 + tabs 360 + 30 留白 */
-  z-index: 6;
+  left: 32px;
+  bottom: 24px;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -567,33 +455,27 @@
   transform: scale(0.95);
 }
 
-/* C v2 · 跑马灯 · 全宽贯穿，浮在 tabBar 上方 */
+/* 跑马灯/聊天条 · 整条可点击，深色透明渐变托底 */
 .newsScroll {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 360px;          /* tabBar 高 360，留出位置 */
-  height: 60px;
-  z-index: 5;
-  width: 100%;
+  width: 680px;
+  height: 80px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 24px;
+  gap: 14px;
+  padding: 0 24px 0 16px;
   background: linear-gradient(
     180deg,
-    rgba(20, 15, 10, 0.92) 0%,
-    rgba(40, 30, 20, 0.82) 100%
+    rgba(20, 15, 10, 0.78) 0%,
+    rgba(40, 30, 20, 0.65) 100%
   );
   border: none;
-  border-top: 1px solid rgba(212, 160, 23, 0.45);
-  border-bottom: 1px solid rgba(212, 160, 23, 0.28);
+  border-radius: 6px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 220, 160, 0.1),
-    0 6px 14px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 rgba(255, 220, 160, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.5);
   overflow: hidden;
+  position: relative;
   cursor: pointer;
-  box-sizing: border-box;
   transition: filter 0.2s, box-shadow 0.2s;
 }
 
@@ -673,54 +555,25 @@
    右下 5 Tab · 紧凑悬浮 Button Group（无托盘）
    ============================================ */
 
-/* C v2 · 底部 5 Tab · 全宽均匀分布 · 加高 + 描金分隔 */
 .tabBar {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 24px;
+  right: 32px;
   z-index: 5;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 0;
-  padding: 32px 24px 28px;
-  height: 360px;
-  box-sizing: border-box;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.45) 40%,
-    rgba(20, 12, 8, 0.85) 100%
-  );
-}
-
-/* Tab 之间的描金分隔（CSS伪元素，每个 tab 之间） */
-.tabBar::before,
-.tabBar::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 1px;
-  height: 220px;
-  transform: translateY(-50%);
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(212, 160, 23, 0.5) 50%,
-    transparent 100%
-  );
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .tab {
   position: relative;
-  width: 192px;
-  height: 280px;
+  width: 140px;
+  height: 150px;
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
   filter:
-    drop-shadow(0 10px 0 rgba(0, 0, 0, 0.8))
-    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+    drop-shadow(0 8px 0 rgba(0, 0, 0, 0.8))
+    drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
   background: transparent;
   border: none;
   padding: 0;

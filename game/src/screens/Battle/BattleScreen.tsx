@@ -12,7 +12,7 @@ import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
 import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
 import { FxSprite } from '@/components/FxSprite/FxSprite'
 import { useFxStore, getFxFrameCount, getFxFrameSequence } from '@/store/fxStore'
-import { registerTarget, unregisterTarget } from '@/utils/targetRegistry'
+import { registerTarget, unregisterTarget, getTargetCenter } from '@/utils/targetRegistry'
 import { getCanvasScale } from '@/utils/canvasScale'
 import { TurnLogModal } from '@/components/TurnLogModal/TurnLogModal'
 import styles from './BattleScreen.module.css'
@@ -113,6 +113,44 @@ export function BattleScreen() {
     ai: [],
   })
   const [dyingMinions, setDyingMinions] = useState<CardInstance[]>([])
+  // Phase F-1 召唤反馈 / F-3 战吼启动：用 prevBoardRef diff 检测新进场
+  const [battlecryIds, setBattlecryIds] = useState<Set<string>>(new Set())
+  // Phase F-2 装备落下：prev weapon ref 检测 null → CardInstance 跃迁，触发 fx_summon 小尺寸
+  const prevWeaponRef = useRef<{ player: string | null; ai: string | null }>({
+    player: null,
+    ai: null,
+  })
+  useEffect(() => {
+    if (!state) return
+    const curP = state.player.weapon?.instanceId ?? null
+    const curA = state.ai.weapon?.instanceId ?? null
+    const s = getCanvasScale()
+    if (curP && curP !== prevWeaponRef.current.player) {
+      window.setTimeout(() => {
+        const center = getTargetCenter('hero_player')
+        if (center) {
+          useFxStore.getState().trigger('summon', {
+            anchor: { x: center.x - 130 * s, y: center.y },
+            size: 200 * s,
+            durationMs: 700,
+          })
+        }
+      }, 40)
+    }
+    if (curA && curA !== prevWeaponRef.current.ai) {
+      window.setTimeout(() => {
+        const center = getTargetCenter('hero_ai')
+        if (center) {
+          useFxStore.getState().trigger('summon', {
+            anchor: { x: center.x - 130 * s, y: center.y },
+            size: 200 * s,
+            durationMs: 700,
+          })
+        }
+      }, 40)
+    }
+    prevWeaponRef.current = { player: curP, ai: curA }
+  }, [state])
 
   // §19.7.5 · 计策/效果文字浮起：监听 log kind='effect' 新增 → 中央上方浮起 1500ms 自动消失
   const [effectToasts, setEffectToasts] = useState<{ id: string; text: string }[]>([])
@@ -239,6 +277,54 @@ export function BattleScreen() {
       // cleanup not critical - timer cleared on next removal too
       void t
     }
+
+    // Phase F-1 / F-3 · 新进场 minion 检测
+    const added = [
+      ...curPlayer.filter((m) => !prev.player.find((c) => c.instanceId === m.instanceId)),
+      ...curAi.filter((m) => !prev.ai.find((c) => c.instanceId === m.instanceId)),
+    ]
+    if (added.length > 0) {
+      // F-1 · token (TK_*) 进场 → fx_summon 光柱
+      // 防避免给从手牌打出的普通 minion 重复触发（minionAppear CSS 已经够了）
+      const tokens = added.filter((m) => m.data.id.startsWith('TK_'))
+      if (tokens.length > 0) {
+        // 延迟 60ms 等 MinionToken mount + targetRegistry 注册 DOM ref
+        window.setTimeout(() => {
+          const s = getCanvasScale()
+          tokens.forEach((m) => {
+            const center = getTargetCenter(m.instanceId)
+            if (!center) return
+            useFxStore.getState().trigger('summon', {
+              anchor: center,
+              size: 260 * s,
+              durationMs: 800,
+            })
+          })
+        }, 60)
+      }
+      // F-3 · 带 battlecry 的新 minion → 边框金光环 600ms
+      const battlecryMinions = added.filter(
+        (m) =>
+          !m.data.id.startsWith('TK_') &&
+          (m.data.effects ?? []).some((e) => e.trigger === 'battlecry'),
+      )
+      if (battlecryMinions.length > 0) {
+        setBattlecryIds((p) => {
+          const next = new Set(p)
+          battlecryMinions.forEach((m) => next.add(m.instanceId))
+          return next
+        })
+        const ids = battlecryMinions.map((m) => m.instanceId)
+        window.setTimeout(() => {
+          setBattlecryIds((p) => {
+            const next = new Set(p)
+            ids.forEach((id) => next.delete(id))
+            return next
+          })
+        }, 600)
+      }
+    }
+
     prevBoardRef.current = { player: curPlayer, ai: curAi }
   }, [state])
 
@@ -498,6 +584,7 @@ export function BattleScreen() {
         getMinionProps={(m) => ({
           targetable: enemyMinionTargetable(m),
           dimmed: enemyMinionDimmed(m),
+          battlecry: battlecryIds.has(m.instanceId),
           onClick: () => handleEnemyMinionClick(m),
           onDoubleClick: () => handleMinionDoubleClick(m),
         })}
@@ -533,6 +620,7 @@ export function BattleScreen() {
           selected: selectedAttackerId === m.instanceId,
           canAttack: playerMinionCanAttack(m),
           targetable: friendlyMinionTargetable(m),
+          battlecry: battlecryIds.has(m.instanceId),
           onClick: () => {
             // 若是友方 buff spell，把 minion 当作目标
             if (selectedSpellTargetsFriendly) {
@@ -728,6 +816,8 @@ interface MinionExtra {
   canAttack?: boolean
   targetable?: boolean
   dimmed?: boolean
+  /** Phase F-3 战吼启动金光环 600ms */
+  battlecry?: boolean
   onClick?: () => void
   onDoubleClick?: () => void
 }
@@ -778,6 +868,7 @@ function BoardZone({
               canAttack={props.canAttack}
               targetable={props.targetable}
               dimmed={props.dimmed}
+              battlecry={props.battlecry}
               onClick={props.onClick}
               onDoubleClick={props.onDoubleClick}
             />
@@ -875,7 +966,7 @@ function HeroDisplay({
       >
         <span>{health}</span>
       </div>
-      {attack > 0 && <div className={styles.heroAttack}>⚔ {attack}</div>}
+      {/* attack 显示已挪到 HeroWeaponSlot 上的 cost gem，主公头像不再 chip 重复显示 */}
       {armor > 0 && <div className={styles.heroArmor}>🛡 {armor}</div>}
       {/* §19.5 装备槽 · 椭圆 frame + 立绘 clip-path + 攻击/耐久数字 */}
       {weapon && <HeroWeaponSlot weapon={weapon} />}
@@ -898,18 +989,16 @@ interface ManaProps {
 
 function ManaDisplay({ current, max, fullUrl, emptyUrl, compact = false }: ManaProps) {
   if (max === 0) return null // AI 第一回合无法力时隐藏
-  const manaBaseUrl = getUiAssetUrl('ui_mana_base.png')
+  // 玩家紧凑 bar 用新切的 ui_mana_slot.png（横条 + 左绿圈 + 右晶槽）
+  // AI 顶部保持原 ui_mana_base.png 横向风格
+  const manaBaseUrl = getUiAssetUrl(compact ? 'ui_mana_slot.png' : 'ui_mana_base.png')
   return (
     <div
       className={`${styles.manaDisplay} ${compact ? styles.manaDisplayCompact : ''}`}
-      style={
-        !compact && manaBaseUrl
-          ? { backgroundImage: `url(${manaBaseUrl})` }
-          : undefined
-      }
+      style={manaBaseUrl ? { backgroundImage: `url(${manaBaseUrl})` } : undefined}
     >
       <div className={styles.manaCounter}>
-        <span>{current}/{max}</span>
+        <span>{compact ? current : `${current}/${max}`}</span>
       </div>
       <div className={styles.manaCrystals}>
         {Array.from({ length: max }).map((_, i) => {

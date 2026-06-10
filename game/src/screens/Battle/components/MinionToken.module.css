@@ -115,12 +115,14 @@
   pointer-events: none;
 }
 
+/* §19.7-1 portraitWrap 跟随 token 放大 135x195，原 92px 太矮裁掉武将下半身
+   §19.7-3 nameBar 隐藏，portraitWrap 占满整个 token（除上下小边距）*/
 .portraitWrap {
   position: absolute;
   top: 6px;
   left: 6px;
   right: 6px;
-  height: 92px;
+  bottom: 6px;
   border-radius: 4px;
   overflow: hidden;
   background: #1a1410;
@@ -130,7 +132,9 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 22%;
+  /* 立绘 1086x1448（9:11.4），槽 ~123x183（2:3），object-position 偏上 30%
+     让头+躯干+手部 + 部分下半身完整显示 */
+  object-position: 50% 30%;
   user-select: none;
   pointer-events: none;
 }
@@ -147,23 +151,10 @@
   letter-spacing: 2px;
 }
 
+/* §19.7-3 场上 minion 不再显示名字（用户反馈：影响立绘观感）
+   保留 class 供未来需要时启用 */
 .nameBar {
-  position: absolute;
-  bottom: 28px;
-  left: 4px;
-  right: 4px;
-  text-align: center;
-  font-family: var(--font-kai);
-  font-size: 13px;
-  font-weight: bold;
-  color: var(--color-paper);
-  letter-spacing: 2px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 4px rgba(212, 160, 23, 0.5);
-  background: linear-gradient(180deg, transparent, rgba(20, 12, 8, 0.85) 50%, rgba(20, 12, 8, 0.95));
-  padding: 6px 0 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 
 .keywords {

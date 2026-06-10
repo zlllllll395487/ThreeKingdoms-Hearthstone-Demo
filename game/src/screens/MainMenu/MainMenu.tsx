@@ -20,7 +20,6 @@ export function MainMenu() {
   const iconCalendarUrl = getUiAssetUrl('icon_calendar.png')
   const iconFriendsUrl = getUiAssetUrl('icon_friends.png')
   const iconChatUrl = getUiAssetUrl('icon_chat.png')
-  const iconMoreUrl = getUiAssetUrl('icon_more.png')
 
   const coinSilverUrl = getUiAssetUrl('coin_silver.png')
   const coinJadeUrl = getUiAssetUrl('coin_jade.png')
@@ -42,7 +41,7 @@ export function MainMenu() {
   const tabShopUrl = getUiAssetUrl('tab_shop.png')
   const tabCodexUrl = getUiAssetUrl('tab_codex.png')
 
-  const dev = (label: string) => () => showModal(label)
+  void showModal // 弹窗 hook 保留供未来按钮接入
 
   return (
     <div className={styles.container}>
@@ -119,13 +118,6 @@ export function MainMenu() {
               />
             )}
           </div>
-          <button
-            className={styles.moreBtn}
-            onClick={dev('更多')}
-            aria-label="更多"
-          >
-            {iconMoreUrl && <img src={iconMoreUrl} alt="" />}
-          </button>
         </div>
       </div>
 

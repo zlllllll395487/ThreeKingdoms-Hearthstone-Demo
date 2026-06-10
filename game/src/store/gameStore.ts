@@ -40,6 +40,10 @@ interface GameStore {
   resolveTarget: (target: TargetRef) => void
   /** 打不需要目标的牌（点空白处或卡片再次确认）*/
   playSelectedCardNoTarget: () => void
+  /** v5.5 UX：选中 minion / 无目标 spell 后，点击我方场上 BoardZone 确认出牌 */
+  playSelectedToBoard: () => void
+  /** v5.5 UX：选中 weapon 后，点击我方主公确认装备 */
+  playSelectedToHero: () => void
   endTurn: () => void
 
   syncState: () => void
@@ -120,19 +124,44 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const card = state.player.hand.find((c) => c.instanceId === instanceId)
     if (!card) return
     if (!engine.canPlayCard('player', instanceId)) return
+    // v5.5 UX：手牌点击只「选中」，需玩家点击场上对战区 / 主公 / 目标 才结算
+    // - minion → 等待玩家点己方场上 BoardZone（即 playMinionToBoard）
+    // - 需要目标的 spell → pendingTargetForCard，等点目标
+    // - 不需要目标的 spell（heal/draw/AoE）→ 等玩家点己方 BoardZone 确认
+    // - weapon → 等玩家点己方主公确认
     const needsTarget = engine.cardNeedsTarget(card)
     set({
       selectedCardId: instanceId,
       pendingTargetForCard: needsTarget ? instanceId : null,
       selectedAttackerId: null,
     })
-    // 不需要目标的牌，立即打出
-    if (!needsTarget) {
-      engine.playCard('player', instanceId)
-      set({
-        selectedCardId: null,
-        pendingTargetForCard: null,
-      })
+  },
+
+  /** v5.5 UX：选中 minion / 无目标 spell 后，点击我方场上 BoardZone 确认出牌 */
+  playSelectedToBoard: () => {
+    const { engine, state, selectedCardId, pendingTargetForCard } = get()
+    if (!engine || !state || !selectedCardId) return
+    if (pendingTargetForCard) return // 需要目标的牌不能从 board click 直接打出
+    const card = state.player.hand.find((c) => c.instanceId === selectedCardId)
+    if (!card) return
+    // minion 类型 / 无目标 spell：直接 play
+    if (card.data.type === 'minion' || card.data.type === 'spell') {
+      engine.playCard('player', selectedCardId)
+      set({ selectedCardId: null, pendingTargetForCard: null })
+      get().syncState()
+    }
+  },
+
+  /** v5.5 UX：选中 weapon 后，点击我方主公确认装备 */
+  playSelectedToHero: () => {
+    const { engine, state, selectedCardId, pendingTargetForCard } = get()
+    if (!engine || !state || !selectedCardId) return
+    if (pendingTargetForCard) return
+    const card = state.player.hand.find((c) => c.instanceId === selectedCardId)
+    if (!card) return
+    if (card.data.type === 'weapon') {
+      engine.playCard('player', selectedCardId)
+      set({ selectedCardId: null, pendingTargetForCard: null })
       get().syncState()
     }
   },

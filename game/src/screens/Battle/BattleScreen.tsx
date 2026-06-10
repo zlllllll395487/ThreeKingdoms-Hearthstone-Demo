@@ -36,6 +36,8 @@ export function BattleScreen() {
     selectCard,
     selectAttacker,
     resolveTarget,
+    playSelectedToBoard,
+    playSelectedToHero,
     endTurn,
     endGame,
   } = useGameStore()
@@ -126,6 +128,36 @@ export function BattleScreen() {
   const hasPendingSpellTarget = !!pendingTargetForCard
   const hasAttackerSelected = !!selectedAttackerId
 
+  // v5.5 选中卡牌的分类（决定 UI 高亮哪里 + 哪些是合法目标）
+  const selectedCard = selectedCardId
+    ? state.player.hand.find((c) => c.instanceId === selectedCardId)
+    : null
+  const FRIENDLY_TARGET_ACTIONS = new Set([
+    'buffMinion',
+    'grantExtraAttack',
+    'grantKeyword',
+  ])
+  const selectedSpellTargetsFriendly = !!(
+    selectedCard &&
+    selectedCard.data.type === 'spell' &&
+    hasPendingSpellTarget &&
+    (selectedCard.data.effects ?? []).some((e) =>
+      FRIENDLY_TARGET_ACTIONS.has(e.action),
+    )
+  )
+  const selectedSpellTargetsEnemy =
+    !!selectedCard && hasPendingSpellTarget && !selectedSpellTargetsFriendly
+
+  // 类型：'minion-to-board' | 'spell-no-target' | 'weapon-to-hero' | null
+  const selectedNeedsBoardClick =
+    !!selectedCard &&
+    !hasPendingSpellTarget &&
+    (selectedCard.data.type === 'minion' || selectedCard.data.type === 'spell')
+  const selectedNeedsHeroClick =
+    !!selectedCard &&
+    !hasPendingSpellTarget &&
+    selectedCard.data.type === 'weapon'
+
   // ============================================
   // 点击逻辑
   // ============================================
@@ -190,9 +222,10 @@ export function BattleScreen() {
 
   const enemyHasTaunt = state.ai.board.some((m) => m.currentKeywords.has('taunt'))
 
+  // 敌方 minion 可作为目标：① 攻击者已选 + 嘲讽规则通过 ② 选中的 spell 是对敌法术
   const enemyMinionTargetable = (m: CardInstance) =>
     isPlayerTurn &&
-    (hasPendingSpellTarget ||
+    (selectedSpellTargetsEnemy ||
       (hasAttackerSelected && canTargetMinion(state, m)))
 
   // 非 taunt 单位被嘲讽锁定时变灰
@@ -202,14 +235,45 @@ export function BattleScreen() {
     enemyHasTaunt &&
     !m.currentKeywords.has('taunt')
 
+  // 敌方 hero 可作为目标：① 攻击者已选可斩杀 ② 选中的 spell 是对敌法术且可指英雄
   const enemyHeroTargetable =
     isPlayerTurn &&
-    !hasPendingSpellTarget &&
-    hasAttackerSelected &&
-    canTargetHero(state, selectedAttackerId!)
+    ((hasAttackerSelected &&
+      !hasPendingSpellTarget &&
+      canTargetHero(state, selectedAttackerId!)) ||
+      selectedSpellTargetsEnemy)
+
+  // 友方 minion 可作为目标：选中的 spell 是友方 buff 法术
+  const friendlyMinionTargetable = (_m: CardInstance) =>
+    isPlayerTurn && selectedSpellTargetsFriendly
 
   const playerMinionCanAttack = (m: CardInstance) =>
     isPlayerTurn && canMinionAttack(m)
+
+  // 出牌区高亮：选中 minion 或无目标 spell → 我方场上 BoardZone 可点击
+  const playerBoardIsDropZone = isPlayerTurn && selectedNeedsBoardClick
+  // 主公高亮：选中 weapon → 我方主公可装备
+  const playerHeroIsEquipZone = isPlayerTurn && selectedNeedsHeroClick
+
+  // 我方 minion 点击行为：
+  // - 若有选中 friendly buff 法术 → 当作 spell 目标
+  // - 否则 → 进入攻击者选中
+  const handleFriendlyMinionForSpell = (m: CardInstance) => {
+    if (!isPlayerTurn || !selectedSpellTargetsFriendly) return
+    resolveTarget({ kind: 'minion', side: 'player', instanceId: m.instanceId })
+  }
+
+  // 我方 BoardZone 点击：出 minion / 无目标 spell
+  const handlePlayerBoardZoneClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!playerBoardIsDropZone) return
+    playSelectedToBoard()
+  }
+
+  // 双击场上 minion 看详情（CP4）
+  const handleMinionDoubleClick = (m: CardInstance) => {
+    setDetailViewCard(m)
+  }
 
   // ============================================
   // 渲染
@@ -296,6 +360,7 @@ export function BattleScreen() {
           targetable: enemyMinionTargetable(m),
           dimmed: enemyMinionDimmed(m),
           onClick: () => handleEnemyMinionClick(m),
+          onDoubleClick: () => handleMinionDoubleClick(m),
         })}
       />
 
@@ -318,19 +383,30 @@ export function BattleScreen() {
         </div>
       )}
 
-      {/* ============ 玩家战场 ============ */}
+      {/* ============ 玩家战场（出牌区 · 选中 minion 时点这里出牌） ============ */}
       <BoardZone
         side="player"
         minions={state.player.board}
         dyingMinions={dyingMinions.filter((m) => m.owner === 'player')}
+        isDropZone={playerBoardIsDropZone}
+        onZoneClick={handlePlayerBoardZoneClick}
         getMinionProps={(m) => ({
           selected: selectedAttackerId === m.instanceId,
           canAttack: playerMinionCanAttack(m),
-          onClick: () => handlePlayerMinionClick(m),
+          targetable: friendlyMinionTargetable(m),
+          onClick: () => {
+            // 若是友方 buff spell，把 minion 当作目标
+            if (selectedSpellTargetsFriendly) {
+              handleFriendlyMinionForSpell(m)
+              return
+            }
+            handlePlayerMinionClick(m)
+          },
+          onDoubleClick: () => handleMinionDoubleClick(m),
         })}
       />
 
-      {/* ============ 玩家头像（底中） ============ */}
+      {/* ============ 玩家头像（底中 · 选中 weapon 时点这里装备） ============ */}
       <div className={styles.playerHeroBox}>
         <HeroDisplay
           name={state.player.hero.name}
@@ -342,7 +418,14 @@ export function BattleScreen() {
           portraitUrl={heroPlayerUrl}
           selected={selectedAttackerId === 'hero_player'}
           canAttack={isPlayerTurn && state.player.hero.attack > 0}
-          onClick={handlePlayerHeroClick}
+          targetable={playerHeroIsEquipZone}
+          onClick={() => {
+            if (playerHeroIsEquipZone) {
+              playSelectedToHero()
+              return
+            }
+            handlePlayerHeroClick()
+          }}
         />
       </div>
 
@@ -452,6 +535,7 @@ interface MinionExtra {
   targetable?: boolean
   dimmed?: boolean
   onClick?: () => void
+  onDoubleClick?: () => void
 }
 
 interface BoardZoneProps {
@@ -459,11 +543,25 @@ interface BoardZoneProps {
   minions: CardInstance[]
   dyingMinions: CardInstance[]
   getMinionProps: (m: CardInstance) => MinionExtra
+  /** v5.5 出牌区高亮：选中 minion / 无目标 spell 时点击此区域出牌 */
+  isDropZone?: boolean
+  onZoneClick?: (e: React.MouseEvent) => void
 }
 
-function BoardZone({ side, minions, dyingMinions, getMinionProps }: BoardZoneProps) {
+function BoardZone({
+  side,
+  minions,
+  dyingMinions,
+  getMinionProps,
+  isDropZone,
+  onZoneClick,
+}: BoardZoneProps) {
   return (
-    <div className={`${styles.boardZone} ${side === 'ai' ? styles.boardAi : styles.boardPlayer}`}>
+    <div
+      className={`${styles.boardZone} ${side === 'ai' ? styles.boardAi : styles.boardPlayer}`}
+      data-drop-zone={isDropZone ? 'true' : 'false'}
+      onClick={onZoneClick}
+    >
       {/* 7 个槽位虚线占位（z:0，被 minion 覆盖时不可见）*/}
       <div className={styles.slotRow}>
         {Array.from({ length: BOARD_MAX }).map((_, i) => (
@@ -487,6 +585,7 @@ function BoardZone({ side, minions, dyingMinions, getMinionProps }: BoardZonePro
               targetable={props.targetable}
               dimmed={props.dimmed}
               onClick={props.onClick}
+              onDoubleClick={props.onDoubleClick}
             />
           )
         })}

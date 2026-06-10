@@ -11,6 +11,31 @@
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
   transition: transform 0.18s ease, filter 0.18s ease, border-color 0.18s ease;
   overflow: visible;
+  /* v5.5 §13 Phase A · 入场动画：从上方落下 + 震动 + 金光（700ms） */
+  animation: minionAppear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes minionAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.5);
+    filter: brightness(1.8) drop-shadow(0 0 32px rgba(255, 215, 100, 0.9))
+            drop-shadow(0 0 12px rgba(255, 230, 140, 0.7));
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(8px) scale(1.08) rotate(-2deg);
+    filter: brightness(1.4) drop-shadow(0 0 24px rgba(255, 215, 100, 0.8));
+  }
+  70% {
+    transform: translateY(-3px) scale(0.98) rotate(1.5deg);
+    filter: brightness(1.15) drop-shadow(0 0 14px rgba(255, 215, 100, 0.5));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  }
 }
 
 /* 稀有度 → 边框色变 */

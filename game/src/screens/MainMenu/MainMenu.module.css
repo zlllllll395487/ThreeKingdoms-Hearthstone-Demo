@@ -141,21 +141,28 @@
    顶部 · 左：玩家信息 ⊙ 右：3 货币 + 更多
    ============================================ */
 
+/* ============================================
+   顶部账号横幅 · 全宽 1080，高 180
+   玩家信息撑左侧 + 货币嵌右上角
+   ============================================ */
 .topBar {
   position: absolute;
-  top: 12px;
-  left: 32px;
-  right: 32px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
   z-index: 5;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
   pointer-events: none;
+  padding: 12px 24px 0;
+  box-sizing: border-box;
 }
 
 .topBar > * { pointer-events: auto; }
 
-/* 玩家信息块 · 1.68x 提权（1.2 × 1.4，比 v8 再放大 40%）+ 可点击 */
+/* 玩家信息块 · 横向铺到屏幕上半 */
 .playerBlock {
   display: flex;
   align-items: center;
@@ -163,80 +170,59 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  transform: scale(1.68);
-  transform-origin: top left;
   filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7)) drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
   transition: transform 0.18s ease, filter 0.18s ease;
 }
 
 .playerBlock:hover {
-  transform: scale(1.74);
   filter:
     drop-shadow(0 6px 0 rgba(0, 0, 0, 0.7))
     drop-shadow(0 0 16px rgba(212, 160, 23, 0.6));
+  transform: scale(1.015);
 }
 
 .playerBlock:active {
-  transform: scale(1.62);
+  transform: scale(0.99);
 }
 
+/* 账号 UI 横幅，宽度约 720（≈ 屏幕 67%） */
 .playerBlockImg {
-  width: 320px;
+  width: 720px;
   height: auto;
+  max-height: 168px;
   object-fit: contain;
   display: block;
 }
 
-/* 顶右区：货币 + 更多 · 整体下移让出顶部空间 */
+/* 顶右区：货币嵌在账号横幅右上角 */
 .topRight {
+  position: absolute;
+  top: 14px;
+  right: 24px;
   display: flex;
   align-items: center;
   gap: 12px;
-  transform: translateY(28px);
+  pointer-events: auto;
 }
 
-/* 货币条 · 3 张 PNG 已自带背景+数字+加号，直接展示 */
 .currencyBar {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 14px;
 }
 
 .currencyImg {
-  height: 72px;
+  height: 56px;
   width: auto;
   object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.75));
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
 }
 
 .currencyImg:hover {
-  transform: translateY(-2px) scale(1.04);
-  filter: drop-shadow(0 6px 14px rgba(212, 160, 23, 0.7));
-}
-
-/* 更多按钮 */
-.moreBtn {
-  width: 72px;
-  height: 72px;
-  padding: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
-  transition: transform 0.2s, filter 0.2s;
-}
-
-.moreBtn img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.moreBtn:hover {
-  transform: scale(1.12);
-  filter: drop-shadow(0 0 12px rgba(212, 160, 23, 0.9));
+  transform: translateY(-2px) scale(1.05);
+  filter: drop-shadow(0 5px 12px rgba(212, 160, 23, 0.7));
 }
 
 /* ============================================
@@ -245,12 +231,12 @@
 
 .sideNav {
   position: absolute;
-  left: 56px;
-  top: 240px;
+  left: 32px;
+  top: 220px;
   z-index: 5;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .sideBtn {
@@ -304,12 +290,13 @@
    右侧动作卡叠层（war-room 底板 + 3 真图卡）
    ============================================ */
 
+/* 3 模式卡 · 垂直居中（约 y=600~1100），整体微微靠右（left:42%） */
 .actionStack {
   position: absolute;
-  right: 16px;
-  top: 14%;
+  left: 42%;
+  top: 32%;
   z-index: 4;
-  width: 1000px;
+  width: 620px;
   height: 600px;
 }
 
@@ -416,11 +403,12 @@
    左下专属容器：桃园 banner + 跑马灯（悬浮，无托盘）
    ============================================ */
 
+/* 左下角悬浮 switchBgBtn（聊天 ticker 已移到底部全宽栏） */
 .bottomLeft {
   position: absolute;
-  left: 32px;
-  bottom: 24px;
-  z-index: 4;
+  left: 24px;
+  bottom: 240px; /* 让位给底部 chat ticker + tab bar */
+  z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -455,27 +443,33 @@
   transform: scale(0.95);
 }
 
-/* 跑马灯/聊天条 · 整条可点击，深色透明渐变托底 */
+/* 跑马灯/聊天条 · 全宽贯穿屏幕，浮在底部 tab bar 上方 */
 .newsScroll {
-  width: 680px;
-  height: 80px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 180px;          /* 紧贴底部 tab bar 顶部 */
+  height: 60px;
+  z-index: 5;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 24px 0 16px;
+  gap: 16px;
+  padding: 0 24px;
   background: linear-gradient(
     180deg,
-    rgba(20, 15, 10, 0.78) 0%,
-    rgba(40, 30, 20, 0.65) 100%
+    rgba(20, 15, 10, 0.86) 0%,
+    rgba(40, 30, 20, 0.72) 100%
   );
   border: none;
-  border-radius: 6px;
+  border-top: 1px solid rgba(212, 160, 23, 0.32);
+  border-bottom: 1px solid rgba(212, 160, 23, 0.18);
   box-shadow:
     inset 0 1px 0 rgba(255, 220, 160, 0.08),
     0 6px 14px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  position: relative;
   cursor: pointer;
+  box-sizing: border-box;
   transition: filter 0.2s, box-shadow 0.2s;
 }
 
@@ -555,20 +549,32 @@
    右下 5 Tab · 紧凑悬浮 Button Group（无托盘）
    ============================================ */
 
+/* 底部 5 Tab · 全宽均匀分布 */
 .tabBar {
   position: absolute;
-  bottom: 24px;
-  right: 32px;
+  bottom: 0;
+  left: 0;
+  right: 0;
   z-index: 5;
   display: flex;
+  justify-content: space-around;
   align-items: flex-end;
-  gap: 12px;
+  gap: 0;
+  padding: 0 24px 12px;
+  height: 180px;
+  box-sizing: border-box;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
 }
 
 .tab {
   position: relative;
-  width: 140px;
-  height: 150px;
+  width: 180px;
+  height: 168px;
   cursor: pointer;
   transition: transform 0.2s, filter 0.2s;
   filter:

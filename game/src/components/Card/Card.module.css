@@ -238,15 +238,41 @@
   backdrop-filter: blur(6px);
 }
 
-.zoomImage {
+.zoomImage,
+.zoomImageDetail {
   max-width: 75vw;
   max-height: 85vh;
   object-fit: contain;
   border-radius: 8px;
+  cursor: pointer;
+  transition: filter 0.18s ease, transform 0.18s ease;
+  animation: zoomImagePop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* portrait 模式：纯立绘 · 金光描边 */
+.zoomImage {
   box-shadow:
     0 24px 80px rgba(0, 0, 0, 0.85),
     0 0 0 2px rgba(212, 160, 23, 0.4),
     0 0 40px rgba(212, 160, 23, 0.25);
+}
+
+/* detail 模式：完整卡牌（cardvisual 已含边框） · 仅阴影不加边 */
+.zoomImageDetail {
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.85),
+    0 0 40px rgba(255, 215, 100, 0.25);
+}
+
+.zoomImage:hover,
+.zoomImageDetail:hover {
+  transform: scale(1.015);
+  filter: brightness(1.05);
+}
+
+@keyframes zoomImagePop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1);    }
 }
 
 .zoomCaption {

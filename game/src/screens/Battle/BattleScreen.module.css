@@ -205,6 +205,46 @@
   width: 1020px;
   height: 200px;
   z-index: 4;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 16px;
+}
+
+/* CP2 出牌区高亮：选中 minion / 无目标 spell 时，我方 board 显示发光 drop zone */
+.boardZone[data-drop-zone='true'] {
+  cursor: pointer;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 100, 0.18) 0%,
+    rgba(255, 200, 80, 0.08) 60%,
+    transparent 100%
+  );
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 215, 100, 0.45),
+    inset 0 0 40px rgba(255, 215, 100, 0.22);
+  animation: dropZonePulse 1.4s ease-in-out infinite;
+}
+
+@keyframes dropZonePulse {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 2px rgba(255, 215, 100, 0.45),
+      inset 0 0 40px rgba(255, 215, 100, 0.22);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 3px rgba(255, 230, 140, 0.7),
+      inset 0 0 60px rgba(255, 215, 100, 0.4);
+  }
+}
+
+/* drop-zone 的虚线 slot 高亮 */
+.boardZone[data-drop-zone='true'] .slot {
+  border-color: rgba(255, 215, 100, 0.45);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 215, 100, 0.15) 0%,
+    transparent 70%
+  );
 }
 
 .boardAi {
@@ -253,6 +293,29 @@
   justify-content: center;
   gap: 12px;
   z-index: 1;
+}
+
+/* v5.5 §13 Phase A · 装备装上特效：武器名带闪光 + 微震 */
+.heroWeapon {
+  animation: weaponEquip 0.6s ease-out;
+}
+
+@keyframes weaponEquip {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-12px) scale(0.7);
+    filter: brightness(1.8) drop-shadow(0 0 18px rgba(255, 215, 100, 0.9));
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(2px) scale(1.05);
+    filter: brightness(1.3);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+    filter: brightness(1);
+  }
 }
 
 /* 死亡淡出 minion */

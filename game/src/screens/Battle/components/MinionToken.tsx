@@ -2,9 +2,12 @@
  * 战场上的随从 token · 立绘 + 攻击/血量数字球（炉石风格 minion token）
  */
 
+import { useRef } from 'react'
 import type { CardInstance } from '@/engine/types'
 import { getPortraitUrl, getUiAssetUrl } from '@/data/assetLoader'
 import styles from './MinionToken.module.css'
+
+const DOUBLE_CLICK_MS = 300
 
 interface Props {
   minion: CardInstance
@@ -13,6 +16,8 @@ interface Props {
   canAttack?: boolean
   dimmed?: boolean
   onClick?: () => void
+  /** v5.5 双击场上 minion 查看完整卡牌详情 */
+  onDoubleClick?: () => void
 }
 
 function getNumberImage(prefix: 'attack' | 'health', n: number): string {
@@ -32,21 +37,34 @@ const KW_ICON: Record<string, string> = {
   freeze: 'kw_freeze.png',
 }
 
-export function MinionToken({ minion, selected, targetable, canAttack, dimmed, onClick }: Props) {
+export function MinionToken({ minion, selected, targetable, canAttack, dimmed, onClick, onDoubleClick }: Props) {
   const portraitUrl = getPortraitUrl(minion.data.portrait)
   const attackUrl = getUiAssetUrl(getNumberImage('attack', minion.currentAttack))
   const healthUrl = getUiAssetUrl(getNumberImage('health', minion.currentHealth))
 
   const damaged = minion.currentHealth < minion.maxHealth
 
+  // v5.5 双击检测：300ms 内点 2 次 = 详情；否则单击 = 攻击者选中 / 目标
+  const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current)
+      clickTimerRef.current = null
+      onDoubleClick?.()
+      return
+    }
+    clickTimerRef.current = setTimeout(() => {
+      clickTimerRef.current = null
+      onClick?.()
+    }, DOUBLE_CLICK_MS)
+  }
+
   return (
     <button
       className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''}`}
       data-rarity={minion.data.rarity}
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick?.()
-      }}
+      onClick={handleClick}
       aria-label={minion.data.name}
     >
       <div className={styles.portraitWrap}>

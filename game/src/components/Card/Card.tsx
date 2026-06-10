@@ -53,8 +53,10 @@ const KEYWORD_BADGES: Record<string, string> = {
 // 卡牌组件
 // ============================================
 
+type ZoomMode = 'closed' | 'detail' | 'portrait'
+
 export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps) {
-  const [zoomed, setZoomed] = useState(false)
+  const [zoomMode, setZoomMode] = useState<ZoomMode>('closed')
   const portraitUrl = getPortraitUrl(card.portrait)
   const cardVisualFile = getCardVisualFile(card.portrait)
   const cardVisualUrl = cardVisualFile ? getUiAssetUrl(cardVisualFile) : null
@@ -73,10 +75,24 @@ export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps
       : null
 
   const handleVisualClick = (e: React.MouseEvent) => {
-    if (!enableZoom || !portraitUrl) return
+    if (!enableZoom) return
+    // 第一次点开默认进入「详情」模式（cardvisual 放大）
+    if (!cardVisualUrl && !portraitUrl) return
     e.stopPropagation()
-    setZoomed(true)
+    setZoomMode('detail')
   }
+
+  // 弹窗内点显示的图：toggle detail ↔ portrait（两者都存在才可切换）
+  const handleZoomImageClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (cardVisualUrl && portraitUrl) {
+      setZoomMode((m) => (m === 'detail' ? 'portrait' : 'detail'))
+    }
+  }
+
+  const closeZoom = () => setZoomMode('closed')
+  const zoomImageUrl =
+    zoomMode === 'portrait' ? portraitUrl : cardVisualUrl ?? portraitUrl
 
   return (
     <>
@@ -149,23 +165,32 @@ export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps
         )}
       </div>
 
-      {/* 立绘高清放大 · 渲染到 document.body 绕过父级 canvas 的 transform: scale */}
-      {zoomed &&
-        portraitUrl &&
+      {/* 详情 / 立绘 切换弹窗 · 渲染到 document.body 绕过父级 canvas 的 transform: scale */}
+      {zoomMode !== 'closed' &&
+        zoomImageUrl &&
         createPortal(
           <div
             className={styles.zoomOverlay}
-            onClick={() => setZoomed(false)}
+            onClick={closeZoom}
             role="dialog"
-            aria-label={`${card.name} 立绘`}
+            aria-label={`${card.name} ${zoomMode === 'detail' ? '详情' : '立绘'}`}
           >
             <img
-              src={portraitUrl}
+              src={zoomImageUrl}
               alt={card.name}
-              className={styles.zoomImage}
+              className={
+                zoomMode === 'portrait'
+                  ? styles.zoomImage
+                  : styles.zoomImageDetail
+              }
+              onClick={handleZoomImageClick}
             />
             <div className={styles.zoomCaption}>{card.name}</div>
-            <div className={styles.zoomHint}>点击任意处关闭</div>
+            <div className={styles.zoomHint}>
+              {cardVisualUrl && portraitUrl
+                ? `点卡片切换 ${zoomMode === 'detail' ? '立绘' : '详情'} · 点外部关闭`
+                : '点击任意处关闭'}
+            </div>
           </div>,
           document.body,
         )}

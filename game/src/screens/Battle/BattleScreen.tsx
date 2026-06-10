@@ -4,6 +4,7 @@ import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import { Card } from '@/components/Card/Card'
+import { BackButton } from '@/components/BackButton/BackButton'
 import type { CardInstance, PlayerSide } from '@/engine/types'
 import type { TargetRef } from '@/engine'
 import { MinionToken } from './components/MinionToken'
@@ -35,6 +36,7 @@ const DOUBLE_CLICK_MS = 300 // v5.5 UX 双击检测窗口
 export function BattleScreen() {
   const navigate = useUIStore((s) => s.navigate)
   const {
+    engine,
     state,
     log,
     selectedCardId,
@@ -183,6 +185,41 @@ export function BattleScreen() {
   // §19.7.3 · 新卡入场动画 + 抽牌 draw_glow sprite
   const playerHandRef = useRef<HTMLDivElement>(null)
   const aiHandRef = useRef<HTMLDivElement>(null)
+  // §19.7.18 · 手牌按死左键拖拽 · translateX 实现（不依赖 overflow，可保留 y 方向溢出）
+  const [handScrollX, setHandScrollX] = useState(0)
+  const handDragRef = useRef<{
+    active: boolean
+    startX: number
+    startScroll: number
+    dragged: boolean
+  }>({ active: false, startX: 0, startScroll: 0, dragged: false })
+
+  const handleHandDragStart = (e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    handDragRef.current = {
+      active: true,
+      startX: e.clientX,
+      startScroll: handScrollX,
+      dragged: false,
+    }
+  }
+  const handleHandDragMove = (e: React.MouseEvent) => {
+    const s = handDragRef.current
+    if (!s.active) return
+    const dx = e.clientX - s.startX
+    if (Math.abs(dx) > 5) s.dragged = true
+    setHandScrollX(s.startScroll + dx)
+  }
+  const handleHandDragEnd = () => {
+    if (handDragRef.current.active) {
+      handDragRef.current.active = false
+      if (handDragRef.current.dragged) {
+        window.setTimeout(() => {
+          handDragRef.current.dragged = false
+        }, 50)
+      }
+    }
+  }
   const prevPlayerHandRef = useRef<Set<string>>(new Set())
   const prevAiHandCountRef = useRef<number>(0)
   const handInitRef = useRef<boolean>(false)
@@ -361,12 +398,15 @@ export function BattleScreen() {
     'grantExtraAttack',
     'grantKeyword',
   ])
+  // §19.7.7 · 友方目标检测：之前限定 type==='spell' 把带 battlecry 的 minion（魏延等）排除了
+  // 改为读 effect trigger ∈ {onCast, battlecry} + action ∈ FRIENDLY_TARGET_ACTIONS
   const selectedSpellTargetsFriendly = !!(
     selectedCard &&
-    selectedCard.data.type === 'spell' &&
     hasPendingSpellTarget &&
-    (selectedCard.data.effects ?? []).some((e) =>
-      FRIENDLY_TARGET_ACTIONS.has(e.action),
+    (selectedCard.data.effects ?? []).some(
+      (e) =>
+        (e.trigger === 'onCast' || e.trigger === 'battlecry') &&
+        FRIENDLY_TARGET_ACTIONS.has(e.action),
     )
   )
   const selectedSpellTargetsEnemy =
@@ -392,6 +432,19 @@ export function BattleScreen() {
       selectCard(null)
       return
     }
+    // §19.7.13 · 不可打原因反馈（之前 silent return）
+    const card = state.player.hand.find((c) => c.instanceId === instanceId)
+    if (!card) return
+    if (state.player.mana.current < card.data.cost) {
+      pushFeedback(
+        `法力不足 · 需要 ${card.data.cost} 点（当前 ${state.player.mana.current}）`,
+      )
+      return
+    }
+    if (card.data.type === 'minion' && state.player.board.length >= 7) {
+      pushFeedback('战场已满，最多 7 个武将')
+      return
+    }
     selectCard(instanceId)
   }
 
@@ -402,23 +455,45 @@ export function BattleScreen() {
       selectAttacker(null)
       return
     }
-    if (canMinionAttack(m)) {
-      selectAttacker(m.instanceId)
+    // §19.7.13 · canMinionAttack 失败时浮起原因（之前 silent return）
+    const reason = whyCannotAttack(m)
+    if (reason) {
+      pushFeedback(reason)
+      return
     }
+    selectAttacker(m.instanceId)
   }
 
   const handlePlayerHeroClick = () => {
     if (!isPlayerTurn) return
-    if (state.player.hero.attack > 0) {
-      selectAttacker('hero_player')
+    if (state.player.hero.attack <= 0) {
+      pushFeedback('主公未装备武器，无法攻击')
+      return
     }
+    // §19.7.19 · 主公本回合已挥砍 → 拦下避免特效空响、引擎 silent return
+    if (engine && !engine.canHeroAttackThisTurn('player')) {
+      pushFeedback('主公本回合已攻击过')
+      return
+    }
+    selectAttacker('hero_player')
   }
 
   const handleEnemyMinionClick = (m: CardInstance) => {
     if (!isPlayerTurn) return
     if (!hasPendingSpellTarget && !hasAttackerSelected) return
-    // 嘲讽规则检查：非 taunt 在 enemy 有 taunt 时不可选
-    if (hasAttackerSelected && !canTargetMinion(state, m)) return
+    // §19.7.13 · 嘲讽阻挡 → 浮起原因
+    if (hasAttackerSelected && !canTargetMinion(state, m)) {
+      pushFeedback('敌方有镇守，必须先攻击带镇守的武将')
+      return
+    }
+    // §19.7.15 · spell 目标约束（maxCost 等）· 拒绝浪费卡牌
+    if (hasPendingSpellTarget && selectedCard) {
+      const v = isValidSpellTarget(selectedCard, m)
+      if (!v.valid) {
+        pushFeedback(v.reason ?? '该目标不满足卡牌生效条件')
+        return
+      }
+    }
     const target: TargetRef = { kind: 'minion', side: 'ai', instanceId: m.instanceId }
     resolveTarget(target)
   }
@@ -426,8 +501,24 @@ export function BattleScreen() {
   const handleEnemyHeroClick = () => {
     if (!isPlayerTurn) return
     if (!hasPendingSpellTarget && !hasAttackerSelected) return
-    if (hasAttackerSelected && !canTargetHero(state, selectedAttackerId!)) return
+    if (hasAttackerSelected) {
+      const reason = whyCannotTargetHero(state, selectedAttackerId!)
+      if (reason) {
+        // §19.7.11 · 之前 silent return → 改为浮起原因告知（突袭/嘲讽不可点英雄）
+        pushFeedback(reason)
+        return
+      }
+    }
     resolveTarget({ kind: 'hero', side: 'ai' })
+  }
+
+  /** §19.7.11 · 一次性手动浮起反馈（不走 engine log 路径）*/
+  const pushFeedback = (text: string) => {
+    const id = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+    setEffectToasts((prev) => [...prev, { id, text }].slice(-4))
+    window.setTimeout(() => {
+      setEffectToasts((prev) => prev.filter((p) => p.id !== id))
+    }, 1500)
   }
 
   const handleBackgroundClick = () => {
@@ -446,18 +537,27 @@ export function BattleScreen() {
 
   const enemyHasTaunt = state.ai.board.some((m) => m.currentKeywords.has('taunt'))
 
-  // 敌方 minion 可作为目标：① 攻击者已选 + 嘲讽规则通过 ② 选中的 spell 是对敌法术
-  const enemyMinionTargetable = (m: CardInstance) =>
-    isPlayerTurn &&
-    (selectedSpellTargetsEnemy ||
-      (hasAttackerSelected && canTargetMinion(state, m)))
+  // 敌方 minion 可作为目标：① 攻击者已选 + 嘲讽规则通过 ② 选中的 spell 是对敌法术且 spell 约束允许
+  const enemyMinionTargetable = (m: CardInstance) => {
+    if (!isPlayerTurn) return false
+    if (selectedSpellTargetsEnemy) {
+      // §19.7.15 · spell 还要满足 maxCost 等约束（反间计 ≤3 等）
+      return isValidSpellTarget(selectedCard!, m).valid
+    }
+    return hasAttackerSelected && canTargetMinion(state, m)
+  }
 
-  // 非 taunt 单位被嘲讽锁定时变灰
-  const enemyMinionDimmed = (m: CardInstance) =>
-    isPlayerTurn &&
-    hasAttackerSelected &&
-    enemyHasTaunt &&
-    !m.currentKeywords.has('taunt')
+  // 非 taunt 单位被嘲讽锁定时变灰 · §19.7.15 spell 不满足条件的目标也变灰
+  const enemyMinionDimmed = (m: CardInstance) => {
+    if (!isPlayerTurn) return false
+    if (hasAttackerSelected && enemyHasTaunt && !m.currentKeywords.has('taunt')) {
+      return true
+    }
+    if (selectedSpellTargetsEnemy && !isValidSpellTarget(selectedCard!, m).valid) {
+      return true
+    }
+    return false
+  }
 
   // 敌方 hero 可作为目标：① 攻击者已选可斩杀 ② 选中的 spell 是对敌法术且可指英雄
   const enemyHeroTargetable =
@@ -466,6 +566,12 @@ export function BattleScreen() {
       !hasPendingSpellTarget &&
       canTargetHero(state, selectedAttackerId!)) ||
       selectedSpellTargetsEnemy)
+  // §19.7.11 · 主公 dim：有攻击者选中但不能打主公（突袭/嘲讽阻挡）→ 灰态提示不可点
+  const enemyHeroDimmed =
+    isPlayerTurn &&
+    hasAttackerSelected &&
+    !hasPendingSpellTarget &&
+    !canTargetHero(state, selectedAttackerId!)
 
   // 友方 minion 可作为目标：选中的 spell 是友方 buff 法术
   const friendlyMinionTargetable = (_m: CardInstance) =>
@@ -514,17 +620,14 @@ export function BattleScreen() {
       {bgUrl && <img src={bgUrl} alt="" className={styles.bg} />}
       <div className={styles.bgVignette} />
 
-      {/* ============ 左上：退出按钮 ============ */}
-      <button
+      {/* ============ 左上：退出按钮 · §19.7.14 BackButton 体系 ============ */}
+      <BackButton
+        onClick={handleQuit}
         className={styles.quitFixed}
-        onClick={(e) => {
-          e.stopPropagation()
-          handleQuit()
-        }}
-        aria-label="退出对战"
+        ariaLabel="退出对战"
       >
-        {btnBackUrl ? <img src={btnBackUrl} alt="退出" /> : <span>退出</span>}
-      </button>
+        退出
+      </BackButton>
 
       {/* ============ AI 手牌（顶中小扇） ============ */}
       <div className={styles.aiHandRow} ref={aiHandRef}>
@@ -556,6 +659,7 @@ export function BattleScreen() {
           weapon={state.ai.weapon}
           portraitUrl={heroAiUrl}
           targetable={enemyHeroTargetable}
+          dimmed={enemyHeroDimmed}
           onClick={handleEnemyHeroClick}
         />
       </div>
@@ -646,7 +750,7 @@ export function BattleScreen() {
           portraitUrl={heroPlayerUrl}
           selected={selectedAttackerId === 'hero_player'}
           canAttack={isPlayerTurn && state.player.hero.attack > 0}
-          targetable={playerHeroIsEquipZone}
+          equipTarget={playerHeroIsEquipZone}
           onClick={() => {
             if (playerHeroIsEquipZone) {
               playSelectedToHero()
@@ -683,11 +787,8 @@ export function BattleScreen() {
         }}
         aria-label="查看回合记录"
       >
-        {btnTurnLogUrl ? (
-          <img src={btnTurnLogUrl} alt="回合记录" />
-        ) : (
-          <span>回合记录</span>
-        )}
+        {/* §19.7.19 · 改用 modal_btn_short_on 底图 + React 文字 */}
+        <span>回合记录</span>
       </button>
 
       {/* ============ 结束回合按钮（右中独立悬浮） ============ */}
@@ -707,36 +808,50 @@ export function BattleScreen() {
         )}
       </button>
 
-      {/* ============ 玩家手牌（底部大扇） ============ */}
-      <div className={styles.playerHand} ref={playerHandRef}>
-        {state.player.hand.map((card, i) => {
-          const playable = isPlayerTurn && card.data.cost <= state.player.mana.current
-          const selected = selectedCardId === card.instanceId
-          const total = state.player.hand.length
-          const offset = i - (total - 1) / 2
-          const angle = offset * 12
-          const lift = Math.abs(offset) * 8
-          const entering = enteringIds.has(card.instanceId)
-          return (
-            <div
-              key={card.instanceId}
-              className={`${styles.handSlot} ${selected ? styles.handSlotSelected : ''} ${!playable ? styles.handSlotUnplayable : ''} ${entering ? styles.handCardEntering : ''}`}
-              style={{
-                ['--rot' as string]: `${angle}deg`,
-                ['--lift' as string]: `${lift}px`,
-                ['--idx' as string]: i,
-                zIndex: 10 + i,
-              }}
-              onClick={(e) => {
-                e.stopPropagation()
-                // v5.5 UX: 单击=选中 / 双击=详情
-                handleCardClickV55(card, () => handleHandCardClick(card.instanceId))
-              }}
-            >
-              <Card card={card.data} scale={0.75} />
-            </div>
-          )
-        })}
+      {/* ============ 玩家手牌（底部大扇）· §19.7.18 加按死左键拖拽滚动 ============ */}
+      <div
+        className={styles.playerHand}
+        ref={playerHandRef}
+        onMouseDown={handleHandDragStart}
+        onMouseMove={handleHandDragMove}
+        onMouseUp={handleHandDragEnd}
+        onMouseLeave={handleHandDragEnd}
+      >
+        <div
+          className={styles.playerHandInner}
+          style={{ ['--hand-scroll-x' as string]: `${handScrollX}px` }}
+        >
+          {state.player.hand.map((card, i) => {
+            const playable = isPlayerTurn && card.data.cost <= state.player.mana.current
+            const selected = selectedCardId === card.instanceId
+            const total = state.player.hand.length
+            const offset = i - (total - 1) / 2
+            const angle = offset * 12
+            const lift = Math.abs(offset) * 8
+            const entering = enteringIds.has(card.instanceId)
+            return (
+              <div
+                key={card.instanceId}
+                className={`${styles.handSlot} ${selected ? styles.handSlotSelected : ''} ${!playable ? styles.handSlotUnplayable : ''} ${entering ? styles.handCardEntering : ''}`}
+                style={{
+                  ['--rot' as string]: `${angle}deg`,
+                  ['--lift' as string]: `${lift}px`,
+                  ['--idx' as string]: i,
+                  zIndex: 10 + i,
+                }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // §19.7.18 · 拖拽中不触发卡牌点击
+                  if (handDragRef.current.dragged) return
+                  // v5.5 UX: 单击=选中 / 双击=详情
+                  handleCardClickV55(card, () => handleHandCardClick(card.instanceId))
+                }}
+              >
+                <Card card={card.data} scale={0.75} />
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* AI 思考 / 待选目标 提示 */}
@@ -749,7 +864,13 @@ export function BattleScreen() {
         />
       )}
       {hasPendingSpellTarget && (
-        <div className={styles.targetHint}>请选择目标（点击敌方武将）</div>
+        <div className={styles.targetHint}>
+          {selectedSpellTargetsFriendly ? '请选择友方武将' : '请选择目标'}
+        </div>
+      )}
+      {/* §19.7.12 · 选中武器卡时提示 "点击主公装备" */}
+      {playerHeroIsEquipZone && (
+        <div className={styles.targetHint}>点击主公装备</div>
       )}
 
       {/* §19.7-2 回合记录弹窗 · 全屏 modal */}
@@ -901,6 +1022,10 @@ interface HeroProps {
   selected?: boolean
   canAttack?: boolean
   targetable?: boolean
+  /** §19.7.11 · 有攻击者但不可打主公（突袭/嘲讽阻挡）→ 视觉变灰 + 仍可点（点击触发原因浮起）*/
+  dimmed?: boolean
+  /** §19.7.12 · 装备目标态：选中武器卡时己方主公金色光环 · 与红色攻击目标态区分 */
+  equipTarget?: boolean
   onClick?: () => void
 }
 
@@ -916,6 +1041,8 @@ function HeroDisplay({
   selected,
   canAttack,
   targetable,
+  dimmed,
+  equipTarget,
   onClick,
 }: HeroProps) {
   const damaged = health < maxHealth
@@ -937,7 +1064,7 @@ function HeroDisplay({
   return (
     <button
       ref={heroRef}
-      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''} ${isCharging ? styles.heroCharging : ''}`}
+      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''} ${isCharging ? styles.heroCharging : ''} ${dimmed ? styles.heroDimmed : ''} ${equipTarget ? styles.heroEquipTarget : ''}`}
       data-charge-side={chargeSide}
       onClick={(e) => {
         e.stopPropagation()
@@ -1020,11 +1147,51 @@ function ManaDisplay({ current, max, fullUrl, emptyUrl, compact = false }: ManaP
 // ============================================
 
 function canMinionAttack(m: CardInstance): boolean {
-  if (m.exhausted) return false
-  if (m.currentAttack <= 0) return false
+  return whyCannotAttack(m) === null
+}
+
+/**
+ * §19.7.15 · 检查 spell/battlecry 目标是否满足卡牌生效约束
+ * 主要拦截 maxCost 限制（W20 反间计 ≤3 / W21 美人计 ≤3 等）
+ * 让 invalid 目标不再 silent waste 卡牌
+ */
+function isValidSpellTarget(
+  selectedCard: CardInstance,
+  targetMinion: CardInstance,
+): { valid: boolean; reason?: string } {
+  for (const e of selectedCard.data.effects ?? []) {
+    const isTargeted =
+      (e.trigger === 'onCast' && selectedCard.data.type === 'spell') ||
+      e.trigger === 'battlecry'
+    if (!isTargeted) continue
+    const params = (e.params ?? {}) as Record<string, unknown>
+    const maxCost = params.maxCost
+    if (typeof maxCost === 'number' && targetMinion.data.cost > maxCost) {
+      return {
+        valid: false,
+        reason: `目标费用 ${targetMinion.data.cost}，超过限制（最多 ${maxCost}）`,
+      }
+    }
+  }
+  return { valid: true }
+}
+
+/** §19.7.13 · 解释为何 minion 不能攻击 · 返回原因文案或 null（可攻击）*/
+function whyCannotAttack(m: CardInstance): string | null {
+  if (m.currentAttack <= 0) return `${m.data.name} · 攻击力为 0，不能攻击`
+  // 沉睡（登场回合无 charge/rush）
+  if (m.exhausted && m.summonedThisTurn) {
+    return `${m.data.name} · 刚登场，下回合才能攻击`
+  }
+  // 本回合已攻击过
+  if (m.exhausted) return `${m.data.name} · 本回合已攻击过`
   const max = m.currentKeywords.has('windfury') ? 2 : 1
-  if (m.attacksThisTurn >= max) return false
-  return true
+  if (m.attacksThisTurn >= max) {
+    return m.currentKeywords.has('windfury')
+      ? `${m.data.name} · 风怒已用尽（每回合 2 次）`
+      : `${m.data.name} · 本回合已攻击过`
+  }
+  return null
 }
 
 function canTargetMinion(
@@ -1040,7 +1207,20 @@ function canTargetHero(
   state: { ai: { board: CardInstance[] }; player: { board: CardInstance[] } },
   attackerId: string,
 ): boolean {
-  if (state.ai.board.some((m) => m.currentKeywords.has('taunt'))) return false
+  return whyCannotTargetHero(state, attackerId) === null
+}
+
+/**
+ * §19.7.11 · 解释为何不能攻击敌方英雄 · 返回原因文案或 null（可攻击）
+ * 用于 click 反馈浮起 + 主公 dim 状态判定
+ */
+function whyCannotTargetHero(
+  state: { ai: { board: CardInstance[] }; player: { board: CardInstance[] } },
+  attackerId: string,
+): string | null {
+  if (state.ai.board.some((m) => m.currentKeywords.has('taunt'))) {
+    return '敌方有镇守，必须先攻击带镇守的武将'
+  }
   if (attackerId !== 'hero_player') {
     const m = state.player.board.find((c) => c.instanceId === attackerId)
     if (
@@ -1049,8 +1229,8 @@ function canTargetHero(
       !m.currentKeywords.has('charge') &&
       m.summonedThisTurn
     ) {
-      return false
+      return '突袭 · 登场回合不可攻击英雄'
     }
   }
-  return true
+  return null
 }

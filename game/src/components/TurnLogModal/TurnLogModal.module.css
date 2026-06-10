@@ -18,22 +18,29 @@
   to   { opacity: 1; }
 }
 
+/* §19.7.10 · 复用用户切的 2:3 装饰画框 modal_frame_2_3.png
+   - 框已含描金外饰 + 中央羊皮纸底 → 删旧 linear-gradient / border / box-shadow
+   - 用内 padding 让内容落在羊皮纸安全区
+   - 资源原图 788×1166（2:3），display 560×840 等比 */
 .panel {
-  width: 640px;
+  width: 560px;
   max-width: 92vw;
-  height: 80vh;
-  max-height: 1100px;
-  background: linear-gradient(180deg, #2a1f15 0%, #1a1410 100%);
-  border: 2px solid rgba(212, 160, 23, 0.6);
-  border-radius: 14px;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.9),
-    inset 0 1px 0 rgba(255, 220, 160, 0.18),
-    0 0 32px rgba(212, 160, 23, 0.35);
+  height: 840px;
+  max-height: 92vh;
+  aspect-ratio: 2 / 3;
+  background-image: url('/src/assets/ui/modal_frame_2_3.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
   display: flex;
   flex-direction: column;
   cursor: default;
+  filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.9));
   animation: panelPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* §19.7.20 · padding-top 11% · 9% 太贴装饰，14% 太松，11% 居中视觉舒适
+     底部金属饰 6%，左右雕边 6% · body 区最大化 */
+  padding: 11% 6% 6%;
+  box-sizing: border-box;
 }
 
 @keyframes panelPop {
@@ -43,28 +50,32 @@
 
 .header {
   position: relative;
-  padding: 18px 24px;
-  border-bottom: 1px solid rgba(212, 160, 23, 0.35);
+  padding: 8px 8px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;       /* §19.7.20 · ✕ 已删，标题居中 */
   flex-shrink: 0;
+  border-bottom: 1px dashed rgba(95, 60, 30, 0.4);
+  margin-bottom: 8px;
 }
 
+/* §19.7.10 · 新框中央是奶白羊皮纸底，文字改深棕色提升对比 */
 .title {
   margin: 0;
   font-family: var(--font-kai);
   font-size: 28px;
-  color: #ffe18a;
+  color: #4a2a12;
   letter-spacing: 12px;
-  text-shadow: 0 0 16px rgba(255, 215, 100, 0.6), 0 2px 6px rgba(0, 0, 0, 0.95);
+  text-shadow: 0 1px 0 rgba(255, 230, 180, 0.8);
+  /* §19.7.20 · 居中后去掉 padding-left 偏移；右侧加同尺寸补偿让字距感对称 */
   padding-left: 12px;
+  text-align: center;
 }
 
 .closeBtn {
-  background: rgba(212, 160, 23, 0.18);
-  border: 1.5px solid rgba(212, 160, 23, 0.6);
-  color: #ffe18a;
+  background: rgba(95, 60, 30, 0.15);
+  border: 1.5px solid rgba(95, 60, 30, 0.5);
+  color: #4a2a12;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -78,14 +89,15 @@
 }
 
 .closeBtn:hover {
-  background: rgba(255, 80, 64, 0.45);
+  background: rgba(212, 80, 64, 0.55);
+  color: #fff5d8;
   transform: scale(1.08);
 }
 
 .body {
   flex: 1;
   overflow-y: auto;
-  padding: 18px 24px;
+  padding: 8px 4px;
   scroll-behavior: smooth;
 }
 
@@ -101,32 +113,32 @@
 }
 
 .turnSection {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  background: rgba(20, 12, 8, 0.65);
-  border: 1px solid rgba(212, 160, 23, 0.28);
-  border-radius: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(95, 60, 30, 0.08);
+  border: 1px solid rgba(95, 60, 30, 0.25);
+  border-radius: 6px;
 }
 
 .turnSection[data-side='player'] {
-  border-color: rgba(122, 219, 135, 0.5);
-  background: linear-gradient(180deg, rgba(20, 50, 30, 0.45), rgba(20, 12, 8, 0.7));
+  border-color: rgba(60, 140, 80, 0.55);
+  background: rgba(60, 140, 80, 0.1);
 }
 
 .turnSection[data-side='ai'] {
-  border-color: rgba(255, 80, 64, 0.5);
-  background: linear-gradient(180deg, rgba(50, 18, 14, 0.45), rgba(20, 12, 8, 0.7));
+  border-color: rgba(200, 60, 50, 0.55);
+  background: rgba(200, 60, 50, 0.08);
 }
 
 .turnHeader {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-family: var(--font-kai);
   font-size: 18px;
-  color: #ffe18a;
+  color: #4a2a12;
   letter-spacing: 4px;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
-  border-bottom: 1px dashed rgba(212, 160, 23, 0.3);
-  padding-bottom: 8px;
+  text-shadow: 0 1px 0 rgba(255, 230, 180, 0.7);
+  border-bottom: 1px dashed rgba(95, 60, 30, 0.4);
+  padding-bottom: 6px;
 }
 
 .entryList {
@@ -145,7 +157,7 @@
   font-family: var(--font-serif);
   font-size: 14px;
   line-height: 1.5;
-  color: rgba(245, 230, 200, 0.92);
+  color: #3a2410;
   padding: 4px 6px;
   border-radius: 3px;
 }
@@ -159,8 +171,8 @@
   text-align: center;
   padding: 2px 6px;
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(212, 160, 23, 0.25);
+  background: rgba(95, 60, 30, 0.15);
+  border: 1px solid rgba(95, 60, 30, 0.4);
   letter-spacing: 1px;
 }
 
@@ -168,57 +180,78 @@
   flex: 1;
 }
 
-/* 按 kind 颜色分级 */
-.kindPlay    .entryKind { color: #ffe18a; border-color: rgba(255, 215, 100, 0.55); }
-.kindAttack  .entryKind { color: #ffaf66; border-color: rgba(255, 175, 102, 0.55); }
-.kindDamage  .entryKind { color: #ff5040; border-color: rgba(255, 80, 64, 0.55); }
-.kindHeal    .entryKind { color: #7adb87; border-color: rgba(122, 219, 135, 0.55); }
-.kindDeath   .entryKind { color: #b87aff; border-color: rgba(184, 122, 255, 0.55); }
-.kindEffect  .entryKind { color: #5fb8ff; border-color: rgba(95, 184, 255, 0.55); }
-.kindDraw    .entryKind { color: #5fb8ff; border-color: rgba(95, 184, 255, 0.55); }
-.kindFatigue .entryKind { color: #b87aff; border-color: rgba(184, 122, 255, 0.55); }
-.kindWin     .entryKind { color: #ffd060; border-color: rgba(255, 208, 96, 0.85); }
-.kindTurn    .entryKind { color: #ffe18a; border-color: rgba(255, 215, 100, 0.85); }
+/* 按 kind 颜色分级 · 深色背景（羊皮纸上），仅 chip 内文字着色 */
+.kindPlay    .entryKind { color: #a16d00; border-color: rgba(180, 130, 20, 0.7); }
+.kindAttack  .entryKind { color: #b85a18; border-color: rgba(200, 110, 50, 0.7); }
+.kindDamage  .entryKind { color: #b8221b; border-color: rgba(200, 50, 40, 0.7); }
+.kindHeal    .entryKind { color: #2d7d3a; border-color: rgba(60, 140, 80, 0.7); }
+.kindDeath   .entryKind { color: #6a3da6; border-color: rgba(120, 70, 200, 0.7); }
+.kindEffect  .entryKind { color: #1c5a8a; border-color: rgba(40, 110, 160, 0.7); }
+.kindDraw    .entryKind { color: #1c5a8a; border-color: rgba(40, 110, 160, 0.7); }
+.kindFatigue .entryKind { color: #6a3da6; border-color: rgba(120, 70, 200, 0.7); }
+.kindWin     .entryKind { color: #a16d00; border-color: rgba(180, 130, 20, 0.95); }
+.kindTurn    .entryKind { color: #a16d00; border-color: rgba(180, 130, 20, 0.95); }
 
 .empty {
   margin: 12px 0;
   text-align: center;
   font-family: var(--font-kai);
   font-size: 14px;
-  color: rgba(245, 230, 200, 0.5);
+  color: rgba(74, 42, 18, 0.6);
   letter-spacing: 4px;
 }
 
 .footer {
-  padding: 14px 24px;
-  border-top: 1px solid rgba(212, 160, 23, 0.35);
+  padding: 12px 8px 4px;
+  border-top: 1px dashed rgba(95, 60, 30, 0.4);
+  margin-top: 8px;
   display: flex;
   justify-content: center;
   flex-shrink: 0;
 }
 
+/* §19.7.14 · 复用用户切的「弹窗按钮-短-可选中.png」 (227×88)
+   - 可选中态 / 不可选中态分别用 modal_btn_short_on.png / off.png
+   - 文字直接叠在按钮中间，按钮自带描金+雕花装饰 */
 .actionBtn {
-  background: linear-gradient(180deg, #ffe18a, #d4a017);
-  color: #2a1f15;
+  background-image: url('/src/assets/ui/modal_btn_short_on.png');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  color: #3a1a08;
   font-family: var(--font-kai);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  letter-spacing: 8px;
-  border: 1.5px solid #b8860b;
-  border-radius: 6px;
-  padding: 8px 32px;
+  letter-spacing: 12px;
+  /* 按钮原图 227×88 · 文字补字距后稍向左留白对齐视觉中心 */
+  padding: 0 12px 0 24px;
+  width: 200px;
+  height: 76px;
   cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 4px 12px rgba(0, 0, 0, 0.55);
+  text-shadow:
+    0 1px 0 rgba(255, 245, 220, 0.7),
+    0 0 8px rgba(255, 200, 100, 0.3);
   transition: filter 0.18s, transform 0.18s;
 }
 
 .actionBtn:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08) drop-shadow(0 0 6px rgba(255, 220, 120, 0.6));
   transform: scale(1.04);
 }
 
 .actionBtn:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+.actionBtn:disabled,
+.actionBtnDisabled {
+  background-image: url('/src/assets/ui/modal_btn_short_off.png');
+  cursor: not-allowed;
+  filter: brightness(0.85) saturate(0.7);
+}
+.actionBtn:disabled:hover,
+.actionBtnDisabled:hover {
+  filter: brightness(0.85) saturate(0.7);
+  transform: none;
 }

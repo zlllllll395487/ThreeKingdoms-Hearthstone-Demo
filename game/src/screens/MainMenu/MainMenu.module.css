@@ -677,34 +677,12 @@
   animation: switchModalScaleIn 0.4s ease-out;
 }
 
+/* §19.7.14 · 仅保留定位，其余 BackButton 共用样式 */
 .switchModalBack {
   position: absolute;
   top: 32px;
   left: 32px;
   z-index: 1001;
-  background: transparent;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7));
-  transition: transform 0.18s ease, filter 0.18s ease;
-}
-
-.switchModalBack img {
-  height: 56px;
-  width: auto;
-  display: block;
-  user-select: none;
-  pointer-events: none;
-}
-
-.switchModalBack:hover {
-  transform: translateX(-3px) scale(1.05);
-  filter: drop-shadow(0 8px 18px rgba(212, 160, 23, 0.6));
-}
-
-.switchModalBack:active {
-  transform: translateX(0) scale(0.96);
 }
 
 @keyframes switchModalFadeIn {

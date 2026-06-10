@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { Card } from '@/components/Card/Card'
+import { BackButton } from '@/components/BackButton/BackButton'
 import { getAllCards } from '@/data/cardLibrary'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import styles from './CodexScreen.module.css'
@@ -85,20 +86,13 @@ export function CodexScreen() {
 
       {/* 顶部 */}
       <header className={styles.header}>
-        <button
-          className={styles.backButton}
+        <BackButton
           onClick={() => navigate('mainmenu')}
-          aria-label="返回主菜单"
+          ariaLabel="返回主菜单"
+          className={styles.backButton}
         >
-          {(() => {
-            const btnBackUrl = getUiAssetUrl('btn_back.png')
-            return btnBackUrl ? (
-              <img src={btnBackUrl} alt="返回" className={styles.backButtonImg} />
-            ) : (
-              <span>‹ 返回</span>
-            )
-          })()}
-        </button>
+          返回
+        </BackButton>
         {(() => {
           const logoUrl = getUiAssetUrl('logo_codex.png')
           return logoUrl ? (

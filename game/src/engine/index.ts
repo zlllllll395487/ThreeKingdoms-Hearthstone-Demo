@@ -207,6 +207,43 @@ export class GameEngine {
     )
   }
 
+  /**
+   * §19.7.8 · 检查需要目标的牌是否有合法可选目标
+   * 用于"魏延手牌只有自己，友方场上无随从"这种死锁场景：
+   *   返回 false → gameStore 直接打出该卡，effect.action 头部的 `!target return` 会让 targeted 部分跳过
+   * 仅检查 trigger ∈ {onCast (限 spell), battlecry} + action 属 targetingActions 的 effect
+   */
+  hasValidTargetsForCard(card: CardInstance, side: PlayerSide): boolean {
+    const FRIENDLY_ACTIONS = new Set([
+      'buffMinion',
+      'grantExtraAttack',
+      'grantKeyword',
+    ])
+    // 可指英雄的 action（其余 targeted action 只能指 minion）
+    const HERO_OK_ACTIONS = new Set([
+      'dealDamage',
+      'dealDamageEqualToAttack',
+    ])
+    const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
+    for (const e of card.data.effects ?? []) {
+      const isTargeted =
+        (e.trigger === 'onCast' && card.data.type === 'spell') ||
+        e.trigger === 'battlecry'
+      if (!isTargeted) continue
+      if (FRIENDLY_ACTIONS.has(e.action)) {
+        // 友方目标：需要至少 1 个友方场上 minion（魏延打前自身还没入场，不算）
+        if (this.state[side].board.length > 0) return true
+      } else if (HERO_OK_ACTIONS.has(e.action)) {
+        // 敌方主公 + 敌方 minion 都可 → 主公永远在
+        return true
+      } else {
+        // 敌方 minion only（freeze / attackDebuff / returnToHand / steal 等）
+        if (this.state[enemySide].board.length > 0) return true
+      }
+    }
+    return false
+  }
+
   playCard(side: PlayerSide, instanceId: string, target?: TargetRef): boolean {
     if (!this.canPlayCard(side, instanceId)) return false
     const player = this.state[side]
@@ -358,6 +395,12 @@ export class GameEngine {
   }
 
   private heroAttacked: Record<PlayerSide, boolean> = { player: false, ai: false }
+
+  /** §19.7.19 · 暴露给 UI · 主公本回合是否仍可攻击（带武器才有意义）*/
+  canHeroAttackThisTurn(side: PlayerSide): boolean {
+    if (this.state[side].hero.attack <= 0) return false
+    return !this.heroAttacked[side]
+  }
 
   attack(side: PlayerSide, attackerId: string, target: TargetRef): boolean {
     if (!this.canAttack(side, attackerId, target)) return false

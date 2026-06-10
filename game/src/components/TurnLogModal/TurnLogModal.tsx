@@ -83,15 +83,9 @@ export function TurnLogModal({ open, onClose, log }: Props) {
   return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
+        {/* §19.7.20 · 删除右上 ✕（与底部"关闭"按钮重复）· 标题居中 */}
         <header className={styles.header}>
           <h2 className={styles.title}>回 合 记 录</h2>
-          <button
-            className={styles.closeBtn}
-            onClick={onClose}
-            aria-label="关闭"
-          >
-            ✕
-          </button>
         </header>
 
         <div className={styles.body}>

@@ -429,13 +429,14 @@ export function BattleScreen() {
         />
       </div>
 
-      {/* ============ 玩家法力（底右） ============ */}
+      {/* §19.2 玩家法力 · 左侧紧凑方形 130×130，与右侧 endTurn 对称 */}
       <div className={styles.playerManaBox}>
         <ManaDisplay
           current={state.player.mana.current}
           max={state.player.mana.max}
           fullUrl={manaFullUrl}
           emptyUrl={manaEmptyUrl}
+          compact
         />
       </div>
 
@@ -675,15 +676,21 @@ interface ManaProps {
   max: number
   fullUrl: string | null
   emptyUrl: string | null
+  /** §19.2 紧凑方形模式（130×130 配合 endTurn 对称）· 玩家用 true / AI 用 false */
+  compact?: boolean
 }
 
-function ManaDisplay({ current, max, fullUrl, emptyUrl }: ManaProps) {
+function ManaDisplay({ current, max, fullUrl, emptyUrl, compact = false }: ManaProps) {
   if (max === 0) return null // AI 第一回合无法力时隐藏
   const manaBaseUrl = getUiAssetUrl('ui_mana_base.png')
   return (
     <div
-      className={styles.manaDisplay}
-      style={manaBaseUrl ? { backgroundImage: `url(${manaBaseUrl})` } : undefined}
+      className={`${styles.manaDisplay} ${compact ? styles.manaDisplayCompact : ''}`}
+      style={
+        !compact && manaBaseUrl
+          ? { backgroundImage: `url(${manaBaseUrl})` }
+          : undefined
+      }
     >
       <div className={styles.manaCounter}>
         <span>{current}/{max}</span>

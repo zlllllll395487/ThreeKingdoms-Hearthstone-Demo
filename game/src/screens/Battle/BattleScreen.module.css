@@ -343,7 +343,7 @@
 
 .playerHeroBox {
   position: absolute;
-  top: 1220px;
+  top: 1320px;  /* §19.2 ↓ 下移 100px（原 1220），给 mana 在 870 对称留空间 */
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -506,6 +506,8 @@
    法力水晶（mana counter + 水晶横排）
    ============================================ */
 
+/* §19.2 玩家 mana · 紧凑方形（130x130）与右侧 endTurn 对称
+   AI mana 不动（顶中央保持横向 380x90 原版）*/
 .manaDisplay {
   width: 380px;
   height: 90px;
@@ -518,6 +520,30 @@
   justify-content: center;
   gap: 14px;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+}
+
+/* 紧凑模式（玩家 mana 用，左下对称 endTurn）*/
+.manaDisplayCompact {
+  width: 130px;
+  height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 10px;
+  box-sizing: border-box;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(60, 40, 28, 0.85) 0%,
+    rgba(20, 12, 8, 0.95) 100%
+  );
+  border: 2px solid rgba(212, 160, 23, 0.55);
+  border-radius: 12px;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 220, 160, 0.18),
+    0 0 12px rgba(70, 140, 240, 0.3);
 }
 
 .manaCounter {
@@ -537,11 +563,28 @@
   white-space: nowrap;
 }
 
+/* 紧凑模式下 counter 字号放大 */
+.manaDisplayCompact .manaCounter span {
+  font-size: 26px;
+  letter-spacing: 3px;
+}
+
 .manaCrystals {
   display: flex;
   gap: 1px;
   align-items: center;
   flex-shrink: 0;
+}
+
+/* 紧凑模式下水晶 2 行 5 列 grid */
+.manaDisplayCompact .manaCrystals {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: auto;
+  gap: 2px;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
 }
 
 .manaCrystal {
@@ -550,21 +593,30 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
 }
 
+/* 紧凑模式下水晶图缩小 */
+.manaDisplayCompact .manaCrystal {
+  height: 18px;
+}
+
 .manaCrystalFallback {
   width: 14px;
   height: 28px;
   background: linear-gradient(180deg, #1e5fc8, #0a2860);
   clip-path: polygon(50% 0, 100% 35%, 100% 65%, 50% 100%, 0 65%, 0 35%);
 }
+.manaDisplayCompact .manaCrystalFallback {
+  width: 10px;
+  height: 18px;
+}
 .manaCrystalFallback[data-full='false'] {
   background: linear-gradient(180deg, #3a3a42, #1c1c20);
 }
 
+/* §19.2 玩家 mana 移到左侧与 endTurn 对称（top 870, left 22） */
 .playerManaBox {
   position: absolute;
-  top: 1395px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 870px;
+  left: 22px;
   z-index: 5;
 }
 

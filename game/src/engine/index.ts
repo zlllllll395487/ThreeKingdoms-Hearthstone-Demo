@@ -272,10 +272,14 @@ export class GameEngine {
       this.triggerEffects(card, 'onCast', target)
       // v5.5 锚点联动：anchorRequirement 匹配场上锚点 → 执行 linkedEffects
       if (card.data.anchorRequirement && this.hasAnchorOnBoard(side, card.data.anchorRequirement)) {
+        // §19.7.21 Phase D · 推一条专门 log 让 UI 浮起 "特殊效果触发"
+        this.log.push(logEffect(`【特殊效果触发】${card.data.name}`))
         this.triggerLinkedEffects(card, 'linkedEffects', target)
       }
       // v5.5 卡-卡 combo：comboFlagRequirement 已 set → 执行 comboLinkedEffects
       if (card.data.comboFlagRequirement && player.comboFlagsThisTurn.has(card.data.comboFlagRequirement)) {
+        // §19.7.21 Phase D · combo 触发专门 log
+        this.log.push(logEffect(`【连击】${card.data.name}`))
         this.triggerLinkedEffects(card, 'comboLinkedEffects', target)
       }
       // v5.5 设置 combo flag（火油 / 反间计）

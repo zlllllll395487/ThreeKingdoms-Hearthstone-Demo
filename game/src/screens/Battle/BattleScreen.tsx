@@ -154,12 +154,18 @@ export function BattleScreen() {
     prevWeaponRef.current = { player: curP, ai: curA }
   }, [state])
 
-  // §19.7.5 · 计策/效果文字浮起：监听 log kind='effect' 新增 → 中央上方浮起 1500ms 自动消失
-  const [effectToasts, setEffectToasts] = useState<{ id: string; text: string }[]>([])
+  // §19.7.21 Phase D-4 · 计策施法者发光 (spell play → 对应 hero 金光一闪 600ms)
+  const [castingSide, setCastingSide] = useState<'player' | 'ai' | null>(null)
+
+  // §19.7.5 + §19.7.21 Phase D · 计策/效果文字浮起 + 仪式感分级
+  // kind 'special' 给"连击/特殊效果触发/冻结/法力"等 → 大字号 + 不同颜色
+  type ToastKind = 'normal' | 'combo' | 'special' | 'freeze' | 'mana'
+  const [effectToasts, setEffectToasts] = useState<
+    { id: string; text: string; kind: ToastKind }[]
+  >([])
   const lastLogIdxRef = useRef(0)
   useEffect(() => {
     if (log.length <= lastLogIdxRef.current) {
-      // log 被清空（新局开始）→ 重置
       if (log.length === 0) {
         lastLogIdxRef.current = 0
         setEffectToasts([])
@@ -168,17 +174,38 @@ export function BattleScreen() {
     }
     const newEntries = log.slice(lastLogIdxRef.current)
     lastLogIdxRef.current = log.length
+    // Phase D-4 · 检测新的 spell play log → 触发对应 hero 发光
+    const spellPlay = newEntries.find(
+      (e) => e.kind === 'play' && e.cardType === 'spell',
+    )
+    if (spellPlay && spellPlay.side) {
+      const side = spellPlay.side
+      setCastingSide(side)
+      window.setTimeout(() => {
+        setCastingSide((cur) => (cur === side ? null : cur))
+      }, 600)
+    }
     const effects = newEntries.filter((e) => e.kind === 'effect')
     if (effects.length === 0) return
+    const classifyToast = (text: string): ToastKind => {
+      if (text.startsWith('【连击】')) return 'combo'
+      if (text.startsWith('【特殊效果触发】')) return 'special'
+      if (text.includes('冻结')) return 'freeze'
+      if (text.includes('法力 +') || text.includes('退还')) return 'mana'
+      return 'normal'
+    }
     const toasts = effects.map((e, i) => ({
       id: `toast_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
       text: e.text,
+      kind: classifyToast(e.text),
     }))
-    setEffectToasts((prev) => [...prev, ...toasts].slice(-4)) // 最多同时显示 4 条
+    setEffectToasts((prev) => [...prev, ...toasts].slice(-4))
     toasts.forEach((t) => {
+      // combo/special 大字仪式感留更久一点
+      const dur = t.kind === 'combo' || t.kind === 'special' ? 1800 : 1500
       window.setTimeout(() => {
         setEffectToasts((prev) => prev.filter((p) => p.id !== t.id))
-      }, 1500)
+      }, dur)
     })
   }, [log])
 
@@ -660,6 +687,7 @@ export function BattleScreen() {
           portraitUrl={heroAiUrl}
           targetable={enemyHeroTargetable}
           dimmed={enemyHeroDimmed}
+          casting={castingSide === 'ai'}
           onClick={handleEnemyHeroClick}
         />
       </div>
@@ -751,6 +779,7 @@ export function BattleScreen() {
           selected={selectedAttackerId === 'hero_player'}
           canAttack={isPlayerTurn && state.player.hero.attack > 0}
           equipTarget={playerHeroIsEquipZone}
+          casting={castingSide === 'player'}
           onClick={() => {
             if (playerHeroIsEquipZone) {
               playSelectedToHero()
@@ -886,7 +915,7 @@ export function BattleScreen() {
           {effectToasts.map((t, i) => (
             <div
               key={t.id}
-              className={styles.effectToast}
+              className={`${styles.effectToast} ${styles[`toast_${t.kind}`] ?? ''}`}
               style={{ ['--toast-delay' as string]: `${i * 80}ms` }}
             >
               {t.text}
@@ -1026,6 +1055,8 @@ interface HeroProps {
   dimmed?: boolean
   /** §19.7.12 · 装备目标态：选中武器卡时己方主公金色光环 · 与红色攻击目标态区分 */
   equipTarget?: boolean
+  /** §19.7.21 Phase D-4 · 该方刚施法（spell 出牌）· 主公金色一闪 600ms */
+  casting?: boolean
   onClick?: () => void
 }
 
@@ -1043,6 +1074,7 @@ function HeroDisplay({
   targetable,
   dimmed,
   equipTarget,
+  casting,
   onClick,
 }: HeroProps) {
   const damaged = health < maxHealth
@@ -1064,7 +1096,7 @@ function HeroDisplay({
   return (
     <button
       ref={heroRef}
-      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''} ${isCharging ? styles.heroCharging : ''} ${dimmed ? styles.heroDimmed : ''} ${equipTarget ? styles.heroEquipTarget : ''}`}
+      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''} ${isCharging ? styles.heroCharging : ''} ${dimmed ? styles.heroDimmed : ''} ${equipTarget ? styles.heroEquipTarget : ''} ${casting ? styles.heroCasting : ''}`}
       data-charge-side={chargeSide}
       onClick={(e) => {
         e.stopPropagation()

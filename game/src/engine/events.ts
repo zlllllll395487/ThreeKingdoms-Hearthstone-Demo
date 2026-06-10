@@ -22,6 +22,8 @@ export interface LogEntry {
   kind: LogKind
   text: string
   side?: PlayerSide
+  /** §19.7.21 Phase D-4 · kind='play' 时附带卡牌类型 · 让 UI 判 spell 施法者发光 */
+  cardType?: 'minion' | 'spell' | 'weapon'
 }
 
 export function logTurn(turn: number, side: PlayerSide): LogEntry {
@@ -29,7 +31,12 @@ export function logTurn(turn: number, side: PlayerSide): LogEntry {
 }
 
 export function logPlay(side: PlayerSide, instance: CardInstance): LogEntry {
-  return { kind: 'play', side, text: `${side === 'player' ? '你' : 'AI'}打出 ${instance.data.name}` }
+  return {
+    kind: 'play',
+    side,
+    text: `${side === 'player' ? '你' : 'AI'}打出 ${instance.data.name}`,
+    cardType: instance.data.type,
+  }
 }
 
 export function logAttack(side: PlayerSide, attacker: string, target: string): LogEntry {

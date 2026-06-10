@@ -108,7 +108,7 @@
     ],
     "portrait": "破虏校尉.png",
     "cardvisual": "破虏校尉.png",
-    "description": "突袭。遗志：召唤一个 2/1 的「巫祝」。",
+    "description": "突袭。亡语：召唤一个 2/1 的「巫祝」。",
     "flavor": "破虏将军，誓灭群雄。"
   },
   {
@@ -127,7 +127,7 @@
     ],
     "portrait": "屯田.png",
     "cardvisual": "屯田.png",
-    "description": "下一回合开始时，你的法力上限 +2（仅下回合）。",
+    "description": "在你的下一个回合开始时，法力水晶上限提升 2 点（仅持续 1 个回合）。",
     "flavor": "兵马未动，粮草先行。"
   },
   {
@@ -150,7 +150,7 @@
     ],
     "portrait": "魏延.png",
     "cardvisual": "魏延.png",
-    "description": "突袭。威名：使一个友方武将获得 +2 攻击力（永久）。",
+    "description": "突袭。战吼：选择一名友方武将，永久使其获得 +2 攻击力。",
     "flavor": "脑后有反骨。"
   },
   {
@@ -171,7 +171,7 @@
       }
     ],
     "portrait": "guanping.png",
-    "description": "威名：召唤一个 1/1 的「义兵」。",
+    "description": "战吼：召唤一个 1/1 的「义兵」。",
     "flavor": "云长之义子。"
   },
   {
@@ -193,7 +193,7 @@
     ],
     "portrait": "严颜.png",
     "cardvisual": "严颜.png",
-    "description": "威名：召唤两个 1/1 的「义兵」。",
+    "description": "战吼：召唤两个 1/1 的「义兵」。",
     "flavor": "断头将军。"
   },
   {
@@ -216,7 +216,7 @@
     "onceUsedKey": "huangyueying_once",
     "portrait": "黄月英.png",
     "cardvisual": "黄月英.png",
-    "description": "受击：受到伤害且未死时召唤一个 1/1 的「木牛流马」（每张每局 1 次）。",
+    "description": "受击：当此武将受到伤害且未死亡时，召唤一个 1/1 的「木牛流马」（每张卡每局触发 1 次）。",
     "flavor": "孔明之妻，巧思过人。"
   },
   {
@@ -237,7 +237,7 @@
       }
     ],
     "portrait": "huangzhong.png",
-    "description": "威名：对一目标造成等于自己攻击力的伤害。",
+    "description": "战吼：对任意目标造成等同于此武将攻击力的伤害。",
     "flavor": "老当益壮。"
   },
   {
@@ -290,7 +290,7 @@
       }
     ],
     "portrait": "guanyu.png",
-    "description": "突袭。威名：场上每个其他友方武将给关羽 +1/+1。",
+    "description": "突袭。战吼：场上每存在一个其他友方武将，关羽便获得 +1/+1。",
     "flavor": "美髯公，温酒斩华雄。"
   },
   {
@@ -312,7 +312,7 @@
       }
     ],
     "portrait": "zhangfei.png",
-    "description": "镇守。威名：场上每个其他友方武将给张飞 +1/+1。",
+    "description": "镇守。战吼：场上每存在一个其他友方武将，张飞便获得 +1/+1。",
     "flavor": "燕人张翼德在此！"
   },
   {
@@ -341,7 +341,7 @@
     "onceUsedKey": "zhaoyun_once",
     "portrait": "赵云.png",
     "cardvisual": "赵云.png",
-    "description": "突袭。威名：场上每个其他友方武将给赵云 +1/+1。受致命伤时留 1 HP（每张每局 1 次）。",
+    "description": "突袭。战吼：场上每存在一个其他友方武将，赵云便获得 +1/+1。当首次受到致命伤害时，保留 1 点生命值（每张卡每局触发 1 次）。",
     "flavor": "七进七出，独闯曹营。"
   },
   {
@@ -360,7 +360,7 @@
     ],
     "portrait": "武勇.png",
     "cardvisual": "武勇.png",
-    "description": "使一个友方武将获得突袭。"
+    "description": "选择一名友方武将，使其获得突袭。"
   },
   {
     "id": "S22",
@@ -383,7 +383,7 @@
     ],
     "portrait": "万军取首.png",
     "cardvisual": "万军取首.png",
-    "description": "使一个友方武将获得 +1/+1，并可于本回合再攻击 1 次。",
+    "description": "选择一名友方武将，使其获得 +1/+1，并可于本回合内额外攻击 1 次。",
     "flavor": "于百万军中取上将首级，如探囊取物。"
   },
   {

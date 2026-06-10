@@ -24,6 +24,13 @@ const uiModules = import.meta.glob('/src/assets/ui/*.png', {
   import: 'default',
 }) as Record<string, string>
 
+// §19.6 Phase C · FX 序列帧
+const fxModules = import.meta.glob('/src/assets/fx/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+}) as Record<string, string>
+
 /**
  * 根据文件名获取立绘 URL；不存在时返回 null（让 UI 显示占位符）
  */
@@ -39,4 +46,14 @@ export function getPortraitUrl(filename: string | undefined): string | null {
 export function getUiAssetUrl(filename: string): string | null {
   const fullPath = `/src/assets/ui/${filename}`
   return uiModules[fullPath] ?? null
+}
+
+/**
+ * §19.6 获取 FX 序列帧 URL
+ * 例：getFxFrame('fire_aoe', 5) → /src/assets/fx/fx_fire_aoe_05.png 的 hash URL
+ */
+export function getFxFrame(name: string, frame: number): string | null {
+  const file = `fx_${name}_${String(frame).padStart(2, '0')}.png`
+  const fullPath = `/src/assets/fx/${file}`
+  return fxModules[fullPath] ?? null
 }

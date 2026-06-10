@@ -139,8 +139,14 @@ export function BattleScreen() {
 
   const bgUrl = getUiAssetUrl('battle_bg_portrait.png')
   const cardbackUrl = getUiAssetUrl('cardback.png')
-  const heroPlayerUrl = getUiAssetUrl('hero_player.png')
-  const heroAiUrl = getUiAssetUrl('hero_ai.png')
+  // §19.7-5 主公头像按阵营动态选 · shu=刘备 / wu=孙权
+  // 替代之前 hardcode 的 hero_player.png（刘备）+ hero_ai.png（曹操）
+  const heroPlayerUrl = getUiAssetUrl(
+    state.player.hero.faction === 'wu' ? 'hero_wu.png' : 'hero_shu.png',
+  )
+  const heroAiUrl = getUiAssetUrl(
+    state.ai.hero.faction === 'wu' ? 'hero_wu.png' : 'hero_shu.png',
+  )
   const manaFullUrl = getUiAssetUrl('mana_full.png')
   const manaEmptyUrl = getUiAssetUrl('mana_empty.png')
   const btnEndTurnUrl = getUiAssetUrl('btn_end_turn.png')

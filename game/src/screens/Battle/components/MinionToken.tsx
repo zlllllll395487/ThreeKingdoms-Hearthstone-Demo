@@ -2,11 +2,13 @@
  * 战场上的随从 token · 立绘 + 攻击/血量数字球（炉石风格 minion token）
  */
 
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import type { CardInstance } from '@/engine/types'
 import { getPortraitUrl, getUiAssetUrl } from '@/data/assetLoader'
 import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
 import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
+import { useFxStore } from '@/store/fxStore'
+import { registerTarget, unregisterTarget } from '@/utils/targetRegistry'
 import styles from './MinionToken.module.css'
 
 const DOUBLE_CLICK_MS = 300
@@ -50,6 +52,18 @@ export function MinionToken({ minion, selected, targetable, canAttack, dimmed, o
   const hpDelta = useHpDelta(minion.currentHealth)
   const isHit = useHitShake(minion.currentHealth)
 
+  // §19.6 Phase B · 攻击者前冲状态
+  const charging = useFxStore((s) => s.chargingAttacker)
+  const isCharging = charging?.id === minion.instanceId
+  const chargeSide = isCharging ? charging!.side : undefined
+
+  // §19.6 Phase B · 注册 DOM ref 供 doAnimatedAttack 计算命中位置
+  const tokenRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    registerTarget(minion.instanceId, tokenRef.current)
+    return () => unregisterTarget(minion.instanceId)
+  }, [minion.instanceId])
+
   // v5.5 双击检测：300ms 内点 2 次 = 详情；否则单击 = 攻击者选中 / 目标
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const handleClick = (e: React.MouseEvent) => {
@@ -68,8 +82,10 @@ export function MinionToken({ minion, selected, targetable, canAttack, dimmed, o
 
   return (
     <button
-      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''} ${isHit ? styles.hitShake : ''}`}
+      ref={tokenRef}
+      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''} ${isHit ? styles.hitShake : ''} ${isCharging ? styles.charging : ''}`}
       data-rarity={minion.data.rarity}
+      data-charge-side={chargeSide}
       onClick={handleClick}
       aria-label={minion.data.name}
     >

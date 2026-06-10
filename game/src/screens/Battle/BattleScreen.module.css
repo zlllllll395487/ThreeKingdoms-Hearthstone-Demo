@@ -738,6 +738,45 @@
    结束回合按钮（右中悬浮）
    ============================================ */
 
+/* §19.7-2 回合记录按钮 · endTurn 左侧 · 同高度 */
+.turnLogFixed {
+  position: absolute;
+  top: 905px;        /* 与 endTurn 中心对齐 (870 + 30 让小图标垂直居中) */
+  right: 170px;      /* endTurn right:22 + width 130 + gap 18 = 170 */
+  z-index: 8;
+  width: 140px;
+  height: 60px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+  transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.turnLogFixed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.turnLogFixed span {
+  font-family: var(--font-kai);
+  font-size: 18px;
+  color: #ffe18a;
+  letter-spacing: 4px;
+}
+
+.turnLogFixed:hover {
+  transform: scale(1.06);
+  filter: drop-shadow(0 0 16px rgba(255, 200, 80, 0.95));
+}
+
+.turnLogFixed:active {
+  transform: scale(0.95);
+}
+
 .endTurnFixed {
   position: absolute;
   top: 870px;

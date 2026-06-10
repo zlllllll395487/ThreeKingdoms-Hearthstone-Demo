@@ -12,6 +12,7 @@ import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
 import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
 import { FxSprite } from '@/components/FxSprite/FxSprite'
 import { useFxStore, getFxFrameCount } from '@/store/fxStore'
+import { TurnLogModal } from '@/components/TurnLogModal/TurnLogModal'
 import styles from './BattleScreen.module.css'
 
 const BOARD_MAX = 7
@@ -48,41 +49,13 @@ export function BattleScreen() {
     endGame,
   } = useGameStore()
 
-  // §19.6 Phase C · FX 队列
+  // §19.6 Phase C · FX 队列（基础设施 · 自动触发先关）
+  // 旧版按 log.kind 自动触发被回退：AI 回合时每条 damage/heal log 都炸 sprite
+  // 糊在「对手思考中」hint 上面 + 误触发于回合结束。
+  // 留 Phase E 在引擎层直接 emit fx intent + 锚点位置，再开。
   const fxEvents = useFxStore((s) => s.events)
-  const fxTrigger = useFxStore((s) => s.trigger)
   const fxRemove = useFxStore((s) => s.remove)
   const fxClear = useFxStore((s) => s.clear)
-
-  // §19.6 Phase C · 监听 log 增量 → 触发对应 FX
-  // 这是 Phase C 的临时桥接，Phase E 改成引擎直接 emit fx intent
-  const prevLogLenRef = useRef(0)
-  useEffect(() => {
-    if (!log) return
-    if (log.length <= prevLogLenRef.current) {
-      prevLogLenRef.current = log.length
-      return
-    }
-    const newEntries = log.slice(prevLogLenRef.current)
-    prevLogLenRef.current = log.length
-    for (const entry of newEntries) {
-      // 治疗 → 治疗光柱
-      if (entry.kind === 'heal') {
-        fxTrigger('heal_pillar', { size: 320 })
-      }
-      // 单体伤害 → 火球（无法判断 AoE，统一用 fire_projectile）
-      // AoE 伤害的判断需要引擎层面信息，留到 Phase E
-      else if (entry.kind === 'damage') {
-        // 仅在 spell / battlecry 上下文触发火球（攻击交换的伤害走 Phase B 武器斩击）
-        // 这里简化：每条 damage log 都触发火球
-        fxTrigger('fire_projectile', { size: 240 })
-      }
-      // 抽牌 → 抽牌发光
-      else if (entry.kind === 'draw') {
-        fxTrigger('draw_glow', { size: 220 })
-      }
-    }
-  }, [log, fxTrigger])
 
   // 离开战场清空 fx 队列
   useEffect(() => {
@@ -107,6 +80,8 @@ export function BattleScreen() {
 
   // v5.5 UX: 单击选中 / 双击详情（替代长按）
   const [detailViewCard, setDetailViewCard] = useState<CardInstance | null>(null)
+  // §19.7-2 回合记录弹窗
+  const [turnLogOpen, setTurnLogOpen] = useState(false)
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastClickedCardRef = useRef<string | null>(null)
 
@@ -169,6 +144,7 @@ export function BattleScreen() {
   const manaFullUrl = getUiAssetUrl('mana_full.png')
   const manaEmptyUrl = getUiAssetUrl('mana_empty.png')
   const btnEndTurnUrl = getUiAssetUrl('btn_end_turn.png')
+  const btnTurnLogUrl = getUiAssetUrl('btn_turn_log.png')
   const btnBackUrl = getUiAssetUrl('btn_back.png')
 
   const isPlayerTurn = state.activePlayer === 'player' && state.phase === 'main'
@@ -493,6 +469,22 @@ export function BattleScreen() {
         <span>{state.player.deck.length}</span>
       </div>
 
+      {/* §19.7-2 回合记录按钮（endTurn 左侧）*/}
+      <button
+        className={styles.turnLogFixed}
+        onClick={(e) => {
+          e.stopPropagation()
+          setTurnLogOpen(true)
+        }}
+        aria-label="查看回合记录"
+      >
+        {btnTurnLogUrl ? (
+          <img src={btnTurnLogUrl} alt="回合记录" />
+        ) : (
+          <span>回合记录</span>
+        )}
+      </button>
+
       {/* ============ 结束回合按钮（右中独立悬浮） ============ */}
       <button
         className={styles.endTurnFixed}
@@ -553,6 +545,13 @@ export function BattleScreen() {
       {hasPendingSpellTarget && (
         <div className={styles.targetHint}>请选择目标（点击敌方武将）</div>
       )}
+
+      {/* §19.7-2 回合记录弹窗 · 全屏 modal */}
+      <TurnLogModal
+        open={turnLogOpen}
+        onClose={() => setTurnLogOpen(false)}
+        log={log}
+      />
 
       {/* §19.6 Phase C · FX 序列帧覆盖层（fixed 定位，覆盖全屏，不挡交互）*/}
       {fxEvents.map((e) => (

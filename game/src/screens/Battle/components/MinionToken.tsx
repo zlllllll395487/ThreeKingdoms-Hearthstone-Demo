@@ -5,6 +5,8 @@
 import { useRef } from 'react'
 import type { CardInstance } from '@/engine/types'
 import { getPortraitUrl, getUiAssetUrl } from '@/data/assetLoader'
+import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
+import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
 import styles from './MinionToken.module.css'
 
 const DOUBLE_CLICK_MS = 300
@@ -44,6 +46,10 @@ export function MinionToken({ minion, selected, targetable, canAttack, dimmed, o
 
   const damaged = minion.currentHealth < minion.maxHealth
 
+  // §19.6 Phase A · HP 变化检测 → 浮起数字 + 受击震动
+  const hpDelta = useHpDelta(minion.currentHealth)
+  const isHit = useHitShake(minion.currentHealth)
+
   // v5.5 双击检测：300ms 内点 2 次 = 详情；否则单击 = 攻击者选中 / 目标
   const clickTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const handleClick = (e: React.MouseEvent) => {
@@ -62,11 +68,19 @@ export function MinionToken({ minion, selected, targetable, canAttack, dimmed, o
 
   return (
     <button
-      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''}`}
+      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''} ${isHit ? styles.hitShake : ''}`}
       data-rarity={minion.data.rarity}
       onClick={handleClick}
       aria-label={minion.data.name}
     >
+      {/* §19.6 浮起数字 */}
+      {hpDelta && (
+        <FloatingNumber
+          key={hpDelta.id}
+          kind={hpDelta.kind}
+          value={hpDelta.value}
+        />
+      )}
       <div className={styles.portraitWrap}>
         {portraitUrl ? (
           <img src={portraitUrl} alt={minion.data.name} className={styles.portrait} />

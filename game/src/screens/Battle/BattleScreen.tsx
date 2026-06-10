@@ -8,6 +8,8 @@ import type { CardInstance, PlayerSide } from '@/engine/types'
 import type { TargetRef } from '@/engine'
 import { MinionToken } from './components/MinionToken'
 import { HeroWeaponSlot } from '@/components/HeroWeaponSlot/HeroWeaponSlot'
+import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
+import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
 import styles from './BattleScreen.module.css'
 
 const BOARD_MAX = 7
@@ -635,15 +637,26 @@ function HeroDisplay({
 }: HeroProps) {
   const damaged = health < maxHealth
   const hpBaseUrl = getUiAssetUrl('ui_hp_base.png')
+  // §19.6 Phase A · HP 变化检测 → 浮起数字 + 受击震动
+  const hpDelta = useHpDelta(health)
+  const isHit = useHitShake(health)
   return (
     <button
-      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''}`}
+      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''}`}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()
       }}
       aria-label={name}
     >
+      {/* §19.6 浮起数字 · -X 红 / +X 绿 */}
+      {hpDelta && (
+        <FloatingNumber
+          key={hpDelta.id}
+          kind={hpDelta.kind}
+          value={hpDelta.value}
+        />
+      )}
       <div className={styles.heroPortraitWrap}>
         {portraitUrl ? (
           <img src={portraitUrl} alt={name} className={styles.heroPortrait} />

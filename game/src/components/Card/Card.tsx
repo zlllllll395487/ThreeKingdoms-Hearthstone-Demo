@@ -50,7 +50,107 @@ const KEYWORD_BADGES: Record<string, string> = {
 }
 
 // ============================================
-// 卡牌组件
+// CardBody · 纯展示子组件（无 zoom 状态）
+// 同时被默认小卡 + zoom modal detail 模式复用，
+// 保证「详情大图」也有文字 + 数字 badge
+// ============================================
+
+interface CardBodyProps {
+  card: CardData
+  scale: number
+  onClick?: () => void
+  onVisualClick?: (e: React.MouseEvent) => void
+}
+
+function CardBody({ card, scale, onClick, onVisualClick }: CardBodyProps) {
+  const cardVisualFile = getCardVisualFile(card.portrait)
+  const cardVisualUrl = cardVisualFile ? getUiAssetUrl(cardVisualFile) : null
+
+  const costUrl = getUiAssetUrl(getNumberImage('cost', card.cost))
+  const attackUrl =
+    card.attack !== undefined
+      ? getUiAssetUrl(getNumberImage('attack', card.attack))
+      : null
+  const healthValue = card.health ?? card.durability
+  const healthUrl =
+    healthValue !== undefined
+      ? getUiAssetUrl(getNumberImage('health', healthValue))
+      : null
+
+  return (
+    <div
+      className={styles.card}
+      data-rarity={card.rarity}
+      data-type={card.type}
+      style={{ transform: `scale(${scale})` }}
+      onClick={onClick}
+    >
+      {/* cardvisual 烫入（立绘 + 边框 + 空名带 + 空 parchment）*/}
+      <div className={styles.cardVisual} onClick={onVisualClick}>
+        {cardVisualUrl ? (
+          <img
+            src={cardVisualUrl}
+            alt={card.name}
+            className={styles.cardVisualImg}
+            loading="lazy"
+          />
+        ) : (
+          <div className={styles.cardVisualPlaceholder}>
+            <span>{card.name}</span>
+          </div>
+        )}
+      </div>
+
+      {/* 描述文字（叠在边框底部 parchment 上） */}
+      <div className={styles.descArea}>
+        {card.description && (
+          <p className={styles.descText}>{card.description}</p>
+        )}
+        {card.flavor && <p className={styles.flavorText}>「{card.flavor}」</p>}
+      </div>
+
+      {/* 名字（叠在边框内置名带上） */}
+      <div className={styles.nameBanner}>
+        <span className={styles.nameText}>{card.name}</span>
+      </div>
+
+      {/* 关键词图标（描述区上方一行） */}
+      {card.keywords && card.keywords.length > 0 && (
+        <div className={styles.keywordRow}>
+          {card.keywords
+            .filter((kw) => KEYWORD_BADGES[kw])
+            .map((kw) => {
+              const url = getUiAssetUrl(KEYWORD_BADGES[kw])
+              return url ? (
+                <img
+                  key={kw}
+                  src={url}
+                  alt={kw}
+                  className={styles.keywordIcon}
+                />
+              ) : null
+            })}
+        </div>
+      )}
+
+      {/* 费用宝石（左上） */}
+      {costUrl && <img src={costUrl} alt="" className={styles.costGem} />}
+
+      {/* 攻击力球（左下，仅武将/兵器） */}
+      {attackUrl && (
+        <img src={attackUrl} alt="" className={styles.attackOrb} />
+      )}
+
+      {/* 血量/耐久球（右下，仅武将/兵器） */}
+      {healthUrl && (
+        <img src={healthUrl} alt="" className={styles.healthOrb} />
+      )}
+    </div>
+  )
+}
+
+// ============================================
+// 卡牌组件 · 主体 + zoom modal 切换
 // ============================================
 
 type ZoomMode = 'closed' | 'detail' | 'portrait'
@@ -61,22 +161,8 @@ export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps
   const cardVisualFile = getCardVisualFile(card.portrait)
   const cardVisualUrl = cardVisualFile ? getUiAssetUrl(cardVisualFile) : null
 
-  // 数值球
-  const costUrl = getUiAssetUrl(getNumberImage('cost', card.cost))
-  const attackUrl =
-    card.attack !== undefined
-      ? getUiAssetUrl(getNumberImage('attack', card.attack))
-      : null
-  // 兵器用 durability 顶替 health
-  const healthValue = card.health ?? card.durability
-  const healthUrl =
-    healthValue !== undefined
-      ? getUiAssetUrl(getNumberImage('health', healthValue))
-      : null
-
   const handleVisualClick = (e: React.MouseEvent) => {
     if (!enableZoom) return
-    // 第一次点开默认进入「详情」模式（cardvisual 放大）
     if (!cardVisualUrl && !portraitUrl) return
     e.stopPropagation()
     setZoomMode('detail')
@@ -91,83 +177,19 @@ export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps
   }
 
   const closeZoom = () => setZoomMode('closed')
-  const zoomImageUrl =
-    zoomMode === 'portrait' ? portraitUrl : cardVisualUrl ?? portraitUrl
 
   return (
     <>
-      <div
-        className={styles.card}
-        data-rarity={card.rarity}
-        data-type={card.type}
-        style={{ transform: `scale(${scale})` }}
+      {/* 默认小卡 */}
+      <CardBody
+        card={card}
+        scale={scale}
         onClick={onClick}
-      >
-        {/* 卡牌完整图（立绘 + 边框 + 空名带 + 空 parchment 一体烤入）· 点击放大原版立绘 */}
-        <div className={styles.cardVisual} onClick={handleVisualClick}>
-          {cardVisualUrl ? (
-            <img
-              src={cardVisualUrl}
-              alt={card.name}
-              className={styles.cardVisualImg}
-              loading="lazy"
-            />
-          ) : (
-            <div className={styles.cardVisualPlaceholder}>
-              <span>{card.name}</span>
-            </div>
-          )}
-        </div>
+        onVisualClick={handleVisualClick}
+      />
 
-        {/* 描述文字（在边框底部 parchment 上） */}
-        <div className={styles.descArea}>
-          {card.description && (
-            <p className={styles.descText}>{card.description}</p>
-          )}
-          {card.flavor && <p className={styles.flavorText}>「{card.flavor}」</p>}
-        </div>
-
-        {/* 名字（叠在边框内置名带上） */}
-        <div className={styles.nameBanner}>
-          <span className={styles.nameText}>{card.name}</span>
-        </div>
-
-        {/* 关键词图标（描述区上方一行） */}
-        {card.keywords && card.keywords.length > 0 && (
-          <div className={styles.keywordRow}>
-            {card.keywords
-              .filter((kw) => KEYWORD_BADGES[kw])
-              .map((kw) => {
-                const url = getUiAssetUrl(KEYWORD_BADGES[kw])
-                return url ? (
-                  <img
-                    key={kw}
-                    src={url}
-                    alt={kw}
-                    className={styles.keywordIcon}
-                  />
-                ) : null
-              })}
-          </div>
-        )}
-
-        {/* 费用宝石（左上） */}
-        {costUrl && <img src={costUrl} alt="" className={styles.costGem} />}
-
-        {/* 攻击力球（左下，仅武将/兵器） */}
-        {attackUrl && (
-          <img src={attackUrl} alt="" className={styles.attackOrb} />
-        )}
-
-        {/* 血量/耐久球（右下，仅武将/兵器） */}
-        {healthUrl && (
-          <img src={healthUrl} alt="" className={styles.healthOrb} />
-        )}
-      </div>
-
-      {/* 详情 / 立绘 切换弹窗 · 渲染到 document.body 绕过父级 canvas 的 transform: scale */}
+      {/* 详情 / 立绘 切换弹窗 */}
       {zoomMode !== 'closed' &&
-        zoomImageUrl &&
         createPortal(
           <div
             className={styles.zoomOverlay}
@@ -175,16 +197,25 @@ export function Card({ card, scale = 1, onClick, enableZoom = false }: CardProps
             role="dialog"
             aria-label={`${card.name} ${zoomMode === 'detail' ? '详情' : '立绘'}`}
           >
-            <img
-              src={zoomImageUrl}
-              alt={card.name}
-              className={
-                zoomMode === 'portrait'
-                  ? styles.zoomImage
-                  : styles.zoomImageDetail
-              }
-              onClick={handleZoomImageClick}
-            />
+            {zoomMode === 'detail' ? (
+              // detail 模式：渲染完整 CardBody 在 scale 2.5x，保证文字 + 名带 + 描述都显示
+              <div
+                className={styles.zoomCardWrap}
+                onClick={handleZoomImageClick}
+              >
+                <CardBody card={card} scale={1} />
+              </div>
+            ) : (
+              // portrait 模式：纯立绘大图
+              portraitUrl && (
+                <img
+                  src={portraitUrl}
+                  alt={card.name}
+                  className={styles.zoomImage}
+                  onClick={handleZoomImageClick}
+                />
+              )
+            )}
             <div className={styles.zoomCaption}>{card.name}</div>
             <div className={styles.zoomHint}>
               {cardVisualUrl && portraitUrl

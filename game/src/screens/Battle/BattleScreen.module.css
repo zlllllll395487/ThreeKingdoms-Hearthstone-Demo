@@ -445,22 +445,6 @@
   100% { transform: scale(1); }
 }
 
-.heroAttack {
-  position: absolute;
-  bottom: -4px;
-  left: -12px;
-  background: linear-gradient(180deg, #5a3a18, #2e1e08);
-  color: #fff5d8;
-  padding: 4px 11px;
-  border-radius: 14px;
-  font-family: var(--font-display);
-  font-weight: bold;
-  font-size: 17px;
-  border: 1.5px solid rgba(255, 220, 100, 0.7);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
-  z-index: 2;
-}
-
 .heroArmor {
   position: absolute;
   top: -4px;
@@ -610,28 +594,71 @@
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
 }
 
-/* 紧凑模式（玩家 mana 用，左下对称 endTurn）*/
+/* 紧凑模式（玩家 mana）· 用新切的 ui_mana_slot.png 横条 bar 替代旧 130×130 方块
+   - 资源原图 1072×270 (~4:1)，缩到 380×95 适配左下位
+   - 左侧绿圆底座写当前 mana 数字
+   - 右侧长槽横排蓝水晶（用 mana_full/mana_empty 复用）·已用变暗 */
 .manaDisplayCompact {
-  width: 130px;
-  height: 130px;
+  width: 380px;
+  height: 95px;
+  position: relative;
+  display: block;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+}
+
+.manaDisplayCompact .manaCounter {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 70px;
+  height: 70px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 12px 10px;
-  box-sizing: border-box;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(60, 40, 28, 0.85) 0%,
-    rgba(20, 12, 8, 0.95) 100%
-  );
-  border: 2px solid rgba(212, 160, 23, 0.55);
-  border-radius: 12px;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 220, 160, 0.18),
-    0 0 12px rgba(70, 140, 240, 0.3);
+  pointer-events: none;
+}
+
+.manaDisplayCompact .manaCounter span {
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 38px;
+  color: #fff5d8;
+  letter-spacing: 0;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(255, 200, 100, 0.55);
+  white-space: nowrap;
+  margin-top: -4px; /* 视觉居中微调（绿圈中心略偏上）*/
+}
+
+.manaDisplayCompact .manaCrystals {
+  position: absolute;
+  left: 102px;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 52px;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+
+.manaDisplayCompact .manaCrystal {
+  height: 48px;
+  width: auto;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.manaDisplayCompact .manaCrystalFallback {
+  width: 22px;
+  height: 42px;
 }
 
 .manaCounter {
@@ -651,28 +678,11 @@
   white-space: nowrap;
 }
 
-/* 紧凑模式下 counter 字号放大 */
-.manaDisplayCompact .manaCounter span {
-  font-size: 26px;
-  letter-spacing: 3px;
-}
-
 .manaCrystals {
   display: flex;
   gap: 1px;
   align-items: center;
   flex-shrink: 0;
-}
-
-/* 紧凑模式下水晶 2 行 5 列 grid */
-.manaDisplayCompact .manaCrystals {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-auto-rows: auto;
-  gap: 2px;
-  align-items: center;
-  justify-items: center;
-  width: 100%;
 }
 
 .manaCrystal {
@@ -681,29 +691,21 @@
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
 }
 
-/* 紧凑模式下水晶图缩小 */
-.manaDisplayCompact .manaCrystal {
-  height: 18px;
-}
-
 .manaCrystalFallback {
   width: 14px;
   height: 28px;
   background: linear-gradient(180deg, #1e5fc8, #0a2860);
   clip-path: polygon(50% 0, 100% 35%, 100% 65%, 50% 100%, 0 65%, 0 35%);
 }
-.manaDisplayCompact .manaCrystalFallback {
-  width: 10px;
-  height: 18px;
-}
 .manaCrystalFallback[data-full='false'] {
   background: linear-gradient(180deg, #3a3a42, #1c1c20);
 }
 
-/* §19.2 玩家 mana 移到左侧与 endTurn 对称（top 870, left 22） */
+/* §19.2 玩家 mana 左侧横条 bar · 中心与 endTurn 中心 y=935 对齐
+   bar 高 95，故 top = 935 - 47 = 888 */
 .playerManaBox {
   position: absolute;
-  top: 870px;
+  top: 888px;
   left: 22px;
   z-index: 5;
 }

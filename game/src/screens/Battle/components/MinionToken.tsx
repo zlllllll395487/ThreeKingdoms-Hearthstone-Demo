@@ -19,6 +19,8 @@ interface Props {
   targetable?: boolean
   canAttack?: boolean
   dimmed?: boolean
+  /** Phase F-3 战吼启动金光环 600ms */
+  battlecry?: boolean
   onClick?: () => void
   /** v5.5 双击场上 minion 查看完整卡牌详情 */
   onDoubleClick?: () => void
@@ -41,7 +43,7 @@ const KW_ICON: Record<string, string> = {
   freeze: 'kw_freeze.png',
 }
 
-export function MinionToken({ minion, selected, targetable, canAttack, dimmed, onClick, onDoubleClick }: Props) {
+export function MinionToken({ minion, selected, targetable, canAttack, dimmed, battlecry, onClick, onDoubleClick }: Props) {
   const portraitUrl = getPortraitUrl(minion.data.portrait)
   const attackUrl = getUiAssetUrl(getNumberImage('attack', minion.currentAttack))
   const healthUrl = getUiAssetUrl(getNumberImage('health', minion.currentHealth))
@@ -83,7 +85,7 @@ export function MinionToken({ minion, selected, targetable, canAttack, dimmed, o
   return (
     <button
       ref={tokenRef}
-      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''} ${isHit ? styles.hitShake : ''} ${isCharging ? styles.charging : ''}`}
+      className={`${styles.token} ${selected ? styles.selected : ''} ${targetable ? styles.targetable : ''} ${canAttack ? styles.canAttack : ''} ${dimmed ? styles.dimmed : ''} ${isHit ? styles.hitShake : ''} ${isCharging ? styles.charging : ''} ${battlecry ? styles.battlecryGlow : ''}`}
       data-rarity={minion.data.rarity}
       data-charge-side={chargeSide}
       onClick={handleClick}

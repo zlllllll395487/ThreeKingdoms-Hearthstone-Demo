@@ -9,13 +9,31 @@
   height: 150px;
   transform: translateY(-50%);
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
-  animation: weaponSlotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Phase F-2 · 装备落下动效 · 从上方降落 + 旋转 + 缩放 + 金光闪 700ms */
+  animation: weaponEquipDrop 700ms cubic-bezier(0.32, 1.6, 0.4, 1);
 }
 
-@keyframes weaponSlotPop {
-  0%   { opacity: 0; transform: translateY(-50%) scale(0.7); }
-  60%  { opacity: 1; transform: translateY(-50%) scale(1.08); }
-  100% { opacity: 1; transform: translateY(-50%) scale(1); }
+@keyframes weaponEquipDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-50% - 220px)) scale(0.45) rotate(-55deg);
+    filter: brightness(1.8) drop-shadow(0 0 28px rgba(255, 220, 120, 1));
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(calc(-50% + 12px)) scale(1.18) rotate(8deg);
+    filter: brightness(1.5) drop-shadow(0 0 24px rgba(255, 220, 120, 0.95));
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(calc(-50% - 6px)) scale(1.05) rotate(-3deg);
+    filter: brightness(1.25) drop-shadow(0 0 18px rgba(255, 220, 120, 0.7));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1) rotate(0deg);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+  }
 }
 
 /* 底层：立绘 · 椭圆 clip + cover 填满 */
@@ -42,56 +60,42 @@
   z-index: 2;
 }
 
-/* 左下攻击 · 红橙渐变描金边 */
-.attack {
+/* 攻击力 · 左下蓝色费用宝石（复用卡牌 cost gem 已切好的 1-10） */
+.attackGem {
   position: absolute;
-  bottom: 2px;
-  left: -8px;
-  width: 32px;
-  height: 32px;
-  background: radial-gradient(
-    ellipse at center,
-    #d4a017 0%,
-    #b8860b 60%,
-    #6e4f00 100%
-  );
-  color: #fff5d8;
-  font-family: var(--font-display);
-  font-weight: bold;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5px solid rgba(255, 220, 100, 0.85);
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  bottom: -6px;
+  left: -10px;
+  width: 46px;
+  height: 46px;
   z-index: 3;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
+  pointer-events: none;
+  object-fit: contain;
 }
 
-/* 右下耐久 · 绿色描金 */
-.durability {
+/* 耐久 · 右下复用主公 HP 底座 + React 渲染动态数字 */
+.durabilityBadge {
   position: absolute;
-  bottom: 2px;
-  right: -8px;
-  width: 32px;
-  height: 32px;
-  background: radial-gradient(
-    ellipse at center,
-    #3d8b5c 0%,
-    #1e4a30 60%,
-    #0a2418 100%
-  );
-  color: #fff5d8;
-  font-family: var(--font-display);
-  font-weight: bold;
-  font-size: 18px;
+  bottom: -6px;
+  right: -10px;
+  width: 46px;
+  height: 46px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid rgba(120, 220, 130, 0.85);
-  border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 20px;
+  color: #fff5d8;
+  text-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.95),
+    0 0 6px rgba(0, 0, 0, 0.6);
   z-index: 3;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+  pointer-events: none;
+}
+.durabilityBadge span {
+  margin-top: -2px; /* 视觉居中微调（底座中心偏下）*/
 }

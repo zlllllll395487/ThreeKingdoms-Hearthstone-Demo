@@ -131,6 +131,32 @@
   100% { transform: translateY(0) scale(1); filter: brightness(1); }
 }
 
+/* Phase F-3 · 战吼启动金光环：新入场带 battlecry 的 minion 边框闪 600ms */
+.battlecryGlow {
+  animation: battlecryGlow 600ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+  z-index: 90;
+}
+@keyframes battlecryGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 220, 120, 0), 0 0 0 0 rgba(255, 240, 180, 0);
+    filter: brightness(1) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55));
+  }
+  25% {
+    box-shadow: 0 0 24px 8px rgba(255, 220, 120, 0.95),
+                0 0 0 3px rgba(255, 240, 180, 0.95);
+    filter: brightness(1.45) drop-shadow(0 0 22px rgba(255, 220, 120, 1));
+  }
+  60% {
+    box-shadow: 0 0 36px 12px rgba(255, 220, 120, 0.85),
+                0 0 0 3px rgba(255, 240, 180, 0.85);
+    filter: brightness(1.35) drop-shadow(0 0 18px rgba(255, 220, 120, 0.85));
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 220, 120, 0), 0 0 0 0 rgba(255, 240, 180, 0);
+    filter: brightness(1) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55));
+  }
+}
+
 /* 嘲讽锁定：非 taunt 单位变灰不可点 */
 .dimmed {
   filter: brightness(0.45) saturate(0.4) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));

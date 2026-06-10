@@ -22,6 +22,12 @@ export function HeroWeaponSlot({ weapon }: Props) {
   const frameUrl = getUiAssetUrl('frame_weapon_slot.png')
   const att = weapon.currentAttack
   const dur = weapon.currentDurability ?? 0
+  // 攻击力：复用卡牌左上角的蓝色费用宝石（cost_X.png）· 1-10 烫好数字
+  const attackGemUrl = getUiAssetUrl(
+    `cost_${Math.max(1, Math.min(10, att))}.png`,
+  )
+  // 耐久：复用主公 HP 底座 + 动态文字
+  const hpBaseUrl = getUiAssetUrl('ui_hp_base.png')
 
   return (
     <div className={styles.slot} title={weapon.data.name}>
@@ -42,9 +48,22 @@ export function HeroWeaponSlot({ weapon }: Props) {
           className={styles.frame}
         />
       )}
-      {/* 数字：左下攻击 + 右下耐久 */}
-      <div className={styles.attack}>{att}</div>
-      <div className={styles.durability}>{dur}</div>
+      {/* 攻击力 · 左下蓝色费用宝石（复用 cost gem） */}
+      {attackGemUrl && (
+        <img
+          src={attackGemUrl}
+          alt=""
+          aria-hidden
+          className={styles.attackGem}
+        />
+      )}
+      {/* 耐久 · 右下主公 HP 底座 + 数字 */}
+      <div
+        className={styles.durabilityBadge}
+        style={hpBaseUrl ? { backgroundImage: `url(${hpBaseUrl})` } : undefined}
+      >
+        <span>{dur}</span>
+      </div>
     </div>
   )
 }

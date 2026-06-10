@@ -209,31 +209,34 @@
   border-radius: 16px;
 }
 
-/* CP2 出牌区高亮：选中 minion / 无目标 spell 时，我方 board 显示发光 drop zone */
+/* §19.6.9 CP2 出牌区高亮强化：金光涌动 + 强呼吸 */
 .boardZone[data-drop-zone='true'] {
   cursor: pointer;
   background: radial-gradient(
     ellipse at center,
-    rgba(255, 215, 100, 0.18) 0%,
-    rgba(255, 200, 80, 0.08) 60%,
-    transparent 100%
+    rgba(255, 215, 100, 0.32) 0%,
+    rgba(255, 200, 80, 0.16) 50%,
+    rgba(255, 180, 40, 0.06) 100%
   );
   box-shadow:
-    inset 0 0 0 2px rgba(255, 215, 100, 0.45),
-    inset 0 0 40px rgba(255, 215, 100, 0.22);
+    inset 0 0 0 3px rgba(255, 215, 100, 0.75),
+    inset 0 0 60px rgba(255, 215, 100, 0.42),
+    0 0 30px rgba(255, 215, 100, 0.3);
   animation: dropZonePulse 1.4s ease-in-out infinite;
 }
 
 @keyframes dropZonePulse {
   0%, 100% {
     box-shadow:
-      inset 0 0 0 2px rgba(255, 215, 100, 0.45),
-      inset 0 0 40px rgba(255, 215, 100, 0.22);
+      inset 0 0 0 3px rgba(255, 215, 100, 0.75),
+      inset 0 0 60px rgba(255, 215, 100, 0.42),
+      0 0 30px rgba(255, 215, 100, 0.3);
   }
   50% {
     box-shadow:
-      inset 0 0 0 3px rgba(255, 230, 140, 0.7),
-      inset 0 0 60px rgba(255, 215, 100, 0.4);
+      inset 0 0 0 5px rgba(255, 230, 140, 1),
+      inset 0 0 90px rgba(255, 215, 100, 0.7),
+      0 0 50px rgba(255, 215, 100, 0.6);
   }
 }
 
@@ -318,22 +321,39 @@
   }
 }
 
-/* 死亡淡出 minion */
+/* §19.6 死亡动画升级 · 震动 + 灰化 + 收缩消散 共 600ms */
 .dyingMinion {
   pointer-events: none;
-  animation: minionFadeOut 0.4s ease-out forwards;
+  animation: minionDeath 0.6s ease-out forwards;
 }
 
-@keyframes minionFadeOut {
+@keyframes minionDeath {
   0% {
     opacity: 1;
-    transform: scale(1);
-    filter: brightness(1);
+    transform: scale(1) rotate(0);
+    filter: brightness(1) grayscale(0);
+  }
+  15% {
+    transform: translate(-6px, 2px) rotate(-2deg);
+    filter: brightness(1.4) grayscale(0);
+  }
+  30% {
+    transform: translate(5px, -2px) rotate(2deg);
+    filter: brightness(1.2) grayscale(0.3);
+  }
+  45% {
+    transform: translate(-4px, 1px) rotate(-1deg) scale(0.95);
+    filter: brightness(1) grayscale(0.5);
+  }
+  70% {
+    opacity: 0.7;
+    transform: scale(0.8) rotate(8deg);
+    filter: brightness(0.6) grayscale(0.85);
   }
   100% {
     opacity: 0;
-    transform: scale(0.5) rotate(15deg);
-    filter: brightness(0.3) blur(2px);
+    transform: scale(0.4) rotate(20deg);
+    filter: brightness(0.2) grayscale(1) blur(3px);
   }
 }
 
@@ -472,20 +492,50 @@
   z-index: 2;
 }
 
+/* §19.6.9 选中 · 双层描边 + 强呼吸 */
 .heroSelected .heroPortraitWrap {
-  box-shadow: 0 0 0 3px rgba(255, 220, 100, 1), 0 0 24px rgba(255, 220, 100, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(255, 220, 100, 1),
+    0 0 0 6px rgba(255, 255, 255, 0.5),
+    0 0 32px rgba(255, 220, 100, 0.95);
+  animation: heroSelectedPulse 1.4s ease-in-out infinite;
 }
 
+@keyframes heroSelectedPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(255, 220, 100, 1),
+      0 0 0 6px rgba(255, 255, 255, 0.5),
+      0 0 24px rgba(255, 220, 100, 0.8);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(255, 220, 100, 1),
+      0 0 0 7px rgba(255, 255, 255, 0.7),
+      0 0 40px rgba(255, 220, 100, 1);
+  }
+}
+
+/* §19.6.9 可主动攻击 · 绿色呼吸强化 */
 .heroCanAttack {
   cursor: pointer;
 }
 .heroCanAttack .heroPortraitWrap {
-  box-shadow: 0 0 0 3px rgba(120, 220, 130, 0.85), 0 0 12px rgba(120, 220, 130, 0.5);
+  animation: heroCanAttackPulse 1.4s ease-in-out infinite;
+}
+@keyframes heroCanAttackPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(122, 219, 135, 0.95), 0 0 18px rgba(122, 219, 135, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(122, 219, 135, 1), 0 0 32px rgba(122, 219, 135, 0.95);
+  }
 }
 .heroCanAttack:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.04);
 }
 
+/* §19.6.9 可作为目标 · 红光强呼吸 */
 .heroTargetable {
   cursor: crosshair;
 }
@@ -495,11 +545,26 @@
 
 @keyframes heroTargetPulse {
   0%, 100% {
-    box-shadow: 0 0 0 3px rgba(220, 60, 50, 0.85), 0 0 12px rgba(220, 60, 50, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 80, 64, 0.9), 0 0 20px rgba(255, 80, 64, 0.75);
+    transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 0 4px rgba(255, 100, 80, 1), 0 0 24px rgba(255, 100, 80, 0.9);
+    box-shadow: 0 0 0 5px rgba(255, 100, 80, 1), 0 0 42px rgba(255, 100, 80, 1);
+    transform: scale(1.04);
   }
+}
+
+/* §19.6 主公受击震动 200ms */
+.heroHitShake {
+  animation: heroHitShake 220ms ease-in-out;
+}
+
+@keyframes heroHitShake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-7px, 2px) rotate(-2deg); }
+  40% { transform: translate(6px, -3px) rotate(2deg); }
+  60% { transform: translate(-5px, 1px) rotate(-1deg); }
+  80% { transform: translate(4px, -1px) rotate(1deg); }
 }
 
 /* ============================================

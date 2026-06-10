@@ -1,0 +1,50 @@
+/* §19.6 浮起数字 / 文字
+   200ms 上飘 + 600ms fade-out 共 800ms（plan §19.6.7 拍板）*/
+
+.float {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  font-family: var(--font-display);
+  font-weight: bold;
+  font-size: 32px;          /* plan §19.6.7 拍板：中字 32px */
+  letter-spacing: 2px;
+  pointer-events: none;
+  user-select: none;
+  animation: floatFadeOut 800ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(0, 0, 0, 0.85),
+    0 0 20px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
+@keyframes floatFadeOut {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0%) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -30%) scale(1.15);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -120%) scale(0.95);
+  }
+}
+
+/* 颜色分级 · plan §19.6.9 配色规范 */
+.kind_damage  { color: #ff5040; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 16px rgba(255,80,64,0.85); }
+.kind_heal    { color: #7adb87; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 16px rgba(122,219,135,0.85); }
+.kind_buff    { color: #ffd060; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 16px rgba(255,208,96,0.85); }
+.kind_debuff  { color: #b87aff; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 16px rgba(184,122,255,0.85); }
+.kind_freeze  { color: #5fb8ff; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 18px rgba(95,184,255,0.95); font-size: 26px; letter-spacing: 4px; }
+.kind_silence { color: #b87aff; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 18px rgba(184,122,255,0.95); font-size: 26px; letter-spacing: 4px; }
+.kind_status  { color: #ffe18a; text-shadow: 0 2px 6px rgba(0,0,0,0.95), 0 0 18px rgba(255,225,138,0.95); font-size: 28px; letter-spacing: 4px; }

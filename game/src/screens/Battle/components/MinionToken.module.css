@@ -50,26 +50,62 @@
   transform: translateY(-8px);
 }
 
-/* 可作为攻击目标：脉冲红光 */
+/* §19.6.9 可作为攻击目标：强化脉冲红光 + 呼吸更明显 */
 .targetable {
   cursor: crosshair;
   animation: targetPulse 1.2s ease-in-out infinite;
 }
 
 @keyframes targetPulse {
-  0%, 100% { box-shadow: 0 0 12px rgba(220, 60, 50, 0.6); }
-  50% { box-shadow: 0 0 22px rgba(255, 100, 80, 0.95); }
+  0%, 100% {
+    box-shadow: 0 0 18px rgba(255, 80, 64, 0.75),
+                0 0 0 2px rgba(255, 80, 64, 0.5);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(255, 100, 80, 1),
+                0 0 0 3px rgba(255, 100, 80, 0.95);
+    transform: scale(1.04);
+  }
 }
 
-/* 可主动攻击：绿色暗示 */
+/* §19.6.9 可主动攻击：绿色呼吸暗示更显眼 */
 .canAttack {
   cursor: pointer;
-  border-color: rgba(120, 220, 130, 0.85);
-  box-shadow: 0 0 10px rgba(120, 220, 130, 0.45);
+  border-color: rgba(120, 220, 130, 1);
+  animation: canAttackPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes canAttackPulse {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(122, 219, 135, 0.6),
+                0 0 0 2px rgba(122, 219, 135, 0.45);
+    transform: translateY(0);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(122, 219, 135, 0.95),
+                0 0 0 3px rgba(122, 219, 135, 0.85);
+    transform: translateY(-3px);
+  }
 }
 
 .canAttack:hover {
-  transform: translateY(-4px) scale(1.04);
+  animation: none;
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 0 32px rgba(122, 219, 135, 1);
+}
+
+/* §19.6 受击震动 200ms */
+.hitShake {
+  animation: hitShake 200ms ease-in-out;
+}
+
+@keyframes hitShake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-6px, 2px) rotate(-2deg); }
+  40% { transform: translate(5px, -2px) rotate(2deg); }
+  60% { transform: translate(-4px, 1px) rotate(-1deg); }
+  80% { transform: translate(3px, -1px) rotate(1deg); }
 }
 
 /* 嘲讽锁定：非 taunt 单位变灰不可点 */

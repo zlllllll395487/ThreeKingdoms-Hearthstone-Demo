@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { getFxFrame } from '@/data/assetLoader'
 import styles from './FxSprite.module.css'
 
@@ -21,6 +22,8 @@ interface Props {
   anchor?: 'center' | 'targetRect' | { x: number; y: number }
   /** 像素尺寸 · 默认 200 */
   size?: number
+  /** 自定义帧序列 · 例如 [1,2,3,4,3,2,1] ping-pong；不传则用 1..totalFrames 线性 */
+  frames?: number[]
   /** 播完触发 */
   onComplete?: () => void
 }
@@ -31,21 +34,23 @@ export function FxSprite({
   durationMs = 1000,
   anchor = 'targetRect',
   size = 200,
+  frames,
   onComplete,
 }: Props) {
-  const [frame, setFrame] = useState(1)
+  const [frame, setFrame] = useState(frames ? frames[0] : 1)
 
   useEffect(() => {
-    const interval = durationMs / totalFrames
-    let cur = 1
+    const seq = frames ?? Array.from({ length: totalFrames }, (_, i) => i + 1)
+    const interval = durationMs / seq.length
+    let idx = 0
     const timer = setInterval(() => {
-      cur += 1
-      if (cur > totalFrames) {
+      idx += 1
+      if (idx >= seq.length) {
         clearInterval(timer)
         onComplete?.()
         return
       }
-      setFrame(cur)
+      setFrame(seq[idx])
     }, interval)
     return () => clearInterval(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -79,7 +84,7 @@ export function FxSprite({
     style.zIndex = 30
   }
 
-  return (
+  const img = (
     <img
       src={url}
       alt=""
@@ -88,4 +93,12 @@ export function FxSprite({
       style={style}
     />
   )
+
+  // §19.7.4 · canvas 用 transform: scale 居中适配，会导致子元素 position:fixed
+  // 失效降级为相对 canvas 定位（CSS containing block 规则）→ {x,y} viewport 坐标错位。
+  // center / {x,y} 模式 portal 到 body 逃出 transform 容器；targetRect 模式仍走原 absolute。
+  if (anchor === 'center' || typeof anchor === 'object') {
+    return createPortal(img, document.body)
+  }
+  return img
 }

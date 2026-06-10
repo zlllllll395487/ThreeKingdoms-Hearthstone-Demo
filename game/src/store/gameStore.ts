@@ -15,6 +15,9 @@ import type { LogEntry } from '@/engine/events'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
 import { getDeckByFaction } from '@/data/decks'
 import { takeAITurn } from '@/engine/ai'
+import { useFxStore } from '@/store/fxStore'
+import { getTargetCenter } from '@/utils/targetRegistry'
+import { getCanvasScale } from '@/utils/canvasScale'
 
 interface GameStore {
   engine: GameEngine | null
@@ -197,9 +200,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     // 路径 2：用选中的攻击者攻击目标
     if (selectedAttackerId) {
-      engine.attack('player', selectedAttackerId, target)
+      // §19.6 Phase B · 立即清选中态，攻击进入异步前冲流程
+      const attackerId = selectedAttackerId
       set({ selectedAttackerId: null })
-      get().syncState()
+      void doAnimatedAttack('player', attackerId, target)
       return
     }
   },
@@ -242,13 +246,18 @@ async function runAITurn() {
   // v5.5 节奏：每个 AI 动作之间 700ms（基础节拍）
   // takeAITurn 内会额外调 2 次 onAfterAction 表示「出牌→攻击阶段切换」(+300ms 节拍) + 「回合结束前」(+600ms 节拍)
   let actionCount = 0
-  await takeAITurn(engine, async () => {
-    store.syncState()
-    actionCount++
-    // 阶段切换 / 收尾的 onAfterAction 调用：判断是否是 attack/end 阶段切换
-    // 简化处理：让每次 onAfterAction 都是 700ms，不细分（v5.5 设计宪法允许）
-    await delay(700)
-  })
+  await takeAITurn(
+    engine,
+    async () => {
+      store.syncState()
+      actionCount++
+      // 阶段切换 / 收尾的 onAfterAction 调用：判断是否是 attack/end 阶段切换
+      // 简化处理：让每次 onAfterAction 都是 700ms，不细分（v5.5 设计宪法允许）
+      await delay(700)
+    },
+    // §19.6 Phase B · AI 攻击走带前冲动画的路径
+    (attackerId, target) => doAnimatedAttack('ai', attackerId, target),
+  )
 
   await delay(600) // v5.5 AI 回合结束前给玩家看一眼最终状态
   void actionCount
@@ -256,6 +265,55 @@ async function runAITurn() {
   engine.endTurn()
   useGameStore.setState({ aiThinking: false })
   useGameStore.getState().syncState()
+}
+
+/**
+ * §19.6 Phase B · 带前冲动画的攻击
+ *
+ * 流程：
+ *   1. 设 chargingAttacker（攻击者 CSS keyframe 朝目标方向冲）
+ *   2. 等 200ms（冲到顶点）
+ *   3. 触发 weapon_slash 火花 sprite 在目标位 + engine.attack（HP 立刻变化 → 浮起数字 + 受击震动）
+ *   4. 等 200ms（弹回）
+ *   5. 清 chargingAttacker
+ *
+ * 总时长 400ms · 与 useHpDelta / useHitShake 同步触发
+ */
+async function doAnimatedAttack(
+  side: 'player' | 'ai',
+  attackerId: string,
+  target: TargetRef,
+): Promise<boolean> {
+  const fx = useFxStore.getState()
+  fx.setCharging({ id: attackerId, side })
+  await delay(200)
+
+  // 触发命中火花在目标位（复用 weapon_slash sprite · plan §19.6 C 方案）
+  // §19.7.4 · sprite portal 到 body 已逃出 canvas transform → size 用 viewport 像素
+  // 220 是 canvas design 像素，乘 canvasScale 还原视觉比例
+  const targetId =
+    target.kind === 'hero' ? `hero_${target.side}` : target.instanceId
+  const center = getTargetCenter(targetId)
+  if (center) {
+    const canvasScale = getCanvasScale()
+    fx.trigger('weapon_slash', {
+      anchor: center,
+      size: 220 * canvasScale,
+      durationMs: 360,
+    })
+  }
+
+  const engine = useGameStore.getState().engine
+  if (!engine) {
+    fx.setCharging(null)
+    return false
+  }
+  const ok = engine.attack(side, attackerId, target)
+  useGameStore.getState().syncState()
+
+  await delay(200)
+  fx.setCharging(null)
+  return ok
 }
 
 function delay(ms: number): Promise<void> {

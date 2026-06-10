@@ -11,7 +11,9 @@ import { HeroWeaponSlot } from '@/components/HeroWeaponSlot/HeroWeaponSlot'
 import { FloatingNumber } from '@/components/FloatingNumber/FloatingNumber'
 import { useHpDelta, useHitShake } from '@/components/FloatingNumber/useHpDelta'
 import { FxSprite } from '@/components/FxSprite/FxSprite'
-import { useFxStore, getFxFrameCount } from '@/store/fxStore'
+import { useFxStore, getFxFrameCount, getFxFrameSequence } from '@/store/fxStore'
+import { registerTarget, unregisterTarget } from '@/utils/targetRegistry'
+import { getCanvasScale } from '@/utils/canvasScale'
 import { TurnLogModal } from '@/components/TurnLogModal/TurnLogModal'
 import styles from './BattleScreen.module.css'
 
@@ -111,6 +113,113 @@ export function BattleScreen() {
     ai: [],
   })
   const [dyingMinions, setDyingMinions] = useState<CardInstance[]>([])
+
+  // §19.7.5 · 计策/效果文字浮起：监听 log kind='effect' 新增 → 中央上方浮起 1500ms 自动消失
+  const [effectToasts, setEffectToasts] = useState<{ id: string; text: string }[]>([])
+  const lastLogIdxRef = useRef(0)
+  useEffect(() => {
+    if (log.length <= lastLogIdxRef.current) {
+      // log 被清空（新局开始）→ 重置
+      if (log.length === 0) {
+        lastLogIdxRef.current = 0
+        setEffectToasts([])
+      }
+      return
+    }
+    const newEntries = log.slice(lastLogIdxRef.current)
+    lastLogIdxRef.current = log.length
+    const effects = newEntries.filter((e) => e.kind === 'effect')
+    if (effects.length === 0) return
+    const toasts = effects.map((e, i) => ({
+      id: `toast_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+      text: e.text,
+    }))
+    setEffectToasts((prev) => [...prev, ...toasts].slice(-4)) // 最多同时显示 4 条
+    toasts.forEach((t) => {
+      window.setTimeout(() => {
+        setEffectToasts((prev) => prev.filter((p) => p.id !== t.id))
+      }, 1500)
+    })
+  }, [log])
+
+  // §19.7.3 · 新卡入场动画 + 抽牌 draw_glow sprite
+  const playerHandRef = useRef<HTMLDivElement>(null)
+  const aiHandRef = useRef<HTMLDivElement>(null)
+  const prevPlayerHandRef = useRef<Set<string>>(new Set())
+  const prevAiHandCountRef = useRef<number>(0)
+  const handInitRef = useRef<boolean>(false)
+  const [enteringIds, setEnteringIds] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    if (!state) return
+    const curPlayerIds = new Set(state.player.hand.map((c) => c.instanceId))
+    const curAiCount = state.ai.hand.length
+
+    // 首次同步不放炮（避免战斗开局所有起手牌一起入场，太吵）
+    if (!handInitRef.current) {
+      prevPlayerHandRef.current = curPlayerIds
+      prevAiHandCountRef.current = curAiCount
+      handInitRef.current = true
+      return
+    }
+
+    // 玩家：新增 instanceId → 入场动画 + draw_glow sprite
+    const newPlayerIds: string[] = []
+    curPlayerIds.forEach((id) => {
+      if (!prevPlayerHandRef.current.has(id)) newPlayerIds.push(id)
+    })
+    if (newPlayerIds.length > 0) {
+      setEnteringIds((prev) => {
+        const next = new Set(prev)
+        newPlayerIds.forEach((id) => next.add(id))
+        return next
+      })
+      window.setTimeout(() => {
+        setEnteringIds((prev) => {
+          const next = new Set(prev)
+          newPlayerIds.forEach((id) => next.delete(id))
+          return next
+        })
+      }, 500)
+
+      const handEl = playerHandRef.current
+      if (handEl) {
+        const rect = handEl.getBoundingClientRect()
+        const center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height * 0.35,
+        }
+        const s = getCanvasScale()
+        useFxStore.getState().trigger('draw_glow', {
+          anchor: center,
+          size: 280 * s,
+          durationMs: 500,
+        })
+      }
+    }
+
+    // AI：手牌数量增加 → 在 AI 手牌区中央放 draw_glow（小尺寸，盲触感知）
+    const aiDelta = curAiCount - prevAiHandCountRef.current
+    if (aiDelta > 0) {
+      const handEl = aiHandRef.current
+      if (handEl) {
+        const rect = handEl.getBoundingClientRect()
+        const center = {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2,
+        }
+        const s = getCanvasScale()
+        useFxStore.getState().trigger('draw_glow', {
+          anchor: center,
+          size: 220 * s,
+          durationMs: 500,
+        })
+      }
+    }
+
+    prevPlayerHandRef.current = curPlayerIds
+    prevAiHandCountRef.current = curAiCount
+  }, [state])
 
   useEffect(() => {
     if (!state) return
@@ -332,7 +441,7 @@ export function BattleScreen() {
       </button>
 
       {/* ============ AI 手牌（顶中小扇） ============ */}
-      <div className={styles.aiHandRow}>
+      <div className={styles.aiHandRow} ref={aiHandRef}>
         {state.ai.hand.map((_, i) => {
           const offset = i - (state.ai.hand.length - 1) / 2
           return (
@@ -352,6 +461,7 @@ export function BattleScreen() {
       {/* ============ AI 头像（顶中） ============ */}
       <div className={styles.aiHeroBox}>
         <HeroDisplay
+          side="ai"
           name={state.ai.hero.name}
           health={state.ai.hero.health}
           maxHealth={state.ai.hero.maxHealth}
@@ -438,6 +548,7 @@ export function BattleScreen() {
       {/* ============ 玩家头像（底中 · 选中 weapon 时点这里装备） ============ */}
       <div className={styles.playerHeroBox}>
         <HeroDisplay
+          side="player"
           name={state.player.hero.name}
           health={state.player.hero.health}
           maxHealth={state.player.hero.maxHealth}
@@ -509,7 +620,7 @@ export function BattleScreen() {
       </button>
 
       {/* ============ 玩家手牌（底部大扇） ============ */}
-      <div className={styles.playerHand}>
+      <div className={styles.playerHand} ref={playerHandRef}>
         {state.player.hand.map((card, i) => {
           const playable = isPlayerTurn && card.data.cost <= state.player.mana.current
           const selected = selectedCardId === card.instanceId
@@ -517,10 +628,11 @@ export function BattleScreen() {
           const offset = i - (total - 1) / 2
           const angle = offset * 12
           const lift = Math.abs(offset) * 8
+          const entering = enteringIds.has(card.instanceId)
           return (
             <div
               key={card.instanceId}
-              className={`${styles.handSlot} ${selected ? styles.handSlotSelected : ''} ${!playable ? styles.handSlotUnplayable : ''}`}
+              className={`${styles.handSlot} ${selected ? styles.handSlotSelected : ''} ${!playable ? styles.handSlotUnplayable : ''} ${entering ? styles.handCardEntering : ''}`}
               style={{
                 ['--rot' as string]: `${angle}deg`,
                 ['--lift' as string]: `${lift}px`,
@@ -559,12 +671,28 @@ export function BattleScreen() {
         log={log}
       />
 
+      {/* §19.7.5 · 计策/效果文字浮起 · 中央上方堆叠 */}
+      {effectToasts.length > 0 && (
+        <div className={styles.effectToastStack}>
+          {effectToasts.map((t, i) => (
+            <div
+              key={t.id}
+              className={styles.effectToast}
+              style={{ ['--toast-delay' as string]: `${i * 80}ms` }}
+            >
+              {t.text}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* §19.6 Phase C · FX 序列帧覆盖层（fixed 定位，覆盖全屏，不挡交互）*/}
       {fxEvents.map((e) => (
         <FxSprite
           key={e.id}
           name={e.kind}
           totalFrames={getFxFrameCount(e.kind)}
+          frames={getFxFrameSequence(e.kind)}
           durationMs={e.durationMs}
           size={e.size}
           anchor={e.anchor}
@@ -671,6 +799,7 @@ function BoardZone({
 // ============================================
 
 interface HeroProps {
+  side: PlayerSide
   name: string
   health: number
   maxHealth: number
@@ -685,6 +814,7 @@ interface HeroProps {
 }
 
 function HeroDisplay({
+  side,
   name,
   health,
   maxHealth,
@@ -702,9 +832,22 @@ function HeroDisplay({
   // §19.6 Phase A · HP 变化检测 → 浮起数字 + 受击震动
   const hpDelta = useHpDelta(health)
   const isHit = useHitShake(health)
+  // §19.6 Phase B · 攻击者前冲订阅
+  const heroId = side === 'player' ? 'hero_player' : 'hero_ai'
+  const charging = useFxStore((s) => s.chargingAttacker)
+  const isCharging = charging?.id === heroId
+  const chargeSide = isCharging ? charging!.side : undefined
+  // §19.6 Phase B · 注册 DOM ref 供 doAnimatedAttack 计算命中位置
+  const heroRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    registerTarget(heroId, heroRef.current)
+    return () => unregisterTarget(heroId)
+  }, [heroId])
   return (
     <button
-      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''}`}
+      ref={heroRef}
+      className={`${styles.heroDisplay} ${selected ? styles.heroSelected : ''} ${canAttack ? styles.heroCanAttack : ''} ${targetable ? styles.heroTargetable : ''} ${isHit ? styles.heroHitShake : ''} ${isCharging ? styles.heroCharging : ''}`}
+      data-charge-side={chargeSide}
       onClick={(e) => {
         e.stopPropagation()
         onClick?.()

@@ -77,25 +77,29 @@
    描述区 · 边框底部羊皮纸面板上
    ============================================ */
 
+/* §19.7.2 · 扩高 23%→28%、上移 bottom 11%→7%，加半透明羊皮纸 BG 遮罩 cardvisual 烫底字 */
 .descArea {
   position: absolute;
-  bottom: 11%;
+  bottom: 7%;
   left: 11%;
   right: 11%;
-  height: 23%;
+  height: 28%;
   text-align: center;
   z-index: 3;
-  padding: 4px 2px;
+  padding: 4px 4px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background: rgba(243, 226, 184, 0.86);
+  border-radius: 4px;
+  box-shadow: inset 0 0 8px rgba(95, 60, 30, 0.18);
 }
 
 .descText {
   font-family: var(--font-serif);
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
   color: var(--color-ink);
   margin: 0 0 3px;
   font-weight: 600;
@@ -105,10 +109,10 @@
 
 .flavorText {
   font-family: var(--font-display);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-ink-soft);
   margin: 2px 0 0;
-  line-height: 1.3;
+  line-height: 1.25;
   letter-spacing: 1px;
   -webkit-font-smoothing: antialiased;
 }

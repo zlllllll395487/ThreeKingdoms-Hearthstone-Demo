@@ -16,6 +16,12 @@ import type { CardInstance, PlayerSide, Keyword } from './types'
 export async function takeAITurn(
   engine: GameEngine,
   onAfterAction: () => Promise<void>,
+  /**
+   * §19.6 Phase B · 攻击执行器（可选）· 注入带前冲动画的攻击流程
+   * 没传则 fallback 直接 engine.attack 同步执行
+   * gameStore 注入版会做：setCharging → 200ms → weapon_slash sprite → engine.attack → syncState → 200ms → clearCharging
+   */
+  performAttack?: (attackerId: string, target: TargetRef) => Promise<boolean>,
 ): Promise<void> {
   const side: PlayerSide = 'ai'
 
@@ -65,7 +71,9 @@ export async function takeAITurn(
     const attacker = attackers[0]
     const target = chooseAttackTarget(engine, attacker, side)
     if (!target) break
-    const ok = engine.attack(side, attacker.id, target)
+    const ok = performAttack
+      ? await performAttack(attacker.id, target)
+      : engine.attack(side, attacker.id, target)
     if (!ok) break
     await onAfterAction()
     if ((engine.state.phase as string) === 'ended') return

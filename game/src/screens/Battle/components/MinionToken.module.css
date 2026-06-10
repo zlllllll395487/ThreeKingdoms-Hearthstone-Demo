@@ -108,6 +108,29 @@
   80% { transform: translate(3px, -1px) rotate(1deg); }
 }
 
+/* §19.6 Phase B · 攻击者前冲：朝目标方向 200ms 冲出 + 200ms 弹回（含轻微缩放+发光）*/
+.charging {
+  z-index: 100;
+}
+.charging[data-charge-side='player'] {
+  animation: minionChargeUp 400ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+.charging[data-charge-side='ai'] {
+  animation: minionChargeDown 400ms cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+@keyframes minionChargeUp {
+  0%   { transform: translateY(0) scale(1); filter: brightness(1); }
+  45%  { transform: translateY(-170px) scale(1.14); filter: brightness(1.35) drop-shadow(0 0 16px rgba(255, 220, 120, 0.9)); }
+  55%  { transform: translateY(-180px) scale(1.15); filter: brightness(1.4) drop-shadow(0 0 20px rgba(255, 220, 120, 1)); }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+@keyframes minionChargeDown {
+  0%   { transform: translateY(0) scale(1); filter: brightness(1); }
+  45%  { transform: translateY(170px) scale(1.14); filter: brightness(1.35) drop-shadow(0 0 16px rgba(255, 100, 80, 0.9)); }
+  55%  { transform: translateY(180px) scale(1.15); filter: brightness(1.4) drop-shadow(0 0 20px rgba(255, 100, 80, 1)); }
+  100% { transform: translateY(0) scale(1); filter: brightness(1); }
+}
+
 /* 嘲讽锁定：非 taunt 单位变灰不可点 */
 .dimmed {
   filter: brightness(0.45) saturate(0.4) drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useUIStore, type Screen } from '@/store/uiStore'
+import { setCanvasScale } from '@/utils/canvasScale'
 import { SplashScreen } from '@/screens/Splash/SplashScreen'
 import { IntroVideo } from '@/screens/Intro/IntroVideo'
 import { LoadingScreen } from '@/screens/Loading/LoadingScreen'
@@ -40,7 +41,10 @@ function App() {
     function updateScale() {
       const sx = window.innerWidth / designWidth
       const sy = window.innerHeight / designHeight
-      setScale(Math.min(sx, sy))
+      const s = Math.min(sx, sy)
+      setScale(s)
+      // §19.7.4 · 同步给 canvasScale 单例 · FxSprite portal 后 size 用它换算
+      setCanvasScale(s)
     }
     updateScale()
     window.addEventListener('resize', updateScale)

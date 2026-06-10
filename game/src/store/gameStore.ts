@@ -13,6 +13,7 @@ import { GameEngine, type TargetRef } from '@/engine'
 import type { GameState } from '@/engine/types'
 import type { LogEntry } from '@/engine/events'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
+import { getDeckByFaction } from '@/data/decks'
 import { takeAITurn } from '@/engine/ai'
 
 interface GameStore {
@@ -77,12 +78,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   startGame: (opts) => {
     const playerFaction = opts?.playerFaction ?? 'shu'
     const aiFaction = opts?.aiFaction ?? 'wu'
+    // v5.5 §19.3.1：用预制阵营牌组（SHU_DECK / WU_DECK），保证阵营隔离
     const engine = GameEngine.createGame({
       cardPool: getAllCardsIncludingTokens(),
       playerHero: makeHero(playerFaction),
       aiHero: makeHero(aiFaction),
       deckSize: 30,
       initialHand: { player: 3, ai: 4 },
+      playerDeckCardIds: getDeckByFaction(playerFaction),
+      aiDeckCardIds: getDeckByFaction(aiFaction),
     })
     set({
       engine,

@@ -23,7 +23,7 @@ import type {
   PlayerSide,
   PlayerState,
 } from './types'
-import { buildRandomDeck, drawCard as drawTopCard } from './deck'
+import { buildRandomDeck, buildDeckFromIds, drawCard as drawTopCard } from './deck'
 import {
   logAttack,
   logDamage,
@@ -46,6 +46,10 @@ export interface CreateGameOptions {
   aiHero: Hero
   deckSize?: number
   initialHand?: { player: number; ai: number }
+  /** v5.5 §19.3.1 阵营隔离：指定玩家牌组的卡 ID 列表（不传则随机抽全池）*/
+  playerDeckCardIds?: string[]
+  /** v5.5 §19.3.1 阵营隔离：指定 AI 牌组的卡 ID 列表（不传则随机抽全池）*/
+  aiDeckCardIds?: string[]
 }
 
 export class GameEngine {
@@ -67,8 +71,14 @@ export class GameEngine {
     const deckSize = opts.deckSize ?? 30
     const handSize = opts.initialHand ?? { player: 3, ai: 4 }
 
-    const playerDeck = buildRandomDeck(opts.cardPool, deckSize, 'player')
-    const aiDeck = buildRandomDeck(opts.cardPool, deckSize, 'ai')
+    // v5.5 §19.3.1：优先用指定的卡 ID 列表构造阵营牌组（阵营隔离）
+    // 如未提供则 fallback 到旧的全池随机（兼容老调用方）
+    const playerDeck = opts.playerDeckCardIds
+      ? buildDeckFromIds(opts.cardPool, opts.playerDeckCardIds, 'player')
+      : buildRandomDeck(opts.cardPool, deckSize, 'player')
+    const aiDeck = opts.aiDeckCardIds
+      ? buildDeckFromIds(opts.cardPool, opts.aiDeckCardIds, 'ai')
+      : buildRandomDeck(opts.cardPool, deckSize, 'ai')
 
     const playerState: PlayerState = {
       hero: { ...opts.playerHero },

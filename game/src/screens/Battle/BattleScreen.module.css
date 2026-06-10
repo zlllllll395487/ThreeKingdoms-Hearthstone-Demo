@@ -738,14 +738,14 @@
    结束回合按钮（右中悬浮）
    ============================================ */
 
-/* §19.7-2 回合记录按钮 · endTurn 左侧 · 同高度 */
+/* §19.7-2 回合记录按钮 · endTurn 左侧 · 同高度（§19.7-6 放大 140x60 → 200x88） */
 .turnLogFixed {
   position: absolute;
-  top: 905px;        /* 与 endTurn 中心对齐 (870 + 30 让小图标垂直居中) */
-  right: 170px;      /* endTurn right:22 + width 130 + gap 18 = 170 */
+  top: 891px;        /* 与 endTurn 中心对齐 (endTurn center y=935, 200/2≈44, 935-44=891) */
+  right: 168px;      /* endTurn right:22 + width 130 + gap 16 = 168 */
   z-index: 8;
-  width: 140px;
-  height: 60px;
+  width: 200px;
+  height: 88px;
   background: transparent;
   border: none;
   padding: 0;

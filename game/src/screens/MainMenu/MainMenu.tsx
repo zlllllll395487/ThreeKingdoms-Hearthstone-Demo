@@ -158,7 +158,30 @@ export function MainMenu() {
         </div>
       </div>
 
-      {/* ============ 左下专属容器：切换背景按钮 + 跑马灯（悬浮） ============ */}
+      {/* ============ 中部 · 热门招募 banner（v2 新增 · 填补中部空白） ============ */}
+      <div
+        className={styles.recruitBanner}
+        onClick={() => navigate('recruit')}
+        role="button"
+      >
+        <div className={styles.recruitPortrait}>
+          <span>关</span>
+        </div>
+        <div className={styles.recruitText}>
+          <div className={styles.recruitTitle}>限定招募开启</div>
+          <div className={styles.recruitSubtitle}>
+            武圣关羽 · 桃园新区限定登场
+          </div>
+        </div>
+        <div className={styles.recruitCta}>查看 ›</div>
+        <div className={styles.recruitDots}>
+          <span className={styles.dotActive} />
+          <span />
+          <span />
+        </div>
+      </div>
+
+      {/* ============ 左下：切换背景按钮（独立小按钮） ============ */}
       <div className={styles.bottomLeft}>
         <button
           className={styles.switchBgBtn}
@@ -167,22 +190,23 @@ export function MainMenu() {
         >
           {btnSwitchBgUrl && <img src={btnSwitchBgUrl} alt="切换背景" />}
         </button>
+      </div>
 
-        <div
-          className={styles.newsScroll}
-          onClick={() => setShowChatModal((prev) => !prev)}
-          role="button"
-          tabIndex={0}
-          aria-label="打开世界聊天"
-        >
-          {iconChatUrl && (
-            <img src={iconChatUrl} alt="" className={styles.newsScrollIcon} />
-          )}
-          <div className={styles.newsScrollText}>
-            <span className={styles.newsScrollMarquee}>
-              【世界】蜀汉招贤纳士中 · 凡有才者皆可请缨 · 新区桃园结义火热开放
-            </span>
-          </div>
+      {/* ============ 底部 panel · ticker 全宽贯穿 ============ */}
+      <div
+        className={styles.newsScroll}
+        onClick={() => setShowChatModal((prev) => !prev)}
+        role="button"
+        tabIndex={0}
+        aria-label="打开世界聊天"
+      >
+        {iconChatUrl && (
+          <img src={iconChatUrl} alt="" className={styles.newsScrollIcon} />
+        )}
+        <div className={styles.newsScrollText}>
+          <span className={styles.newsScrollMarquee}>
+            【世界】蜀汉招贤纳士中 · 凡有才者皆可请缨 · 新区桃园结义火热开放
+          </span>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import { Card } from '@/components/Card/Card'
 import type { CardInstance, PlayerSide } from '@/engine/types'
 import type { TargetRef } from '@/engine'
 import { MinionToken } from './components/MinionToken'
+import { HeroWeaponSlot } from '@/components/HeroWeaponSlot/HeroWeaponSlot'
 import styles from './BattleScreen.module.css'
 
 const BOARD_MAX = 7
@@ -658,11 +659,8 @@ function HeroDisplay({
       </div>
       {attack > 0 && <div className={styles.heroAttack}>⚔ {attack}</div>}
       {armor > 0 && <div className={styles.heroArmor}>🛡 {armor}</div>}
-      {weapon && (
-        <div className={styles.heroWeapon} title={weapon.data.name}>
-          {weapon.data.name} {weapon.currentAttack}/{weapon.currentDurability}
-        </div>
-      )}
+      {/* §19.5 装备槽 · 椭圆 frame + 立绘 clip-path + 攻击/耐久数字 */}
+      {weapon && <HeroWeaponSlot weapon={weapon} />}
     </button>
   )
 }

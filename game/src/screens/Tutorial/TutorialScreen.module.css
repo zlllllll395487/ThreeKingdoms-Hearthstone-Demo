@@ -108,20 +108,16 @@
 
 .title {
   font-family: var(--font-kai);
-  font-size: 54px;
-  font-weight: 900;
-  color: #2a1208;
-  letter-spacing: 12px;
+  font-size: 46px;
+  font-weight: 700;
+  color: #3a1f08;
+  letter-spacing: 10px;
   text-align: center;
-  margin: 0 0 28px 0;
-  padding-left: 12px;
-  -webkit-text-stroke: 1.2px #2a1208;
+  margin: 0 0 22px 0;
+  padding-left: 10px;
   text-shadow:
-    1px 0 0 #2a1208,
-    -1px 0 0 #2a1208,
-    0 1px 0 #2a1208,
-    0 -1px 0 #2a1208,
-    0 2px 4px rgba(255, 230, 180, 0.6);
+    0 1px 0 rgba(255, 235, 200, 0.7),
+    0 2px 4px rgba(120, 70, 30, 0.35);
 }
 
 .body {
@@ -135,60 +131,45 @@
 }
 
 .h {
-  font-size: 34px;
-  font-weight: 900;
-  color: #6a1f08;
-  letter-spacing: 5px;
-  margin: 12px 0 4px 0;
-  padding-left: 14px;
-  border-left: 5px solid #b85a25;
-  -webkit-text-stroke: 1px #6a1f08;
-  text-shadow:
-    1px 0 0 #6a1f08,
-    -1px 0 0 #6a1f08,
-    0 1px 0 #6a1f08,
-    0 -1px 0 #6a1f08;
+  font-size: 28px;
+  font-weight: 700;
+  color: #7a2a10;
+  letter-spacing: 4px;
+  margin: 10px 0 4px 0;
+  padding-left: 12px;
+  border-left: 4px solid #b85a25;
+  text-shadow: 0 1px 0 rgba(255, 235, 200, 0.55);
 }
 
 .p {
-  font-size: 27px;
-  font-weight: 900;
-  line-height: 1.55;
-  letter-spacing: 1.5px;
-  margin: 0;
-  color: #1a0e04;
-  -webkit-text-stroke: 0.8px #1a0e04;
-  text-shadow:
-    1px 0 0 #1a0e04,
-    -1px 0 0 #1a0e04,
-    0 1px 0 #1a0e04,
-    0 -1px 0 #1a0e04;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  margin: 0 0 4px 0;
+  color: #2a1808;
+  text-shadow: 0 1px 0 rgba(255, 240, 205, 0.5);
 }
 
 .li {
-  font-size: 26px;
-  font-weight: 900;
-  line-height: 1.5;
-  letter-spacing: 1.5px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.55;
+  letter-spacing: 1px;
   margin: 0;
-  padding-left: 26px;
+  padding-left: 22px;
   position: relative;
-  color: #1a0e04;
-  -webkit-text-stroke: 0.8px #1a0e04;
-  text-shadow:
-    1px 0 0 #1a0e04,
-    -1px 0 0 #1a0e04,
-    0 1px 0 #1a0e04,
-    0 -1px 0 #1a0e04;
+  color: #2a1808;
+  text-shadow: 0 1px 0 rgba(255, 240, 205, 0.5);
 }
 
 .bullet {
   position: absolute;
-  left: 6px;
-  top: -2px;
+  left: 4px;
+  top: -1px;
   color: #b85a25;
-  font-weight: 900;
-  font-size: 34px;
+  font-weight: 700;
+  font-size: 26px;
   line-height: 1;
 }
 

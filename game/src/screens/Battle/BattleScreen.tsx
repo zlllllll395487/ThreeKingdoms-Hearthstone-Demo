@@ -906,8 +906,8 @@ export function BattleScreen() {
         </div>
       </div>
 
-      {/* AI 思考 / 待选目标 提示 */}
-      {aiThinking && (
+      {/* AI 思考 / 待选目标 提示 · §24 托管期间不弹"对手思考中" */}
+      {aiThinking && state.activePlayer === 'ai' && (
         <div
           className={styles.aiThinkingHint}
           style={{

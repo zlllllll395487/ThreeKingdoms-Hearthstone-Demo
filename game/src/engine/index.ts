@@ -695,16 +695,51 @@ function pinStarterCard(player: PlayerState, faction: 'shu' | 'wu', cardId: stri
 
 /**
  * §22-iter2 扩展：蜀 / 吴 都强制保证 1+2+3 费
- * 吴现在有 W27 谋议（1 费）+ W11/W18 等 2 费 → 可以保证 1 费档
- * 解决 71.7% T1 起手卡死问题
+ * §22-iter6 修正：1 费档必须可在 T1 实际打出
+ *   即排除需要目标的法术（W30 冷箭 / S21 武勇 等），因 T1 双方场上均空
+ *   解决 iter5 引入的 9.5% T1 卡死回归
  */
+const T1_BLOCKED_ACTIONS = new Set([
+  'dealDamage',
+  'dealDamageEqualToAttack',
+  'freeze',
+  'cannotAttackThisTurn',
+  'cannotAttackAdjacent',
+  'attackDebuff',
+  'returnToHand',
+  'steal',
+  'buffMinion',
+  'grantExtraAttack',
+  'grantKeyword',
+  'applyTagToTargetAndAdjacent',
+])
+
+function cardPlayableOnT1(card: CardInstance): boolean {
+  return !(card.data.effects ?? []).some(
+    (e) =>
+      T1_BLOCKED_ACTIONS.has(e.action) &&
+      ((e.trigger === 'onCast' && card.data.type === 'spell') ||
+        e.trigger === 'battlecry'),
+  )
+}
+
 function ensureSmoothOpener(player: PlayerState) {
   const requiredCosts: number[] = [1, 2, 3]
   for (const cost of requiredCosts) {
-    if (player.hand.some((c) => c.data.cost === cost)) continue
-    // 牌组里找该费用的卡
-    const candidateIdx = player.deck.findIndex((c) => c.data.cost === cost)
-    if (candidateIdx < 0) continue // 牌组没有就跳过
+    // §22-iter6: cost=1 还需保证 T1 实际可打（不需目标）
+    const handHasUsable = player.hand.some((c) =>
+      cost === 1
+        ? c.data.cost === cost && cardPlayableOnT1(c)
+        : c.data.cost === cost,
+    )
+    if (handHasUsable) continue
+    // 牌组里找该费用的卡（cost=1 仍需 T1 可打）
+    const candidateIdx = player.deck.findIndex((c) =>
+      cost === 1
+        ? c.data.cost === cost && cardPlayableOnT1(c)
+        : c.data.cost === cost,
+    )
+    if (candidateIdx < 0) continue // 牌组没有合规卡就跳过
     // 手牌里换出最高费的（避免换核心战术卡）
     let maxHandIdx = 0
     for (let i = 1; i < player.hand.length; i++) {

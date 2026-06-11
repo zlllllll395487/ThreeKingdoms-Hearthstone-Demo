@@ -24,7 +24,7 @@
     "faction": "wu",
     "rarity": "epic",
     "attack": 3,
-    "health": 5,
+    "health": 4,
     "tribe": "strategist",
     "keywords": ["taunt"],
     "anchorTag": "anchor_draw",
@@ -440,12 +440,12 @@
       {
         "trigger": "onCast",
         "action": "returnToHand",
-        "params": { "targetSelector": "enemyMinion", "maxCost": 5 }
+        "params": { "targetSelector": "enemyMinion", "maxCost": 4 }
       }
     ],
     "portrait": "反间计.png",
     "cardvisual": "反间计.png",
-    "description": "将一名法力消耗不超过 5 点的敌方武将送回其拥有者手牌。",
+    "description": "将一名法力消耗不超过 4 点的敌方武将送回其拥有者手牌。",
     "flavor": "蒋干盗书，反中其计。"
   },
   {
@@ -492,14 +492,14 @@
       {
         "trigger": "onCast",
         "action": "healHero",
-        "params": { "side": "self", "amount": 6 }
+        "params": { "side": "self", "amount": 5 }
       }
     ],
     "linkedEffects": [
       {
         "trigger": "onCast",
         "action": "healHero",
-        "params": { "side": "self", "amount": 3 }
+        "params": { "side": "self", "amount": 2 }
       },
       {
         "trigger": "onCast",
@@ -509,7 +509,7 @@
     ],
     "portrait": "春风化雨.png",
     "cardvisual": "春风化雨.png",
-    "description": "为你的主公恢复 6 点生命值。【特殊效果·大乔】：改为恢复 9 点生命值，且所有友方武将获得 +0/+1。",
+    "description": "为你的主公恢复 5 点生命值。【特殊效果·大乔】：改为恢复 7 点生命值，且所有友方武将获得 +0/+1。",
     "flavor": "春风化雨，泽被万物。"
   },
   {

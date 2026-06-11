@@ -57,12 +57,14 @@ export async function takeAITurn(
   // ============================================
   // Phase A: 出牌（v5.5 启发式打分）
   // ============================================
+  // §22-iter6: 本回合无目标的卡 blacklist · 避免最高分但选不到目标的卡反复阻塞次优出牌
+  const blockedThisTurn = new Set<string>()
   let safety = 0
   while (safety++ < 20) {
     if ((engine.state.phase as string) === 'ended') return
     const handSnapshot = [...engine.state[side].hand]
-    const playable = engine.state[side].hand.filter((c) =>
-      engine.canPlayCard(side, c.instanceId),
+    const playable = engine.state[side].hand.filter(
+      (c) => engine.canPlayCard(side, c.instanceId) && !blockedThisTurn.has(c.instanceId),
     )
     if (playable.length === 0) {
       tracer?.recordPlayDecision({
@@ -104,6 +106,8 @@ export async function takeAITurn(
     if (engine.cardNeedsTarget(card)) {
       target = chooseSpellTarget(engine, card, side)
       if (!target) {
+        // §22-iter6: 此卡本回合无目标 · 拉黑后继续尝试次优 · 不再整回合 break
+        blockedThisTurn.add(card.instanceId)
         tracer?.recordPlayDecision({
           side,
           turn: engine.state.turn,
@@ -114,7 +118,7 @@ export async function takeAITurn(
           chosenScore: best.score,
           reason: 'no-target',
         })
-        break
+        continue
       }
     }
     tracer?.recordPlayDecision({

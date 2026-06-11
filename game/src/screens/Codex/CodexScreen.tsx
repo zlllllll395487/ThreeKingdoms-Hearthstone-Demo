@@ -40,8 +40,7 @@ export function CodexScreen() {
   const [activeTab, setActiveTab] = useState<CodexTab>('shu')
   const allCards = getAllCards()
 
-  // §24 排序调整：按费用升序为主轴 · 同费用按品质降序（传说 → 普通）
-  // 用户反馈：之前按品质优先看不清「同品质的费用顺序」
+  // §24 排序：品质降序为主轴（传说在前，最强先入眼）· 同品质按费用升序
   const RARITY_ORDER: Record<string, number> = {
     legendary: 0,
     epic: 1,
@@ -55,12 +54,12 @@ export function CodexScreen() {
       return c.faction === activeTab
     })
     .sort((a, b) => {
-      // 主轴：费用升序
-      if (a.cost !== b.cost) return a.cost - b.cost
-      // 次轴：同费用按品质降序（传说在前 · 高品质先入眼）
+      // 主轴：品质（传说 → 史诗 → 稀有 → 普通）
       const ra = RARITY_ORDER[a.rarity] ?? 99
       const rb = RARITY_ORDER[b.rarity] ?? 99
-      return ra - rb
+      if (ra !== rb) return ra - rb
+      // 次轴：同品质按费用升序
+      return a.cost - b.cost
     })
 
   return (

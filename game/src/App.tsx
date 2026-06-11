@@ -10,6 +10,7 @@ import { SubPageScreen } from '@/screens/SubPage/SubPageScreen'
 import { BattleScreen } from '@/screens/Battle/BattleScreen'
 import { FactionSelectScreen } from '@/screens/FactionSelect/FactionSelectScreen'
 import { ResultScreen } from '@/screens/Result/ResultScreen'
+import { TutorialScreen } from '@/screens/Tutorial/TutorialScreen'
 import { DevelopingModal } from '@/components/Modal/DevelopingModal'
 
 /**
@@ -22,7 +23,7 @@ import { DevelopingModal } from '@/components/Modal/DevelopingModal'
  * canvas 在进入 / 离开 Battle 时切换尺寸，scale 重算适配窗口。
  */
 
-const PORTRAIT_SCREENS = new Set<Screen>(['battle'])
+const PORTRAIT_SCREENS = new Set<Screen>(['battle', 'tutorial'])
 const PORTRAIT_W = 1080
 const PORTRAIT_H = 1920
 const LANDSCAPE_W = 1920
@@ -93,6 +94,7 @@ function App() {
         {currentScreen === 'friends' && <SubPageScreen screen="friends" />}
         {currentScreen === 'news' && <SubPageScreen screen="news" />}
         {currentScreen === 'factionselect' && <FactionSelectScreen />}
+        {currentScreen === 'tutorial' && <TutorialScreen />}
         {currentScreen === 'battle' && <BattleScreen />}
         {currentScreen === 'result' && <ResultScreen />}
 

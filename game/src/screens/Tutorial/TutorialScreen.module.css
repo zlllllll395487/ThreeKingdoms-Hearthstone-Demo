@@ -1,0 +1,295 @@
+/* 教程屏 · 竖屏 1080×1920 设计基准 */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(160deg, #1d130a 0%, #0e0805 100%);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(40, 22, 10, 0.4) 30%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 跳过按钮 · 右上 */
+.skipBtn {
+  position: absolute;
+  top: 60px;
+  right: 60px;
+  z-index: 10;
+  width: 180px;
+  height: 80px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.72));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.skipBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.skipText {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-kai);
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff5c8;
+  letter-spacing: 6px;
+  padding-left: 6px;
+  text-shadow:
+    0 0 8px rgba(255, 200, 80, 0.55),
+    0 2px 5px rgba(0, 0, 0, 0.95);
+}
+
+.skipBtn:hover {
+  transform: scale(1.05);
+}
+
+/* 主弹窗 · 顶部留 200px 给标题装饰 · 容器尺寸 800×1380 居中 */
+.modalWrap {
+  position: absolute;
+  top: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 880px;
+  height: 1380px;
+  z-index: 2;
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.85));
+}
+
+.modalFrame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* 内容区 · 避开装饰边框（红旗在上方，红色侧卷在左右） */
+.modalContent {
+  position: absolute;
+  top: 200px; /* 避开顶部红旗装饰 */
+  left: 110px; /* 避开左侧红色卷轴 */
+  right: 110px;
+  bottom: 100px; /* 避开底部装饰 */
+  padding: 24px 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 自定义滚动条样式（防止教程内容稍多需要滑动）*/
+.modalContent::-webkit-scrollbar {
+  width: 6px;
+}
+.modalContent::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modalContent::-webkit-scrollbar-thumb {
+  background: rgba(180, 140, 80, 0.5);
+  border-radius: 3px;
+}
+
+.title {
+  font-family: var(--font-kai);
+  font-size: 56px;
+  font-weight: bold;
+  color: #5a3416;
+  letter-spacing: 14px;
+  text-align: center;
+  margin: 0 0 36px 0;
+  padding-left: 14px;
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.45),
+    0 2px 4px rgba(120, 70, 30, 0.42);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: var(--font-kai);
+  color: #3a2510;
+}
+
+.h {
+  font-size: 38px;
+  font-weight: bold;
+  color: #8a3a1a;
+  letter-spacing: 6px;
+  margin: 18px 0 6px 0;
+  padding-left: 6px;
+  border-left: 6px solid #b85a25;
+  padding-left: 18px;
+}
+
+.p {
+  font-size: 30px;
+  line-height: 1.65;
+  letter-spacing: 2px;
+  margin: 0;
+  color: #4a2f15;
+}
+
+.li {
+  font-size: 30px;
+  line-height: 1.5;
+  letter-spacing: 2px;
+  margin: 0;
+  padding-left: 28px;
+  position: relative;
+  color: #4a2f15;
+}
+
+.bullet {
+  position: absolute;
+  left: 6px;
+  top: 0;
+  color: #b85a25;
+  font-weight: bold;
+  font-size: 36px;
+  line-height: 1;
+}
+
+/* 页码点 · 修正位置在 modal 下方 */
+.dots {
+  position: absolute;
+  bottom: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 18px;
+}
+
+.dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(255, 215, 100, 0.25);
+  border: 2px solid rgba(255, 215, 100, 0.5);
+  transition: all 0.25s ease;
+}
+
+.dotActive {
+  background: #ffd870;
+  border-color: #fff5c8;
+  box-shadow:
+    0 0 14px rgba(255, 215, 100, 0.85),
+    0 0 6px rgba(255, 215, 100, 0.6);
+  transform: scale(1.15);
+}
+
+/* 底部按钮组 · 上一页 / 下一页 (or 开始对战) */
+.bottomBar {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  gap: 60px;
+}
+
+.navBtn {
+  position: relative;
+  width: 320px;
+  height: 110px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.78));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.navBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.navText {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-kai);
+  font-size: 36px;
+  font-weight: bold;
+  color: #fff5c8;
+  letter-spacing: 8px;
+  padding-left: 8px;
+  padding-top: 4px;
+  text-shadow:
+    0 0 10px rgba(255, 200, 80, 0.75),
+    0 2px 6px rgba(0, 0, 0, 0.95);
+}
+
+.navBtn:hover:not(:disabled) {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 20px rgba(255, 200, 80, 0.85));
+}
+
+.navBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.navBtn:disabled,
+.navBtn[data-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.navBtn:disabled .navText,
+.navBtn[data-disabled='true'] .navText {
+  color: rgba(255, 245, 200, 0.6);
+}
+
+/* 开始对战按钮 · 末页发光强调 */
+.navStart {
+  animation: startBtnPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes startBtnPulse {
+  0%, 100% {
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.78))
+      drop-shadow(0 0 12px rgba(255, 200, 80, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.78))
+      drop-shadow(0 0 22px rgba(255, 215, 100, 0.85));
+  }
+}

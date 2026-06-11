@@ -13,6 +13,31 @@
 import type { GameEngine, TargetRef } from './index'
 import type { CardInstance, PlayerSide, Keyword } from './types'
 
+/** §22 · trace mode · 让 simulator 抓 AI 每个决策的评分排名 + 选择 + 攻击目标理由 */
+export interface AiTracer {
+  /** 出牌阶段每一轮 · 候选评分 + 最终选择 */
+  recordPlayDecision(info: {
+    side: PlayerSide
+    turn: number
+    mana: { current: number; max: number }
+    hand: CardInstance[]
+    candidates: Array<{ card: CardInstance; score: number }>
+    chosen: CardInstance | null
+    chosenScore: number | null
+    target?: TargetRef
+    reason: 'played' | 'all-negative' | 'no-affordable' | 'no-target'
+  }): void
+  /** 攻击阶段每一次 · 攻击者 / 目标 / 选择理由 */
+  recordAttackDecision(info: {
+    side: PlayerSide
+    turn: number
+    attackerName: string
+    attackerAtk: number
+    targetDesc: string
+    reason: string
+  }): void
+}
+
 export async function takeAITurn(
   engine: GameEngine,
   onAfterAction: () => Promise<void>,
@@ -24,6 +49,8 @@ export async function takeAITurn(
   performAttack?: (attackerId: string, target: TargetRef) => Promise<boolean>,
   /** §22 模拟器用 · 让 AI 帮 player 也走完一回合 · 默认 'ai' 保持向后兼容 */
   sideOverride?: PlayerSide,
+  /** §22 trace 模式 · 抓决策路径 */
+  tracer?: AiTracer,
 ): Promise<void> {
   const side: PlayerSide = sideOverride ?? 'ai'
 
@@ -33,10 +60,23 @@ export async function takeAITurn(
   let safety = 0
   while (safety++ < 20) {
     if ((engine.state.phase as string) === 'ended') return
+    const handSnapshot = [...engine.state[side].hand]
     const playable = engine.state[side].hand.filter((c) =>
       engine.canPlayCard(side, c.instanceId),
     )
-    if (playable.length === 0) break
+    if (playable.length === 0) {
+      tracer?.recordPlayDecision({
+        side,
+        turn: engine.state.turn,
+        mana: { ...engine.state[side].mana },
+        hand: handSnapshot,
+        candidates: [],
+        chosen: null,
+        chosenScore: null,
+        reason: 'no-affordable',
+      })
+      break
+    }
 
     // v5.5 启发式打分：每张可打的牌 → 综合得分
     const scored = playable.map((c) => ({
@@ -45,14 +85,49 @@ export async function takeAITurn(
     }))
     scored.sort((a, b) => b.score - a.score)
     const best = scored[0]
-    if (best.score <= -500) break // 全部都是糟糕选择，停手
+    if (best.score <= -500) {
+      tracer?.recordPlayDecision({
+        side,
+        turn: engine.state.turn,
+        mana: { ...engine.state[side].mana },
+        hand: handSnapshot,
+        candidates: scored,
+        chosen: null,
+        chosenScore: best.score,
+        reason: 'all-negative',
+      })
+      break // 全部都是糟糕选择，停手
+    }
     const card = best.card
 
     let target: TargetRef | undefined
     if (engine.cardNeedsTarget(card)) {
       target = chooseSpellTarget(engine, card, side)
-      if (!target) break
+      if (!target) {
+        tracer?.recordPlayDecision({
+          side,
+          turn: engine.state.turn,
+          mana: { ...engine.state[side].mana },
+          hand: handSnapshot,
+          candidates: scored,
+          chosen: null,
+          chosenScore: best.score,
+          reason: 'no-target',
+        })
+        break
+      }
     }
+    tracer?.recordPlayDecision({
+      side,
+      turn: engine.state.turn,
+      mana: { ...engine.state[side].mana },
+      hand: handSnapshot,
+      candidates: scored,
+      chosen: card,
+      chosenScore: best.score,
+      target,
+      reason: 'played',
+    })
     engine.playCard(side, card.instanceId, target)
     await onAfterAction()
     if ((engine.state.phase as string) === 'ended') return
@@ -73,6 +148,30 @@ export async function takeAITurn(
     const attacker = attackers[0]
     const target = chooseAttackTarget(engine, attacker, side)
     if (!target) break
+    if (tracer) {
+      const attackerName = attacker.isHero
+        ? `主公(${engine.state[side].hero.name})`
+        : engine.findInstance(attacker.id, side)?.data.name ?? attacker.id
+      const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
+      const targetDesc =
+        target.kind === 'hero'
+          ? `对方主公(${engine.state[enemySide].hero.name} HP=${engine.state[enemySide].hero.health})`
+          : (() => {
+              const m = engine.state[enemySide].board.find(
+                (b) => b.instanceId === (target as { instanceId: string }).instanceId,
+              )
+              return m ? `${m.data.name}(${m.currentAttack}/${m.currentHealth})` : '?'
+            })()
+      const reason = explainAttackTarget(engine, attacker, target, side)
+      tracer.recordAttackDecision({
+        side,
+        turn: engine.state.turn,
+        attackerName,
+        attackerAtk: attacker.attack,
+        targetDesc,
+        reason,
+      })
+    }
     const ok = performAttack
       ? await performAttack(attacker.id, target)
       : engine.attack(side, attacker.id, target)
@@ -89,7 +188,7 @@ export async function takeAITurn(
 // v5.5 启发式打分
 // ============================================
 
-function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide): number {
+export function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide): number {
   let score = 0
   const data = card.data
   const player = engine.state[side]
@@ -136,6 +235,13 @@ function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide)
       (c) => c.data.anchorRequirement === data.anchorTag,
     ).length
     score += matchingLinkedInHand * 2.5
+    // §22-trace-fix-4 · 生存压力下 setup 锚点是奢侈 · 敌方下回合可斩杀时大幅减分
+    const enemyNextAttack = enemy.board.reduce((s, m) => s + m.currentAttack, 0)
+    const survivalThreshold = player.hero.health * 0.7
+    if (enemyNextAttack >= survivalThreshold) {
+      // setup 不会立即兑现，让位给清场卡
+      score -= 6 + matchingLinkedInHand * 1.5
+    }
   }
 
   // §22-iter1 · 联动卡价值评估
@@ -264,11 +370,14 @@ function scoreSpellEffect(
     }
     case 'healHero': {
       // §22.P1-8 · 残血时高权重
-      if (player.hero.health >= player.hero.maxHealth) return -100
+      // §22-trace-fix-2 · 满 HP 时硬负 -1000（×0.6 = -600 < -500 阈值 → AI 不打）
+      if (player.hero.health >= player.hero.maxHealth) return -1000
       const amount = (p.amount as number) ?? 0
       const missingHp = player.hero.maxHealth - player.hero.health
       const effective = Math.min(amount, missingHp)
       const hpPct = player.hero.health / player.hero.maxHealth
+      // 几乎满血（剩 1-2 HP missing） → 仍负避免过度治疗
+      if (missingHp <= 2) return -50
       // 残血时（<30% HP）×3 权重
       const weight = hpPct < 0.3 ? 1.5 : hpPct < 0.6 ? 0.8 : 0.4
       return effective * weight
@@ -276,14 +385,29 @@ function scoreSpellEffect(
     case 'freeze':
     case 'cannotAttackThisTurn': {
       // §22.P2-6 · 看目标价值（敌方最高 atk minion）
-      if (enemy.board.length === 0) return -100
+      if (enemy.board.length === 0) return -1000
       const maxAtk = Math.max(...enemy.board.map((m) => m.currentAttack))
       return maxAtk >= 4 ? 5 : maxAtk >= 2 ? 3 : 1.5
+    }
+    case 'attackDebuff':
+    case 'applyTagToTargetAndAdjacent': {
+      // §22-trace-fix-3 · 火油 -2 atk + oiled · 价值看"我方是否会被攻击"
+      // 我方场上无 minion AND 敌方场上无嘲讽威胁 AND HP > 20 → 几乎无价值
+      if (enemy.board.length === 0) return -1000
+      const amount = (p.amount as number) ?? 2
+      const maxEnemyAtk = Math.max(...enemy.board.map((m) => m.currentAttack), 0)
+      // 我方可能承受伤害的"压力指标"
+      const myMinionCount = player.board.length
+      const hpDangerFactor = player.hero.health <= 10 ? 2 : player.hero.health <= 18 ? 1 : 0.4
+      // 我方有 minion 需要保护 OR HP 偏低 → 价值高
+      const protectFactor = myMinionCount > 0 ? 1.5 : hpDangerFactor
+      // -2 atk 价值 ≈ amount * 1.0 * protectFactor，再加 oiled tag combo 预留 +1
+      return amount * 0.9 * protectFactor + 1
     }
     case 'freezeAll': {
       // §22-iter1 · W23 连环计 · 全场冰冻 · 敌方 board 越大越值
       const targetSide = (p.side as string) === 'self' ? player.board : enemy.board
-      if (targetSide.length === 0) return -50
+      if (targetSide.length === 0) return -1000
       const totalAtk = targetSide.reduce((s, m) => s + m.currentAttack, 0)
       return totalAtk * 1.2 + targetSide.length * 2
     }
@@ -303,13 +427,16 @@ function scoreSpellEffect(
       // §22.P2-6 · maxCost 约束：找匹配 cost 的最强目标
       const maxCost = (p.maxCost as number) ?? Infinity
       const valid = enemy.board.filter((m) => m.data.cost <= maxCost)
-      if (valid.length === 0) return -100 // 无有效目标 → 别浪费
+      if (valid.length === 0) return -1000 // 无有效目标 → 别浪费
       const best = valid.reduce(
         (max, m) =>
           (m.currentAttack + m.currentHealth) > (max.currentAttack + max.currentHealth) ? m : max,
         valid[0],
       )
-      return (best.currentAttack + best.currentHealth) * 0.7 + 2
+      // §22-trace-fix-1 · 加目标价值门槛 · 1/1 vanilla 不值得反间计
+      const targetValue = best.currentAttack + best.currentHealth
+      if (targetValue <= 2) return -200 // 太弱不值得
+      return targetValue * 0.7 + 2
     }
     case 'refundMana':
       return ((p.amount as number) ?? 0) * 1.0
@@ -317,7 +444,7 @@ function scoreSpellEffect(
       return ((p.amount as number) ?? 0) * 0.9
     case 'buffMinion': {
       // §22.P1-9 · 看目标 · 友方最高 atk 武将
-      if (player.board.length === 0) return -100
+      if (player.board.length === 0) return -1000
       const att = (p.attack as number) ?? 0
       const hp = (p.health as number) ?? 0
       const best = player.board.reduce(
@@ -328,9 +455,9 @@ function scoreSpellEffect(
       return (att + hp) * 1.2 + best.currentAttack * 0.3
     }
     case 'grantExtraAttack':
-      return player.board.length > 0 ? 3 : -100
+      return player.board.length > 0 ? 3 : -1000
     case 'grantKeyword':
-      return player.board.length > 0 ? 2.5 : -100
+      return player.board.length > 0 ? 2.5 : -1000
     case 'summonToken':
       return ((p.count as number) ?? 1) * 2
     case 'addPermanentSpellPower':
@@ -365,6 +492,39 @@ function getAttackers(engine: GameEngine, side: PlayerSide): Attacker[] {
     result.push({ id: `hero_${side}`, attack: player.hero.attack, isHero: true })
   }
   return result
+}
+
+// §22 trace · 解释 chooseAttackTarget 给出的目标背后的理由（与 chooseAttackTarget 的判定顺序保持同步）
+function explainAttackTarget(
+  engine: GameEngine,
+  attacker: Attacker,
+  target: TargetRef,
+  side: PlayerSide,
+): string {
+  const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
+  const enemy = engine.state[enemySide]
+  const me = engine.state[side]
+  const enemyNextTurnAttack = enemy.board.reduce((s, m) => s + m.currentAttack, 0)
+  if (enemyNextTurnAttack >= me.hero.health && target.kind === 'minion') {
+    return `生存模式·敌方下回合总攻 ${enemyNextTurnAttack}≥我方HP ${me.hero.health}→清最高威胁`
+  }
+  if (engine.hasTaunt(enemySide) && target.kind === 'minion') {
+    return '敌方有嘲讽·选最低血嘲讽'
+  }
+  if (target.kind === 'hero' && attacker.attack >= enemy.hero.health) {
+    return `斩杀线·攻 ${attacker.attack}≥敌HP ${enemy.hero.health}`
+  }
+  if (target.kind === 'minion') {
+    const m = enemy.board.find((b) => b.instanceId === target.instanceId)
+    if (m?.data.anchorTag) {
+      return `优先清锚点武将(${m.data.anchorTag})`
+    }
+    if (m && m.currentAttack >= 3 && attacker.attack >= m.currentHealth) {
+      return `清高攻威胁·攻 ${m.currentAttack}≥3·可斩`
+    }
+    return '残留目标（无 face 通路）'
+  }
+  return '默认打脸'
 }
 
 // ============================================
@@ -425,6 +585,27 @@ function chooseAttackTarget(
     }
   }
 
+  // §22-trace-fix-5 · 吴 control 偏好 trade · 任何可净换都换（不打脸）
+  // 蜀 aggressive 维持原行为打脸
+  if (me.hero.faction === 'wu' && enemyMinions.length > 0) {
+    // 选可斩杀且不会反伤死自己的目标 · atk 最高优先
+    const myMinion = !attacker.isHero ? engine.findInstance(attacker.id, side) : null
+    const killable = enemyMinions.filter((m) => {
+      const canKill = attacker.attack >= m.currentHealth
+      // 反伤判定（主公没反伤·minion 有）
+      const willSurvive = attacker.isHero || (myMinion && myMinion.currentHealth > m.currentAttack)
+      return canKill && willSurvive
+    })
+    if (killable.length > 0) {
+      killable.sort((a, b) => b.currentAttack - a.currentAttack)
+      return { kind: 'minion', side: enemySide, instanceId: killable[0].instanceId }
+    }
+    // 没有 clean kill·但有高威胁 → 牺牲自己 trade（仅限大威胁 atk≥4）
+    if (!attacker.isHero && enemyMinions[0].currentAttack >= 4) {
+      return { kind: 'minion', side: enemySide, instanceId: enemyMinions[0].instanceId }
+    }
+  }
+
   // 默认攻击英雄
   if (canHitHero) {
     return { kind: 'hero', side: enemySide }
@@ -446,18 +627,51 @@ function chooseSpellTarget(
 ): TargetRef | undefined {
   const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
   const enemy = engine.state[enemySide]
+  const effects = card.data.effects ?? []
 
   // v5.5 buffMinion / grantExtraAttack / grantKeyword → 选自家高 atk 武将
   const targetingFriendly = ['buffMinion', 'grantExtraAttack', 'grantKeyword']
-  if ((card.data.effects ?? []).some((e) => targetingFriendly.includes(e.action))) {
+  if (effects.some((e) => targetingFriendly.includes(e.action))) {
     const friendly = engine.state[side].board
     if (friendly.length === 0) return undefined
     const sorted = [...friendly].sort((a, b) => b.currentAttack - a.currentAttack)
     return { kind: 'minion', side, instanceId: sorted[0].instanceId }
   }
 
-  // 敌方目标：选血量最低的（最易斩杀）
   if (enemy.board.length === 0) return undefined
-  const sorted = [...enemy.board].sort((a, b) => a.currentHealth - b.currentHealth)
-  return { kind: 'minion', side: enemySide, instanceId: sorted[0].instanceId }
+
+  // §22-trace-fix-1 · 控场卡（送回手/抢夺/冰冻/不能攻击/降攻）选 maxCost 内"最强威胁"
+  // 不再用"血量最低"·因为反间计送 1/2 vanilla 是浪费
+  const controlActions = ['returnToHand', 'steal', 'freeze', 'cannotAttackThisTurn', 'attackDebuff', 'applyTagToTargetAndAdjacent']
+  const controlEff = effects.find((e) => controlActions.includes(e.action))
+  if (controlEff) {
+    const maxCost = ((controlEff.params as Record<string, unknown> | undefined)?.maxCost as number | undefined) ?? Infinity
+    const valid = enemy.board.filter((m) => m.data.cost <= maxCost)
+    if (valid.length === 0) return undefined
+    // 取 atk+hp 最大（最强威胁）·atk 优先（控制 atk 比控制 hp 价值高）
+    const ranked = [...valid].sort(
+      (a, b) =>
+        (b.currentAttack * 2 + b.currentHealth) - (a.currentAttack * 2 + a.currentHealth),
+    )
+    return { kind: 'minion', side: enemySide, instanceId: ranked[0].instanceId }
+  }
+
+  // 伤害类法术：优先斩杀（hp ≤ amount），其次最高威胁
+  const dmgEff = effects.find((e) => e.action === 'dealDamage')
+  if (dmgEff) {
+    const amount = ((dmgEff.params as Record<string, unknown> | undefined)?.amount as number | undefined) ?? 0
+    const lethal = enemy.board.filter((m) => m.currentHealth <= amount)
+    if (lethal.length > 0) {
+      // 可斩杀 → 选 atk 最高（清最威胁）
+      lethal.sort((a, b) => b.currentAttack - a.currentAttack)
+      return { kind: 'minion', side: enemySide, instanceId: lethal[0].instanceId }
+    }
+    // 无法斩杀 → 砸最高威胁血量
+    const sorted = [...enemy.board].sort((a, b) => b.currentAttack - a.currentAttack)
+    return { kind: 'minion', side: enemySide, instanceId: sorted[0].instanceId }
+  }
+
+  // 兜底：选血量最低（fallback 保持原行为）
+  const sortedByHp = [...enemy.board].sort((a, b) => a.currentHealth - b.currentHealth)
+  return { kind: 'minion', side: enemySide, instanceId: sortedByHp[0].instanceId }
 }

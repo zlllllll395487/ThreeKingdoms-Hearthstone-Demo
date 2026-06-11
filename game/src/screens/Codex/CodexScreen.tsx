@@ -58,8 +58,8 @@ export function CodexScreen() {
       const ra = RARITY_ORDER[a.rarity] ?? 99
       const rb = RARITY_ORDER[b.rarity] ?? 99
       if (ra !== rb) return ra - rb
-      // 次轴：同品质按费用升序
-      return a.cost - b.cost
+      // 次轴：同品质按费用降序（高费在左 · 强卡先入眼）
+      return b.cost - a.cost
     })
 
   return (

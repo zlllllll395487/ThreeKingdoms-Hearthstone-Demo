@@ -4,7 +4,6 @@ import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import { BackButton } from '@/components/BackButton/BackButton'
 import type { AIDifficulty } from '@/engine/ai'
-import { hasSeenTutorial } from '@/screens/Tutorial/TutorialScreen'
 import styles from './FactionSelectScreen.module.css'
 
 type Faction = 'shu' | 'wu'
@@ -69,12 +68,8 @@ export function FactionSelectScreen() {
       // localStorage 不可用 · 静默
     }
     startGame({ playerFaction, aiFaction, aiDifficulty })
-    // §25 首次进入：游戏已就位 · 先弹教程,末页/跳过后再进 battle
-    if (!hasSeenTutorial()) {
-      navigate('tutorial')
-    } else {
-      navigate('battle')
-    }
+    // §25 修正：每次进入对战前都弹教程（玩家可随时按「跳过」直接进战斗）
+    navigate('tutorial')
   }
 
   const renderFactionColumn = (

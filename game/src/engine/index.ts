@@ -126,7 +126,16 @@ export class GameEngine {
       if (c) aiState.hand.push(c)
     }
 
-    // v5.5 起手双轨制：蜀强制 1 费 + 2 费 / 吴强制 2 费 + 3 费（跳过 1 费检查）
+    // §22-iter3 · 固定开局卡组：starter pack 强制塞起手
+    // 蜀: S08 屯田 (1 费下回合 mana +2)
+    // 吴: W27 谋议 (1 费下回合抽 +2)
+    // 解决前期卡死 + 给玩家可靠的"过渡"卡
+    pinStarterCard(playerState, 'shu', 'S08')
+    pinStarterCard(playerState, 'wu', 'W27')
+    pinStarterCard(aiState, 'shu', 'S08')
+    pinStarterCard(aiState, 'wu', 'W27')
+
+    // v5.5 起手双轨制：1+2+3 cost 必有（§22-iter2 扩展）
     ensureSmoothOpener(playerState)
     ensureSmoothOpener(aiState)
 
@@ -660,6 +669,24 @@ export class GameEngine {
       this.log.push(logWin(this.state.winner))
     }
   }
+}
+
+// ============================================
+// §22-iter3 · 固定开局卡组 (Starter Pack)
+// ============================================
+
+/**
+ * 若该方阵营匹配，从 deck 中取出指定 cardId 强制塞入 hand
+ * 没有该卡 / 阵营不匹配 → no-op
+ */
+function pinStarterCard(player: PlayerState, faction: 'shu' | 'wu', cardId: string) {
+  if (player.faction !== faction) return
+  // 已经在 hand 中 → 不重复加
+  if (player.hand.some((c) => c.data.id === cardId)) return
+  const idx = player.deck.findIndex((c) => c.data.id === cardId)
+  if (idx < 0) return
+  const [card] = player.deck.splice(idx, 1)
+  player.hand.push(card)
 }
 
 // ============================================

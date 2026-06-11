@@ -126,6 +126,7 @@ export interface CardInstance {
   summonedThisTurn?: boolean  // rush 限制英雄攻击用
   frozen?: boolean            // v5.5 冰冻态（W12/W23/W26）
   cannotAttackThisTurn?: boolean  // v5.5 本回合无法攻击（W18 火油 / W26 画地为牢）
+  tags?: Set<string>          // §22-iter3 任意标记（如 'oiled' 火油标记）· 为未来 combo 联动卡留接口
 
   // 阵营归属（场上时记录控制者）
   owner?: 'player' | 'ai'

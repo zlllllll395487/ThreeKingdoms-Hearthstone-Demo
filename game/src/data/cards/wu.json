@@ -573,5 +573,24 @@
     "cardvisual": "画地为牢.png",
     "description": "选择一名敌方武将，使其本回合无法攻击；与其相邻的友方武将在下一回合无法攻击。",
     "flavor": "划地以困之。"
+  },
+  {
+    "id": "W27",
+    "name": "谋议",
+    "cost": 1,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "common",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "setNextTurnDrawBoost",
+        "params": { "amount": 2 }
+      }
+    ],
+    "portrait": "moyi.png",
+    "cardvisual": "moyi.png",
+    "description": "下回合开始时，额外抽 2 张牌。",
+    "flavor": "运筹于内，决胜于外。"
   }
 ]

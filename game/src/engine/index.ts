@@ -23,12 +23,13 @@ import type {
   PlayerSide,
   PlayerState,
 } from './types'
-import { buildRandomDeck, buildDeckFromIds, drawCard as drawTopCard } from './deck'
+import { buildRandomDeck, buildDeckFromIds, drawCard as drawTopCard, drawCardWithSynergy } from './deck'
 import {
   logAttack,
   logDamage,
   logDeath,
   logDraw,
+  logEffect,
   logPlay,
   logTurn,
   logWin,
@@ -95,6 +96,7 @@ export class GameEngine {
       comboFlagsThisTurn: new Set(),
       onceUsedKeys: new Set(),
       nextTurnManaBoost: 0,
+      nextTurnDrawBoost: 0,
     }
     const aiState: PlayerState = {
       hero: { ...opts.aiHero },
@@ -111,6 +113,7 @@ export class GameEngine {
       comboFlagsThisTurn: new Set(),
       onceUsedKeys: new Set(),
       nextTurnManaBoost: 0,
+      nextTurnDrawBoost: 0,
     }
 
     // 起手抽牌
@@ -566,12 +569,18 @@ export class GameEngine {
 
   drawCardForSide(side: PlayerSide): void {
     const before = this.state[side].deck.length
-    const drawn = drawTopCard(this.state[side])
+    // §22-iter2 · 用带联动加权的抽牌 · 锚点/combo 在场 → 联动卡更易抽到
+    const drawn = drawCardWithSynergy(this.state[side])
     if (drawn) {
       this.log.push(logDraw(side, drawn.data.name))
     } else if (before === 0) {
       // 疲劳已在 drawCard 内处理
     }
+  }
+
+  /** §22-iter2 · 保留无加权抽（保险/测试用，目前未直接调用）*/
+  drawCardTopForSide(side: PlayerSide): void {
+    void drawTopCard(this.state[side])
   }
 
   endTurn(): void {
@@ -621,8 +630,16 @@ export class GameEngine {
     this.heroAttacked[nextSide] = false
     next.heroPowerUsed = false
 
-    // 抽牌
-    this.drawCardForSide(nextSide)
+    // §22-iter2 · adaptive draw + W27 谋议 boost
+    // T1-T5: 1 张/回合（HS 标准 tempo）
+    // T6+: 2 张/回合（解决后期断流）
+    // + nextTurnDrawBoost（W27 谋议 等卡触发）
+    const baseDraw = this.state.turn >= 6 ? 2 : 1
+    const totalDraw = baseDraw + (next.nextTurnDrawBoost ?? 0)
+    for (let i = 0; i < totalDraw; i++) {
+      this.drawCardForSide(nextSide)
+    }
+    next.nextTurnDrawBoost = 0
 
     // 触发回合开始效果
     for (const m of next.board) {
@@ -650,11 +667,12 @@ export class GameEngine {
 // ============================================
 
 /**
- * 蜀 = 强制保证 1 张 1 费 + 1 张 2 费
- * 吴 = 跳过 1 费检查（火油是吴 1 费唯一卡，强制塞会 100% 固化），强制 1 张 2 费 + 1 张 3 费
+ * §22-iter2 扩展：蜀 / 吴 都强制保证 1+2+3 费
+ * 吴现在有 W27 谋议（1 费）+ W11/W18 等 2 费 → 可以保证 1 费档
+ * 解决 71.7% T1 起手卡死问题
  */
 function ensureSmoothOpener(player: PlayerState) {
-  const requiredCosts: number[] = player.faction === 'shu' ? [1, 2] : [2, 3]
+  const requiredCosts: number[] = [1, 2, 3]
   for (const cost of requiredCosts) {
     if (player.hand.some((c) => c.data.cost === cost)) continue
     // 牌组里找该费用的卡

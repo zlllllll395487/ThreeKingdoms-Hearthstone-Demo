@@ -13,6 +13,14 @@
 import type { GameEngine, TargetRef } from './index'
 import type { CardInstance, PlayerSide, Keyword } from './types'
 
+/**
+ * §23 · AI 难度等级
+ * - novice 新手: 评分噪声 + 随机目标 + 偏好打脸 (~ 30-40% 胜率 vs standard)
+ * - standard 标准: iter6.1 基线启发式 (默认值)
+ * - grandmaster 宗师: 跨回合 combo 规划 + 锚点保留判断 (~ 55-60% 胜率 vs standard)
+ */
+export type AIDifficulty = 'novice' | 'standard' | 'grandmaster'
+
 /** §22 · trace mode · 让 simulator 抓 AI 每个决策的评分排名 + 选择 + 攻击目标理由 */
 export interface AiTracer {
   /** 出牌阶段每一轮 · 候选评分 + 最终选择 */
@@ -51,8 +59,11 @@ export async function takeAITurn(
   sideOverride?: PlayerSide,
   /** §22 trace 模式 · 抓决策路径 */
   tracer?: AiTracer,
+  /** §23 AI 难度 · 默认 'standard' */
+  difficulty?: AIDifficulty,
 ): Promise<void> {
   const side: PlayerSide = sideOverride ?? 'ai'
+  const aiLevel: AIDifficulty = difficulty ?? 'standard'
 
   // ============================================
   // Phase A: 出牌（v5.5 启发式打分）
@@ -83,10 +94,15 @@ export async function takeAITurn(
     // v5.5 启发式打分：每张可打的牌 → 综合得分
     const scored = playable.map((c) => ({
       card: c,
-      score: scoreCardPlay(engine, c, side),
+      score: scoreCardPlay(engine, c, side, aiLevel),
     }))
     scored.sort((a, b) => b.score - a.score)
-    const best = scored[0]
+    // §23 新手：15% 概率从前 3 候选随机选（模拟新手判断失误）
+    let chosenIdx = 0
+    if (aiLevel === 'novice' && scored.length >= 2 && Math.random() < 0.25) {
+      chosenIdx = Math.min(Math.floor(Math.random() * 3), scored.length - 1)
+    }
+    const best = scored[chosenIdx]
     if (best.score <= -500) {
       tracer?.recordPlayDecision({
         side,
@@ -104,7 +120,7 @@ export async function takeAITurn(
 
     let target: TargetRef | undefined
     if (engine.cardNeedsTarget(card)) {
-      target = chooseSpellTarget(engine, card, side)
+      target = chooseSpellTarget(engine, card, side, aiLevel)
       if (!target) {
         // §22-iter6: 此卡本回合无目标 · 拉黑后继续尝试次优 · 不再整回合 break
         blockedThisTurn.add(card.instanceId)
@@ -150,7 +166,7 @@ export async function takeAITurn(
     if (attackers.length === 0) break
     attackers.sort((a, b) => b.attack - a.attack)
     const attacker = attackers[0]
-    const target = chooseAttackTarget(engine, attacker, side)
+    const target = chooseAttackTarget(engine, attacker, side, aiLevel)
     if (!target) break
     if (tracer) {
       const attackerName = attacker.isHero
@@ -192,7 +208,12 @@ export async function takeAITurn(
 // v5.5 启发式打分
 // ============================================
 
-export function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide): number {
+export function scoreCardPlay(
+  engine: GameEngine,
+  card: CardInstance,
+  side: PlayerSide,
+  difficulty: AIDifficulty = 'standard',
+): number {
   let score = 0
   const data = card.data
   const player = engine.state[side]
@@ -311,13 +332,43 @@ export function scoreCardPlay(engine: GameEngine, card: CardInstance, side: Play
   const cost = data.cost ?? 0
   const efficiency = cost > 0 ? score / cost : score * 1.5
   // 综合分 = 60% 绝对价值 + 40% tempo 效率
-  const finalScore = score * 0.6 + efficiency * 0.4 * cost
+  let finalScore = score * 0.6 + efficiency * 0.4 * cost
+
+  // §23 难度修正
+  if (difficulty === 'novice') {
+    // 新手：评分加 ±40% 随机噪声 · 但保留 -500 阈值（极差选项仍会避开）
+    if (finalScore > -100) {
+      finalScore = finalScore * (0.5 + Math.random())
+    }
+  } else if (difficulty === 'grandmaster') {
+    // 宗师：积极兑现联动 + combo · 已有 standard 的留牌逻辑覆盖（不再 penalize）
+    // 1. combo 件齐全时额外加权（鼓励 combo 兑现）
+    if (data.comboFlagSet) {
+      const partnerInHand = player.hand.some(
+        (c) => c.data.comboFlagRequirement === data.comboFlagSet,
+      )
+      if (partnerInHand) finalScore += 3
+    }
+    // 2. 锚点联动卡 · 锚点已激活时额外加权（更看重联动收益）
+    if (data.anchorRequirement) {
+      const anchorOnBoard = engine.hasAnchorOnBoard(side, data.anchorRequirement)
+      if (anchorOnBoard) finalScore += 2
+    }
+    // 3. 锚点武将自带额外加权（更愿铺锚点）
+    if (data.anchorTag) {
+      const matchingLinkedInHand = player.hand.filter(
+        (c) => c.data.anchorRequirement === data.anchorTag,
+      ).length
+      finalScore += matchingLinkedInHand * 1.5
+    }
+  }
+
   return finalScore
 }
 
 function scoreSpellEffect(
   eff: { action: string; params?: Record<string, unknown>; trigger?: string },
-  side: PlayerSide,
+  _side: PlayerSide,
   player: {
     deck: unknown[]
     hand: unknown[]
@@ -399,7 +450,6 @@ function scoreSpellEffect(
       // 我方场上无 minion AND 敌方场上无嘲讽威胁 AND HP > 20 → 几乎无价值
       if (enemy.board.length === 0) return -1000
       const amount = (p.amount as number) ?? 2
-      const maxEnemyAtk = Math.max(...enemy.board.map((m) => m.currentAttack), 0)
       // 我方可能承受伤害的"压力指标"
       const myMinionCount = player.board.length
       const hpDangerFactor = player.hero.health <= 10 ? 2 : player.hero.health <= 18 ? 1 : 0.4
@@ -539,11 +589,35 @@ function chooseAttackTarget(
   engine: GameEngine,
   attacker: Attacker,
   side: PlayerSide,
+  difficulty: AIDifficulty = 'standard',
 ): TargetRef | null {
   const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
   const enemy = engine.state[enemySide]
   const me = engine.state[side]
   const myMinion = !attacker.isHero ? engine.findInstance(attacker.id, side) : null
+
+  // §23 新手：60% 概率直接打脸（无视嘲讽除外）· 不做防过载 / 锚点 / 威胁判断
+  if (difficulty === 'novice') {
+    const canHitHero = !(
+      myMinion &&
+      myMinion.currentKeywords.has('rush' as Keyword) &&
+      !myMinion.currentKeywords.has('charge' as Keyword) &&
+      myMinion.summonedThisTurn
+    )
+    if (engine.hasTaunt(enemySide)) {
+      const taunts = enemy.board.filter((m) => m.currentKeywords.has('taunt' as Keyword))
+      return { kind: 'minion', side: enemySide, instanceId: taunts[0].instanceId }
+    }
+    if (canHitHero && Math.random() < 0.6) {
+      return { kind: 'hero', side: enemySide }
+    }
+    if (enemy.board.length > 0) {
+      const random = enemy.board[Math.floor(Math.random() * enemy.board.length)]
+      return { kind: 'minion', side: enemySide, instanceId: random.instanceId }
+    }
+    if (canHitHero) return { kind: 'hero', side: enemySide }
+    return null
+  }
 
   // v5.5 防过载：残血时优先清场最高威胁
   const enemyNextTurnAttack = enemy.board.reduce((s, m) => s + m.currentAttack, 0)
@@ -628,6 +702,7 @@ function chooseSpellTarget(
   engine: GameEngine,
   card: CardInstance,
   side: PlayerSide,
+  difficulty: AIDifficulty = 'standard',
 ): TargetRef | undefined {
   const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
   const enemy = engine.state[enemySide]
@@ -638,11 +713,22 @@ function chooseSpellTarget(
   if (effects.some((e) => targetingFriendly.includes(e.action))) {
     const friendly = engine.state[side].board
     if (friendly.length === 0) return undefined
+    // §23 新手：40% 概率选随机友方（错失最优 buff 目标）
+    if (difficulty === 'novice' && Math.random() < 0.4) {
+      const random = friendly[Math.floor(Math.random() * friendly.length)]
+      return { kind: 'minion', side, instanceId: random.instanceId }
+    }
     const sorted = [...friendly].sort((a, b) => b.currentAttack - a.currentAttack)
     return { kind: 'minion', side, instanceId: sorted[0].instanceId }
   }
 
   if (enemy.board.length === 0) return undefined
+
+  // §23 新手：40% 概率随机选敌方目标（错失斩杀线 / 错失高威胁清除）
+  if (difficulty === 'novice' && Math.random() < 0.4) {
+    const random = enemy.board[Math.floor(Math.random() * enemy.board.length)]
+    return { kind: 'minion', side: enemySide, instanceId: random.instanceId }
+  }
 
   // §22-trace-fix-1 · 控场卡（送回手/抢夺/冰冻/不能攻击/降攻）选 maxCost 内"最强威胁"
   // 不再用"血量最低"·因为反间计送 1/2 vanilla 是浪费

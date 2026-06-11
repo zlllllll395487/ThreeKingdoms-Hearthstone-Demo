@@ -14,7 +14,7 @@ import type { GameState } from '@/engine/types'
 import type { LogEntry } from '@/engine/events'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
 import { getDeckByFaction } from '@/data/decks'
-import { takeAITurn } from '@/engine/ai'
+import { takeAITurn, type AIDifficulty } from '@/engine/ai'
 import { useFxStore } from '@/store/fxStore'
 import { getTargetCenter } from '@/utils/targetRegistry'
 import { getCanvasScale } from '@/utils/canvasScale'
@@ -31,11 +31,21 @@ interface GameStore {
   pendingTargetForCard: string | null
   /** AI 思考中标记 */
   aiThinking: boolean
+  /** §24 玩家方托管开关 · 开启后自动用宗师 AI 走玩家回合 · 用户可随时切换 */
+  autopilot: boolean
 
   // ============================================
   // Actions
   // ============================================
-  startGame: (opts?: { playerFaction?: 'shu' | 'wu'; aiFaction?: 'shu' | 'wu' }) => void
+  startGame: (opts?: {
+    playerFaction?: 'shu' | 'wu'
+    aiFaction?: 'shu' | 'wu'
+    aiDifficulty?: AIDifficulty
+  }) => void
+  /** §23 当前 AI 难度（影响 takeAITurn 决策强度）*/
+  aiDifficulty: AIDifficulty
+  /** §24 切换托管状态（开 / 关）· 开启时若当前是玩家回合则立刻启动 */
+  toggleAutopilot: () => void
   endGame: () => void
 
   selectCard: (instanceId: string | null) => void
@@ -78,9 +88,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
   pendingTargetForCard: null,
   aiThinking: false,
 
+  aiDifficulty: 'standard',
+  autopilot: false,
+  toggleAutopilot: () => {
+    const next = !get().autopilot
+    set({ autopilot: next })
+    // §24 开启托管 + 当前是玩家回合 + AI 未在思考 → 立刻启动玩家托管
+    if (next) {
+      const s = get()
+      if (
+        s.engine &&
+        s.state?.activePlayer === 'player' &&
+        s.state?.phase === 'main' &&
+        !s.aiThinking
+      ) {
+        void runPlayerAutopilotTurn()
+      }
+    }
+  },
   startGame: (opts) => {
     const playerFaction = opts?.playerFaction ?? 'shu'
     const aiFaction = opts?.aiFaction ?? 'wu'
+    const aiDifficulty = opts?.aiDifficulty ?? 'standard'
     // v5.5 §19.3.1：用预制阵营牌组（SHU_DECK / WU_DECK），保证阵营隔离
     const engine = GameEngine.createGame({
       cardPool: getAllCardsIncludingTokens(),
@@ -99,6 +128,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       selectedAttackerId: null,
       pendingTargetForCard: null,
       aiThinking: false,
+      aiDifficulty,
+      autopilot: false, // §24 每局重置托管
     })
   },
 
@@ -111,6 +142,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       selectedAttackerId: null,
       pendingTargetForCard: null,
       aiThinking: false,
+      autopilot: false, // §24
     })
   },
 
@@ -137,6 +169,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // - 不需要目标的 spell（heal/draw/AoE）→ 等玩家点己方 BoardZone 确认
     // - weapon → 等玩家点己方主公确认
     const needsTarget = engine.cardNeedsTarget(card)
+    // §19.7.8 · 需目标但无合法目标 → 直接打出（targeted 部分跳过）
+    // 解决魏延手牌只有自己 + 友方场上无随从死锁 / 程普打 AI 无随从死锁 等场景
+    if (needsTarget && !engine.hasValidTargetsForCard(card, 'player')) {
+      engine.playCard('player', instanceId)
+      set({
+        selectedCardId: null,
+        pendingTargetForCard: null,
+        selectedAttackerId: null,
+      })
+      get().syncState()
+      return
+    }
     set({
       selectedCardId: instanceId,
       pendingTargetForCard: needsTarget ? instanceId : null,
@@ -257,6 +301,9 @@ async function runAITurn() {
     },
     // §19.6 Phase B · AI 攻击走带前冲动画的路径
     (attackerId, target) => doAnimatedAttack('ai', attackerId, target),
+    undefined, // sideOverride
+    undefined, // tracer
+    useGameStore.getState().aiDifficulty, // §23 注入难度
   )
 
   await delay(600) // v5.5 AI 回合结束前给玩家看一眼最终状态
@@ -265,6 +312,69 @@ async function runAITurn() {
   engine.endTurn()
   useGameStore.setState({ aiThinking: false })
   useGameStore.getState().syncState()
+
+  // §24 托管链：AI 回合结束后若玩家仍开着托管 → 自动跑玩家回合
+  const after = useGameStore.getState()
+  if (
+    after.autopilot &&
+    engine.state.activePlayer === 'player' &&
+    engine.state.phase === 'main'
+  ) {
+    void runPlayerAutopilotTurn()
+  }
+}
+
+/**
+ * §24 · 玩家方托管回合
+ *
+ * 复用 takeAITurn 但 sideOverride='player' + 难度='grandmaster'
+ * 节奏与 AI 回合一致（700ms / action + 600ms 收尾），便于玩家观察
+ * 完成后自动链 AI 回合
+ */
+async function runPlayerAutopilotTurn() {
+  const engine = useGameStore.getState().engine
+  if (!engine) return
+  if (engine.state.phase !== 'main') return
+  if (engine.state.activePlayer !== 'player') return
+
+  // 锁定 UI（与 AI 回合一致的视觉处理）+ 清掉任何残留选中
+  useGameStore.setState({
+    aiThinking: true,
+    selectedCardId: null,
+    selectedAttackerId: null,
+    pendingTargetForCard: null,
+  })
+
+  await delay(800) // 与 AI 回合开局节拍一致
+
+  await takeAITurn(
+    engine,
+    async () => {
+      useGameStore.getState().syncState()
+      await delay(700)
+    },
+    (attackerId, target) => doAnimatedAttack('player', attackerId, target),
+    'player', // §24 sideOverride
+    undefined, // tracer
+    'grandmaster', // §24 托管 = 宗师强度
+  )
+
+  await delay(600)
+
+  // 若玩家在托管期间没主动取消，照常 endTurn 进 AI 回合
+  const stateBeforeEnd = engine.state
+  if (stateBeforeEnd.phase === 'main' && stateBeforeEnd.activePlayer === 'player') {
+    engine.endTurn()
+  }
+  useGameStore.setState({ aiThinking: false })
+  useGameStore.getState().syncState()
+
+  // 链 AI 回合（重新读 engine.state · TS 控制流不跨 mutation）
+  const stateAfterEnd = engine.state
+  if (stateAfterEnd.activePlayer === 'ai' && stateAfterEnd.phase === 'main') {
+    useGameStore.setState({ aiThinking: true })
+    void runAITurn()
+  }
 }
 
 /**

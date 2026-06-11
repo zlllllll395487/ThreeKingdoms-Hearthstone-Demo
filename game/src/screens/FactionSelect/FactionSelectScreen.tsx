@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import { BackButton } from '@/components/BackButton/BackButton'
+import type { AIDifficulty } from '@/engine/ai'
 import styles from './FactionSelectScreen.module.css'
 
 type Faction = 'shu' | 'wu'
@@ -11,6 +12,15 @@ const HERO_BY_FACTION: Record<Faction, string> = {
   shu: '刘备',
   wu: '孙权',
 }
+
+/** §23 AI 难度展示 · 名称 / 短描述 */
+const DIFFICULTY_META: Array<{ key: AIDifficulty; label: string; sub: string }> = [
+  { key: 'novice', label: '新手', sub: '草莽之辈' },
+  { key: 'standard', label: '标准', sub: '军中谋士' },
+  { key: 'grandmaster', label: '宗师', sub: '卧龙之谋' },
+]
+
+const LS_DIFFICULTY_KEY = 'sgls.aiDifficulty'
 
 /**
  * 阵营选择屏 · 横屏 1920×1080
@@ -26,6 +36,19 @@ export function FactionSelectScreen() {
   const startGame = useGameStore((s) => s.startGame)
   const [playerFaction, setPlayerFaction] = useState<Faction | null>(null)
   const [aiFaction, setAiFaction] = useState<Faction | null>(null)
+  // §23 AI 难度：从 localStorage 读上次选择，默认 standard
+  const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('standard')
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LS_DIFFICULTY_KEY)
+      if (saved === 'novice' || saved === 'standard' || saved === 'grandmaster') {
+        setAiDifficulty(saved)
+      }
+    } catch {
+      // localStorage 不可用 · 静默
+    }
+  }, [])
 
   const bgUrl = getUiAssetUrl('faction_select_bg.png')
   const shuCardUrl = getUiAssetUrl('faction_card_shu.png')
@@ -37,7 +60,12 @@ export function FactionSelectScreen() {
 
   const handleStart = () => {
     if (!playerFaction || !aiFaction) return
-    startGame({ playerFaction, aiFaction })
+    try {
+      localStorage.setItem(LS_DIFFICULTY_KEY, aiDifficulty)
+    } catch {
+      // localStorage 不可用 · 静默
+    }
+    startGame({ playerFaction, aiFaction, aiDifficulty })
     navigate('battle')
   }
 
@@ -109,6 +137,28 @@ export function FactionSelectScreen() {
         {renderFactionColumn('player', '你的阵营', playerFaction, setPlayerFaction)}
         <div className={styles.vsDivider}>VS</div>
         {renderFactionColumn('ai', '对手阵营', aiFaction, setAiFaction)}
+      </div>
+
+      {/* §23 难度选择 */}
+      <div className={styles.difficultyRow}>
+        <h3 className={styles.difficultyTitle}>对手难度</h3>
+        <div className={styles.difficultyButtons}>
+          {DIFFICULTY_META.map((d) => (
+            <button
+              key={d.key}
+              type="button"
+              className={`${styles.difficultyBtn} ${
+                aiDifficulty === d.key ? styles.difficultyBtnActive : ''
+              }`}
+              onClick={() => setAiDifficulty(d.key)}
+              aria-pressed={aiDifficulty === d.key}
+              aria-label={`对手难度：${d.label}`}
+            >
+              <span className={styles.difficultyLabel}>{d.label}</span>
+              <span className={styles.difficultySub}>{d.sub}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className={styles.bottomBar}>

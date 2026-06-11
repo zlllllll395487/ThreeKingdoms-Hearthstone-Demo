@@ -412,7 +412,6 @@ export function BattleScreen() {
   const manaEmptyUrl = getUiAssetUrl('mana_empty.png')
   const btnEndTurnUrl = getUiAssetUrl('btn_end_turn.png')
   const btnTurnLogUrl = getUiAssetUrl('btn_turn_log.png')
-  const btnBackUrl = getUiAssetUrl('btn_back.png')
   const btnCircularUrl = getUiAssetUrl('btn_circular.png')
 
   const isPlayerTurn = state.activePlayer === 'player' && state.phase === 'main'
@@ -545,7 +544,7 @@ export function BattleScreen() {
   /** §19.7.11 · 一次性手动浮起反馈（不走 engine log 路径）*/
   const pushFeedback = (text: string) => {
     const id = `fb_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-    setEffectToasts((prev) => [...prev, { id, text }].slice(-4))
+    setEffectToasts((prev) => [...prev, { id, text, kind: 'normal' as ToastKind }].slice(-4))
     window.setTimeout(() => {
       setEffectToasts((prev) => prev.filter((p) => p.id !== id))
     }, 1500)
@@ -1091,7 +1090,7 @@ function HeroDisplay({
   name,
   health,
   maxHealth,
-  attack,
+  attack: _attack,
   armor,
   weapon,
   portraitUrl,

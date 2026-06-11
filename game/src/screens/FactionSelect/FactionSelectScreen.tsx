@@ -54,7 +54,6 @@ export function FactionSelectScreen() {
   const shuCardUrl = getUiAssetUrl('faction_card_shu.png')
   const wuCardUrl = getUiAssetUrl('faction_card_wu.png')
   const btnStartUrl = getUiAssetUrl('btn_start_battle_v2.png')
-  const btnBackUrl = getUiAssetUrl('btn_back.png')
   // §24 难度按钮底图 · 用户切的「难度ui按钮.png」（asset/新增组件0610/）
   const btnDifficultyUrl = getUiAssetUrl('btn_difficulty.png')
 

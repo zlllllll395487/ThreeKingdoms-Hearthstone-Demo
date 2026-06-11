@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
+import { BackButton } from '@/components/BackButton/BackButton'
 import styles from './MainMenu.module.css'
 
 /**
@@ -35,15 +36,14 @@ export function MainMenu() {
   const modalSwitchBgUrl = getUiAssetUrl('modal_switch_bg.png')
   const modalChatUrl = getUiAssetUrl('modal_chat.png')
   const modalResourceUrl = getUiAssetUrl('modal_resource.png')
-  const btnBackUrl = getUiAssetUrl('btn_back.png')
-
   const tabDeckUrl = getUiAssetUrl('tab_deck.png')
   const tabRecruitUrl = getUiAssetUrl('tab_recruit.png')
   const tabQuestUrl = getUiAssetUrl('tab_quest.png')
   const tabShopUrl = getUiAssetUrl('tab_shop.png')
   const tabCodexUrl = getUiAssetUrl('tab_codex.png')
 
-  const dev = (label: string) => () => showModal(label)
+  // 占位入口 · 弹出"正在开发中"提示
+  void showModal // 保留 showModal 给将来用 · 当前 + 号已挂教程
 
   return (
     <div className={styles.container}>

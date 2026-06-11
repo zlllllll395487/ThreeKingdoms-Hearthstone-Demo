@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
+import { hasSeenTutorial } from '@/screens/Tutorial/TutorialScreen'
 import styles from './MainMenu.module.css'
 
 /**
@@ -12,6 +13,15 @@ export function MainMenu() {
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [showChatModal, setShowChatModal] = useState(false)
   const [showResourceModal, setShowResourceModal] = useState(false)
+
+  // §25 首次进入主菜单 · 若未看过教程则自动弹
+  useEffect(() => {
+    if (!hasSeenTutorial()) {
+      // 给 MainMenu 进入动画留个 800ms 缓冲，再弹教程
+      const timer = window.setTimeout(() => navigate('tutorial'), 800)
+      return () => window.clearTimeout(timer)
+    }
+  }, [navigate])
 
   const bgUrl = getUiAssetUrl('menu_background.png')
   const playerUiBlockUrl = getUiAssetUrl('player_ui_block.png')

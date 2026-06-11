@@ -72,10 +72,10 @@
 /* 双栏行 · 居中铺满 · §23 缩高为难度行让位 */
 .columnsRow {
   position: absolute;
-  top: 130px;
+  top: 120px;
   left: 0;
   right: 0;
-  height: 570px;
+  height: 520px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,17 +235,17 @@
   50%      { transform: scale(1.06); }
 }
 
-/* §23 AI 难度选择行 · 位于 columnsRow 与 bottomBar 之间 */
+/* §23 AI 难度选择行 · 位于 columnsRow 与 bottomBar 之间 · 上移给 bottomBar preview 让位 */
 .difficultyRow {
   position: absolute;
-  top: 720px;
+  top: 660px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
 }
 
 .difficultyTitle {
@@ -330,7 +330,7 @@
     0 2px 6px rgba(0, 0, 0, 0.95);
 }
 
-/* 底部 · 预览文字 + 确认按钮 */
+/* 底部 · 预览文字 + 确认按钮 · §25 加 top padding 与难度行隔开 */
 .bottomBar {
   position: absolute;
   bottom: 0;
@@ -341,7 +341,12 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 0 0 38px;
+  padding: 0 0 30px;
+}
+
+/* preview 字段单独加上方间距 */
+.bottomBar > .preview {
+  margin-top: 36px;
 }
 
 .preview {

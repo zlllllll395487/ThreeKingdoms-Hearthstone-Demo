@@ -6,7 +6,7 @@
  *   npx tsx scripts/sim/run-sims.ts --games 1000 --seed 42
  */
 
-import { simulateGame, type Faction, type SimResult } from './simulator.js'
+import { simulateGame, type Faction, type SimResult, type SimDifficulty } from './simulator.js'
 import { installSeeded } from './seeded-random.js'
 import { collectStats } from './stats-collector.js'
 import { renderReport } from './reporter.js'
@@ -22,11 +22,18 @@ function parseArgs() {
     const i = args.indexOf(flag)
     return i >= 0 && args[i + 1] ? args[i + 1] : def
   }
+  const asDifficulty = (s: string): SimDifficulty => {
+    if (s === 'novice' || s === 'standard' || s === 'grandmaster') return s
+    return 'standard'
+  }
   return {
     games: parseInt(get('--games', '1000'), 10),
     seed: parseInt(get('--seed', '1'), 10),
     label: get('--label', 'baseline'),
     checkInterval: parseInt(get('--check', '100'), 10),
+    // §23 两边 AI 难度 · 默认都 standard（向后兼容）
+    playerDifficulty: asDifficulty(get('--player-difficulty', 'standard')),
+    aiDifficulty: asDifficulty(get('--ai-difficulty', 'standard')),
   }
 }
 
@@ -35,6 +42,9 @@ async function main() {
   installSeeded()
   console.log(
     `[sim] starting ${opts.games} games · seed ${opts.seed} · label "${opts.label}"`,
+  )
+  console.log(
+    `[sim] difficulty · player=${opts.playerDifficulty} / ai=${opts.aiDifficulty}`,
   )
 
   const results: SimResult[] = []
@@ -58,6 +68,8 @@ async function main() {
         aiFaction: matchup.a,
         firstPlayer: matchup.firstP,
         maxTurns: 40,
+        playerDifficulty: opts.playerDifficulty,
+        aiDifficulty: opts.aiDifficulty,
       })
       results.push(r)
     } catch (e) {

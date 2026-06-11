@@ -13,6 +13,7 @@ import { getDeckByFaction } from '../../src/data/decks.js'
 import { setSeed } from './seeded-random.js'
 
 export type Faction = 'shu' | 'wu'
+export type SimDifficulty = 'novice' | 'standard' | 'grandmaster'
 
 export interface SimConfig {
   seed: number
@@ -21,6 +22,9 @@ export interface SimConfig {
   /** 哪边先手 · 默认 player */
   firstPlayer?: 'player' | 'ai'
   maxTurns?: number
+  /** §23 两边 AI 难度 · 用来跑梯度验证 */
+  playerDifficulty?: SimDifficulty
+  aiDifficulty?: SimDifficulty
 }
 
 export interface SimResult {
@@ -67,9 +71,13 @@ function makeHero(faction: Faction) {
 }
 
 /** 极简启发式 AI 决策器（复用 ai.ts 的 takeAITurn 但带 sideOverride 让 player 也走 AI）*/
-async function runOneTurn(engine: GameEngine, side: 'player' | 'ai'): Promise<void> {
+async function runOneTurn(
+  engine: GameEngine,
+  side: 'player' | 'ai',
+  difficulty?: SimDifficulty,
+): Promise<void> {
   const { takeAITurn } = await import('../../src/engine/ai.js')
-  await takeAITurn(engine, async () => {}, undefined, side)
+  await takeAITurn(engine, async () => {}, undefined, side, undefined, difficulty)
 }
 
 export async function simulateGame(cfg: SimConfig): Promise<SimResult> {
@@ -111,10 +119,10 @@ export async function simulateGame(cfg: SimConfig): Promise<SimResult> {
     const cardsBefore = playedCards[active].length
 
     if (active === 'player') {
-      await runOneTurn(engine, 'player')
+      await runOneTurn(engine, 'player', cfg.playerDifficulty)
       engine.endTurn()
     } else {
-      await runOneTurn(engine, 'ai')
+      await runOneTurn(engine, 'ai', cfg.aiDifficulty)
       engine.endTurn()
     }
 

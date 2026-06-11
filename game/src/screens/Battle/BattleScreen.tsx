@@ -43,6 +43,7 @@ export function BattleScreen() {
     selectedAttackerId,
     pendingTargetForCard,
     aiThinking,
+    autopilot,
     startGame,
     selectCard,
     selectAttacker,
@@ -51,6 +52,7 @@ export function BattleScreen() {
     playSelectedToHero,
     endTurn,
     endGame,
+    toggleAutopilot,
   } = useGameStore()
 
   // §19.6 Phase C · FX 队列（基础设施 · 自动触发先关）
@@ -411,6 +413,7 @@ export function BattleScreen() {
   const btnEndTurnUrl = getUiAssetUrl('btn_end_turn.png')
   const btnTurnLogUrl = getUiAssetUrl('btn_turn_log.png')
   const btnBackUrl = getUiAssetUrl('btn_back.png')
+  const btnCircularUrl = getUiAssetUrl('btn_circular.png')
 
   const isPlayerTurn = state.activePlayer === 'player' && state.phase === 'main'
   const hasPendingSpellTarget = !!pendingTargetForCard
@@ -818,6 +821,26 @@ export function BattleScreen() {
       >
         {/* §19.7.19 · 改用 modal_btn_short_on 底图 + React 文字 */}
         <span>回合记录</span>
+      </button>
+
+      {/* ============ §24 托管按钮（结束回合按钮上方） ============ */}
+      <button
+        type="button"
+        className={styles.autopilotFixed}
+        onClick={(e) => {
+          e.stopPropagation()
+          toggleAutopilot()
+        }}
+        aria-label={autopilot ? '取消托管' : '开启托管'}
+        aria-pressed={autopilot}
+        data-active={autopilot}
+      >
+        {btnCircularUrl && (
+          <img src={btnCircularUrl} alt="" aria-hidden className={styles.autopilotBg} />
+        )}
+        <span className={styles.autopilotLabel}>
+          {autopilot ? '取消\n托管' : '托管'}
+        </span>
       </button>
 
       {/* ============ 结束回合按钮（右中独立悬浮） ============ */}

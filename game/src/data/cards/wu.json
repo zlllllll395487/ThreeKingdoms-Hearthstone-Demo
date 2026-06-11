@@ -23,8 +23,8 @@
     "type": "minion",
     "faction": "wu",
     "rarity": "epic",
-    "attack": 2,
-    "health": 4,
+    "attack": 3,
+    "health": 5,
     "tribe": "strategist",
     "keywords": ["taunt"],
     "anchorTag": "anchor_draw",
@@ -246,7 +246,7 @@
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 1, "targetType": "minion" }
+        "params": { "side": "enemy", "amount": 2, "targetType": "minion" }
       }
     ],
     "linkedEffects": [
@@ -263,7 +263,7 @@
     ],
     "portrait": "草船借箭.png",
     "cardvisual": "草船借箭.png",
-    "description": "对所有敌方武将造成 1 点伤害。【特殊效果·鲁肃】：抽 2 张牌，并退还 1 点法力（仅本回合有效）。",
+    "description": "对所有敌方武将造成 2 点伤害。【特殊效果·鲁肃】：抽 2 张牌，并退还 1 点法力（仅本回合有效）。",
     "flavor": "雾锁长江，孔明从容。"
   },
   {
@@ -301,7 +301,7 @@
   {
     "id": "W15",
     "name": "运筹帷幄",
-    "cost": 4,
+    "cost": 3,
     "type": "spell",
     "faction": "wu",
     "rarity": "epic",
@@ -440,12 +440,12 @@
       {
         "trigger": "onCast",
         "action": "returnToHand",
-        "params": { "targetSelector": "enemyMinion", "maxCost": 3 }
+        "params": { "targetSelector": "enemyMinion", "maxCost": 5 }
       }
     ],
     "portrait": "反间计.png",
     "cardvisual": "反间计.png",
-    "description": "将一名法力消耗不超过 3 点的敌方武将送回其拥有者手牌。",
+    "description": "将一名法力消耗不超过 5 点的敌方武将送回其拥有者手牌。",
     "flavor": "蒋干盗书，反中其计。"
   },
   {
@@ -644,7 +644,7 @@
       {
         "trigger": "onCast",
         "action": "dealDamage",
-        "params": { "amount": 3, "targetSelector": "enemyAny" }
+        "params": { "amount": 4, "targetSelector": "enemyAny" }
       }
     ],
     "comboLinkedEffects": [
@@ -656,13 +656,13 @@
     ],
     "portrait": "tianlei.png",
     "cardvisual": "tianlei.png",
-    "description": "对一名敌方目标造成 3 点伤害。【连击·火油】对同一目标额外造成 2 点伤害（合计 5 点）。",
+    "description": "对一名敌方目标造成 4 点伤害。【连击·火油】对同一目标额外造成 2 点伤害（合计 6 点）。",
     "flavor": "雷霆万钧，势不可挡。"
   },
   {
     "id": "W30",
     "name": "冷箭",
-    "cost": 2,
+    "cost": 1,
     "type": "spell",
     "faction": "wu",
     "rarity": "rare",

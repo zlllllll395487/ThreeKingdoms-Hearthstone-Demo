@@ -137,7 +137,7 @@
     "type": "minion",
     "faction": "shu",
     "rarity": "epic",
-    "attack": 5,
+    "attack": 4,
     "health": 4,
     "tribe": "cavalry",
     "keywords": ["rush"],
@@ -145,12 +145,12 @@
       {
         "trigger": "battlecry",
         "action": "buffMinion",
-        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 2, "permanent": true }
+        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 1, "permanent": true }
       }
     ],
     "portrait": "魏延.png",
     "cardvisual": "魏延.png",
-    "description": "突袭。出阵：选择一名友方武将，永久使其获得 +2 攻击力。",
+    "description": "突袭。出阵：选择一名友方武将，永久使其获得 +1 攻击力。",
     "flavor": "脑后有反骨。"
   },
   {
@@ -300,7 +300,7 @@
     "type": "minion",
     "faction": "shu",
     "rarity": "epic",
-    "attack": 3,
+    "attack": 2,
     "health": 3,
     "tribe": "infantry",
     "keywords": ["taunt"],
@@ -373,7 +373,7 @@
       {
         "trigger": "onCast",
         "action": "buffMinion",
-        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 1, "health": 1, "permanent": true }
+        "params": { "side": "self", "targetSelector": "friendlyMinion", "attack": 0, "health": 1, "permanent": true }
       },
       {
         "trigger": "onCast",
@@ -383,7 +383,7 @@
     ],
     "portrait": "万军取首.png",
     "cardvisual": "万军取首.png",
-    "description": "选择一名友方武将，使其获得 +1/+1，并可于本回合内额外攻击 1 次。",
+    "description": "选择一名友方武将，使其获得 +0/+1，并可于本回合内额外攻击 1 次。",
     "flavor": "于百万军中取上将首级，如探囊取物。"
   },
   {
@@ -393,7 +393,7 @@
     "type": "weapon",
     "faction": "shu",
     "rarity": "rare",
-    "attack": 2,
+    "attack": 1,
     "durability": 2,
     "effects": [
       {
@@ -424,7 +424,7 @@
   {
     "id": "S25",
     "name": "百锐刀",
-    "cost": 2,
+    "cost": 3,
     "type": "weapon",
     "faction": "shu",
     "rarity": "common",

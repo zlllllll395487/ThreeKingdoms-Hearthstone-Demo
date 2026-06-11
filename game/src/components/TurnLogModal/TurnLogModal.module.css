@@ -133,10 +133,11 @@
 .turnHeader {
   margin: 0 0 8px;
   font-family: var(--font-kai);
-  font-size: 18px;
-  color: #4a2a12;
+  font-size: 19px;
+  font-weight: 700;
+  color: #3a1f08;
   letter-spacing: 4px;
-  text-shadow: 0 1px 0 rgba(255, 230, 180, 0.7);
+  text-shadow: 0 1px 0 rgba(255, 230, 180, 0.85);
   border-bottom: 1px dashed rgba(95, 60, 30, 0.4);
   padding-bottom: 6px;
 }
@@ -155,17 +156,18 @@
   align-items: baseline;
   gap: 10px;
   font-family: var(--font-serif);
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   line-height: 1.5;
-  color: #3a2410;
+  color: #2a1808;
   padding: 4px 6px;
   border-radius: 3px;
 }
 
 .entryKind {
   font-family: var(--font-display);
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 800;
   flex-shrink: 0;
   min-width: 56px;
   text-align: center;
@@ -178,6 +180,7 @@
 
 .entryText {
   flex: 1;
+  font-weight: 700;
 }
 
 /* 按 kind 颜色分级 · 深色背景（羊皮纸上），仅 chip 内文字着色 */

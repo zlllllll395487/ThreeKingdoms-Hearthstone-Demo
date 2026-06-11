@@ -505,7 +505,7 @@ function scoreSpellEffect(
         (max, m) => (m.currentAttack > max.currentAttack ? m : max),
         player.board[0],
       )
-      // 高 atk 友方 +buff → 滚雪球，价值高
+      // 高 atk 友方 +buff → 滚雪 / 助势，价值高
       return (att + hp) * 1.2 + best.currentAttack * 0.3
     }
     case 'grantExtraAttack':

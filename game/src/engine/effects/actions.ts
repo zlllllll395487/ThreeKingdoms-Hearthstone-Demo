@@ -161,7 +161,7 @@ const buffMinion: ActionFn = (engine, source, params, target) => {
   engine.log.push(logEffect(`${source.data.name}：${m.data.name} +${attack}/+${health}`))
 }
 
-/** v5.5 滚雪球公式（S18/S19/S20）：场上每个其他友方武将 → 自身 +N/+N */
+/** v5.5「助势」公式（S18/S19/S20）：场上每个其他友方武将 → 自身 +N/+N · 游戏内术语「助势」 */
 const dynamicBuffByFriendlyCount: ActionFn = (engine, source, params, _target) => {
   const player = getPlayer(engine, source.owner!)
   const friendlyCount = player.board.filter((m) => m.instanceId !== source.instanceId).length
@@ -171,7 +171,7 @@ const dynamicBuffByFriendlyCount: ActionFn = (engine, source, params, _target) =
   source.currentAttack += attack
   source.currentHealth += health
   source.maxHealth += health
-  engine.log.push(logEffect(`${source.data.name}：滚雪球 +${attack}/+${health}（数 ${friendlyCount} 个友方）`))
+  engine.log.push(logEffect(`${source.data.name}：助势 +${attack}/+${health}（场上 ${friendlyCount} 名友方）`))
 }
 
 /** v5.5 S22 万军取首：让一友方武将本回合再攻击 1 次 */

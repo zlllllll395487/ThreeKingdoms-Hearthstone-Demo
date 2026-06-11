@@ -122,8 +122,8 @@ export function MainMenu() {
           </div>
           <button
             className={styles.moreBtn}
-            onClick={dev('更多')}
-            aria-label="更多"
+            onClick={() => navigate('tutorial')}
+            aria-label="教程"
           >
             {iconMoreUrl && <img src={iconMoreUrl} alt="" />}
           </button>

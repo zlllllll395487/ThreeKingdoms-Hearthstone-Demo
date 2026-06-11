@@ -15,7 +15,13 @@ import styles from './TutorialScreen.module.css'
  *   - tutorial_btn_short_off/on.png (次按钮 · 跳过)
  */
 
-const LS_TUTORIAL_SEEN_KEY = 'sgls.tutorialSeen'
+/**
+ * §25 教程触发状态 · 改为内存变量
+ * 用户反馈：希望刷新页面后能重看教程（方便测试 + 新用户每次进游戏都有教程提醒）
+ * - 当前页面会话内：看完后不再重复弹（避免回到主菜单再次进战斗时重弹）
+ * - 浏览器刷新 / 关闭标签：状态重置，下次进入又会弹
+ */
+let tutorialSeenInSession = false
 
 interface PageContent {
   title: string
@@ -155,11 +161,7 @@ export function TutorialScreen() {
   }, [isFirst, isLast])
 
   function markSeen() {
-    try {
-      localStorage.setItem(LS_TUTORIAL_SEEN_KEY, '1')
-    } catch {
-      // localStorage 不可用 · 静默
-    }
+    tutorialSeenInSession = true
   }
 
   /** 跳过 / 末页开始对战 都直接进战斗（游戏已在 FactionSelect 确认时启动）*/
@@ -292,20 +294,12 @@ export function TutorialScreen() {
   )
 }
 
-/** 检查是否已看过教程 · FactionSelect 确认时调用 */
+/** 检查本会话是否已看过教程 · FactionSelect 确认时调用 · 刷新页面后会重置 */
 export function hasSeenTutorial(): boolean {
-  try {
-    return localStorage.getItem(LS_TUTORIAL_SEEN_KEY) === '1'
-  } catch {
-    return true // localStorage 不可用 · 不弹
-  }
+  return tutorialSeenInSession
 }
 
-/** 调试用 · 清除教程已看标记 */
+/** 手动重置 · 立即让下次触发再次弹教程（不需要刷新）*/
 export function clearTutorialSeen() {
-  try {
-    localStorage.removeItem(LS_TUTORIAL_SEEN_KEY)
-  } catch {
-    // ignore
-  }
+  tutorialSeenInSession = false
 }

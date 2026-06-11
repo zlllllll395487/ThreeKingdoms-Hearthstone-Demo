@@ -1,4 +1,4 @@
-/* 教程屏 · 竖屏 1080×1920 设计基准 */
+/* 教程屏 · 竖屏 1080×1920 设计基准 · 2:3 弹窗框 */
 
 .container {
   position: relative;
@@ -72,14 +72,14 @@
   transform: scale(1.05);
 }
 
-/* 主弹窗 · 顶部留 200px 给标题装饰 · 容器尺寸 800×1380 居中 */
+/* 主弹窗 · 2:3 ratio · 760 × 1140 · 居中偏上 */
 .modalWrap {
   position: absolute;
   top: 180px;
   left: 50%;
   transform: translateX(-50%);
-  width: 880px;
-  height: 1380px;
+  width: 800px;
+  height: 1200px;
   z-index: 2;
   filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.85));
 }
@@ -93,40 +93,28 @@
   pointer-events: none;
 }
 
-/* 内容区 · 避开装饰边框（红旗在上方，红色侧卷在左右） */
+/* 内容安全区 · 避开顶部红旗 / 左右红色卷轴 / 底部装饰 */
 .modalContent {
   position: absolute;
-  top: 200px; /* 避开顶部红旗装饰 */
+  top: 180px; /* 避开顶部红旗装饰 */
   left: 110px; /* 避开左侧红色卷轴 */
   right: 110px;
-  bottom: 100px; /* 避开底部装饰 */
-  padding: 24px 8px;
-  overflow-y: auto;
+  bottom: 90px; /* 避开底部装饰 */
+  padding: 24px 6px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
-/* 自定义滚动条样式（防止教程内容稍多需要滑动）*/
-.modalContent::-webkit-scrollbar {
-  width: 6px;
-}
-.modalContent::-webkit-scrollbar-track {
-  background: transparent;
-}
-.modalContent::-webkit-scrollbar-thumb {
-  background: rgba(180, 140, 80, 0.5);
-  border-radius: 3px;
-}
-
 .title {
   font-family: var(--font-kai);
-  font-size: 56px;
+  font-size: 52px;
   font-weight: bold;
   color: #5a3416;
-  letter-spacing: 14px;
+  letter-spacing: 12px;
   text-align: center;
-  margin: 0 0 36px 0;
-  padding-left: 14px;
+  margin: 0 0 28px 0;
+  padding-left: 12px;
   text-shadow:
     0 0 2px rgba(0, 0, 0, 0.45),
     0 2px 4px rgba(120, 70, 30, 0.42);
@@ -135,36 +123,37 @@
 .body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   font-family: var(--font-kai);
   color: #3a2510;
+  flex: 1;
+  overflow: hidden;
 }
 
 .h {
-  font-size: 38px;
+  font-size: 32px;
   font-weight: bold;
   color: #8a3a1a;
-  letter-spacing: 6px;
-  margin: 18px 0 6px 0;
-  padding-left: 6px;
-  border-left: 6px solid #b85a25;
-  padding-left: 18px;
+  letter-spacing: 5px;
+  margin: 12px 0 4px 0;
+  padding-left: 14px;
+  border-left: 5px solid #b85a25;
 }
 
 .p {
-  font-size: 30px;
-  line-height: 1.65;
-  letter-spacing: 2px;
+  font-size: 26px;
+  line-height: 1.55;
+  letter-spacing: 1.5px;
   margin: 0;
   color: #4a2f15;
 }
 
 .li {
-  font-size: 30px;
-  line-height: 1.5;
-  letter-spacing: 2px;
+  font-size: 25px;
+  line-height: 1.45;
+  letter-spacing: 1.5px;
   margin: 0;
-  padding-left: 28px;
+  padding-left: 26px;
   position: relative;
   color: #4a2f15;
 }
@@ -172,27 +161,27 @@
 .bullet {
   position: absolute;
   left: 6px;
-  top: 0;
+  top: -2px;
   color: #b85a25;
   font-weight: bold;
-  font-size: 36px;
+  font-size: 32px;
   line-height: 1;
 }
 
-/* 页码点 · 修正位置在 modal 下方 */
+/* 页码点 · 在 modal 下方 */
 .dots {
   position: absolute;
-  bottom: 200px;
+  bottom: 220px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
-  gap: 18px;
+  gap: 14px;
 }
 
 .dot {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: rgba(255, 215, 100, 0.25);
   border: 2px solid rgba(255, 215, 100, 0.5);
@@ -211,17 +200,17 @@
 /* 底部按钮组 · 上一页 / 下一页 (or 开始对战) */
 .bottomBar {
   position: absolute;
-  bottom: 60px;
+  bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 3;
   display: flex;
-  gap: 60px;
+  gap: 50px;
 }
 
 .navBtn {
   position: relative;
-  width: 320px;
+  width: 300px;
   height: 110px;
   background: transparent;
   border: none;
@@ -247,7 +236,7 @@
   position: relative;
   z-index: 1;
   font-family: var(--font-kai);
-  font-size: 36px;
+  font-size: 34px;
   font-weight: bold;
   color: #fff5c8;
   letter-spacing: 8px;

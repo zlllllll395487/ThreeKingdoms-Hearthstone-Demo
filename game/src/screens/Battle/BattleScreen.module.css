@@ -806,6 +806,7 @@
 /* §19.7-2 回合记录按钮 · endTurn 左侧 · 同高度（§19.7-6 放大 140x60 → 200x88） */
 /* §19.7.19 · 回合记录按钮改用 modal_btn_short_on.png + React 文字
    原 btn_turn_log.png 自带"回合记录"歪斜，换共用按钮系统统一观感 */
+/* §25 用户切的新「回合记录」按钮 · 文字已烫入 PNG · 仅做尺寸 + hover */
 .turnLogFixed {
   position: absolute;
   top: 891px;
@@ -813,26 +814,31 @@
   z-index: 8;
   width: 200px;
   height: 78px;
-  background: url('/src/assets/ui/modal_btn_short_on.png') no-repeat center / 100% 100%;
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.72));
   transition: transform 0.18s ease, filter 0.18s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.turnLogFixed img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .turnLogFixed span {
   font-family: var(--font-kai);
   font-size: 20px;
   font-weight: bold;
-  color: #3a1a08;
+  color: #fff5c8;
   letter-spacing: 6px;
-  text-shadow:
-    0 1px 0 rgba(255, 245, 220, 0.7),
-    0 0 6px rgba(255, 200, 100, 0.3);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
   padding-left: 6px;
 }
 

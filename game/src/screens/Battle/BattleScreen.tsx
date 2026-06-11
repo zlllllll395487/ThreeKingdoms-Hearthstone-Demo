@@ -810,7 +810,7 @@ export function BattleScreen() {
         <span>{state.player.deck.length}</span>
       </div>
 
-      {/* §19.7-2 回合记录按钮（endTurn 左侧）*/}
+      {/* §19.7-2 回合记录按钮（endTurn 左侧）· §25 用户新切按钮，文字已烫入 PNG */}
       <button
         className={styles.turnLogFixed}
         onClick={(e) => {
@@ -819,8 +819,11 @@ export function BattleScreen() {
         }}
         aria-label="查看回合记录"
       >
-        {/* §19.7.19 · 改用 modal_btn_short_on 底图 + React 文字 */}
-        <span>回合记录</span>
+        {btnTurnLogUrl ? (
+          <img src={btnTurnLogUrl} alt="回合记录" />
+        ) : (
+          <span>回合记录</span>
+        )}
       </button>
 
       {/* ============ §24 托管按钮（结束回合按钮上方） ============ */}

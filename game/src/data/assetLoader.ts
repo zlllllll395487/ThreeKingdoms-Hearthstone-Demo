@@ -59,39 +59,122 @@ export function getFxFrame(name: string, frame: number): string | null {
 }
 
 /**
- * §26 LoadingScreen 真预加载 · 返回必须预加载的资源 URL 列表
+ * §26 两阶段预加载策略
  *
- * 分类策略：
- * - critical: 主菜单 / Codex / 战斗用到的所有大图（立绘 + 卡面 + cardvisual）
- *   占总资源约 70% 体积,预加载完后 Codex 进入不再卡顿
- * - 不含 fx 序列帧（仅战斗时用 · 占 ~10MB · 战斗启动时再加载）
- * - 不含小型 ui icon（自然加载即可,体积小不卡）
+ * Phase 1 (LoadingScreen 阻塞): 主菜单进入前必须就绪的资源 · 总 ~5 MB · 秒级完成
+ * Phase 2 (MainMenu 挂载后后台执行): Codex / Battle 用到的大图 · ~110 MB
+ *   - 不阻塞 UI 交互
+ *   - 拉完后 Codex/Battle 切屏无图片闪烁
+ *   - 若用户在拉完前就进 Codex,单图按需加载 (退化为普通体验,无 bug)
  */
-export function getCriticalPreloadUrls(): string[] {
+
+/** Phase 1 · 主菜单加载所需小图 (10-20 张,约 5 MB) */
+export function getEssentialPreloadUrls(): string[] {
+  const essentialNames = [
+    'menu_background.png',
+    'player_ui_block.png',
+    'coin_silver.png',
+    'coin_jade.png',
+    'coin_gem.png',
+    'icon_mail.png',
+    'icon_calendar.png',
+    'icon_friends.png',
+    'icon_chat.png',
+    'icon_more.png',
+    'card_battle.png',
+    'card_story.png',
+    'card_event.png',
+    'tab_deck.png',
+    'tab_recruit.png',
+    'tab_quest.png',
+    'tab_shop.png',
+    'tab_codex.png',
+    'btn_switch_bg.png',
+    'loading_bg.png',
+  ]
+  return essentialNames
+    .map((n) => uiModules[`/src/assets/ui/${n}`])
+    .filter((u): u is string => !!u)
+}
+
+/** Phase 2 · 后台预加载 · Codex / Battle / FactionSelect / Tutorial 用到的大图 */
+function getBackgroundPreloadUrls(): string[] {
   const portraits = Object.values(portraitModules)
-  // cardvisual_*.png 位于 ui/ 目录 · 单独筛出 (Codex 主要靠这些)
+  // cardvisual_*.png (Codex 主要素材)
   const cardvisuals = Object.entries(uiModules)
     .filter(([path]) => path.includes('/cardvisual_'))
     .map(([, url]) => url)
-  // UI 中含「frame」「modal」「bg」「menu」等关键背景大图
-  const criticalUi = Object.entries(uiModules)
+  // 其它屏的背景 / 边框 / 弹窗
+  const screenUi = Object.entries(uiModules)
     .filter(([path]) => {
       const name = path.split('/').pop() ?? ''
       return (
         name.startsWith('frame_') ||
         name.startsWith('modal_') ||
-        name.startsWith('menu_') ||
         name.startsWith('faction_') ||
         name.startsWith('tutorial_') ||
         name.startsWith('hero_') ||
-        name.startsWith('card_') ||
         name === 'battle_bg.png' ||
         name === 'battle_bg_portrait.png' ||
-        name === 'codex_bg.png' ||
-        name === 'loading_bg.png'
+        name === 'codex_bg.png'
       )
     })
     .map(([, url]) => url)
+  return [...portraits, ...cardvisuals, ...screenUi]
+}
 
-  return [...portraits, ...cardvisuals, ...criticalUi]
+/**
+ * 通用预加载工具 · N 路并发批处理
+ *
+ * 比"全部 new Image()"快的原因：
+ *   - 全部 new Image()：浏览器会同时排 200 个待处理请求 · 解码管线 / 内存压力大
+ *   - 8 路并发：始终只有 8 个 in-flight · 完成一个立刻补一个 · 吞吐稳定
+ *
+ * 默认并发数 8 · 浏览器 HTTP/2 多路复用下吞吐最佳
+ *
+ * @param urls 待加载的 URL 列表
+ * @param onTick 每张完成时回调（可用于更新进度）
+ * @param concurrent 并发上限 · 默认 8
+ */
+export async function preloadBatched(
+  urls: string[],
+  onTick?: () => void,
+  concurrent = 8,
+): Promise<void> {
+  if (urls.length === 0) return
+  let idx = 0
+
+  async function worker() {
+    while (idx < urls.length) {
+      const myIdx = idx++
+      if (myIdx >= urls.length) return
+      await new Promise<void>((resolve) => {
+        const img = new Image()
+        img.decoding = 'async'
+        const done = () => {
+          onTick?.()
+          resolve()
+        }
+        img.onload = done
+        img.onerror = done
+        img.src = urls[myIdx]
+      })
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrent, urls.length) }, () =>
+    worker(),
+  )
+  await Promise.all(workers)
+}
+
+let backgroundPreloadStarted = false
+
+/** Phase 2 触发器 · 由 MainMenu 挂载时调用 · 重复调用安全无副作用 */
+export function startBackgroundPreload(): void {
+  if (backgroundPreloadStarted) return
+  backgroundPreloadStarted = true
+  const urls = getBackgroundPreloadUrls()
+  // 不阻塞 await · fire-and-forget · 用 8 路并发批处理
+  void preloadBatched(urls, undefined, 8)
 }

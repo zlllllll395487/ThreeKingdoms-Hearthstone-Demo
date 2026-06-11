@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
-import { getUiAssetUrl } from '@/data/assetLoader'
+import { getUiAssetUrl, startBackgroundPreload } from '@/data/assetLoader'
 import { BackButton } from '@/components/BackButton/BackButton'
 import styles from './MainMenu.module.css'
 
@@ -14,6 +14,12 @@ export function MainMenu() {
   const [showChatModal, setShowChatModal] = useState(false)
   const [showResourceModal, setShowResourceModal] = useState(false)
   // §25 修正：教程不在主菜单弹 · 移到 FactionSelect 确认后
+
+  // §26 后台预加载：MainMenu 挂载后立即静默拉取 Codex / Battle 大图
+  // 不阻塞 UI · 仅重复调用安全
+  useEffect(() => {
+    startBackgroundPreload()
+  }, [])
 
   const bgUrl = getUiAssetUrl('menu_background.png')
   const playerUiBlockUrl = getUiAssetUrl('player_ui_block.png')

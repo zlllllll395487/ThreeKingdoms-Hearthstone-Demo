@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
-import { getUiAssetUrl, getCriticalPreloadUrls } from '@/data/assetLoader'
+import {
+  getUiAssetUrl,
+  getEssentialPreloadUrls,
+  preloadBatched,
+} from '@/data/assetLoader'
 import styles from './LoadingScreen.module.css'
 
 /**
- * 加载页 · §26 真预加载实现
+ * 加载页 · §26 两阶段预加载 · Phase 1
  *
- * - 全屏背景图
- * - 底部 40px 深色文字行 + 4px 进度填充
- * - 进度按"图片加载完成数 / 总数"实时更新
- * - 全部加载完后再进 mainmenu (保证 Codex / Battle 不再卡顿)
- * - 最长等待 30 秒 · 安全兜底
- * - 最短显示 1.2 秒 · 体验缓冲
+ * 只阻塞加载主菜单必需的小型资源（~20 张 · ~5 MB · 秒级完成）
+ * 大图（立绘 / 卡面）在 MainMenu 挂载后由 startBackgroundPreload() 后台静默拉取
+ *
+ * 进度条按真实加载数 / 总数刷新
+ * - 最短显示 800ms（体验缓冲）
+ * - 最长 8 秒兜底（即使网络极慢也不卡死）
  */
 export function LoadingScreen() {
   const navigate = useUIStore((s) => s.navigate)
@@ -21,11 +25,11 @@ export function LoadingScreen() {
   const bgUrl = getUiAssetUrl('loading_bg.png')
 
   useEffect(() => {
-    const urls = getCriticalPreloadUrls()
+    const urls = getEssentialPreloadUrls()
     const total = urls.length || 1
     const startTime = Date.now()
-    const MIN_DURATION = 1200 // 最短 1.2s 显示
-    const MAX_DURATION = 30000 // 最长 30s 兜底
+    const MIN_DURATION = 800
+    const MAX_DURATION = 8000
 
     let loaded = 0
 
@@ -34,28 +38,27 @@ export function LoadingScreen() {
       navigatedRef.current = true
       const elapsed = Date.now() - startTime
       const delay = Math.max(0, MIN_DURATION - elapsed)
-      window.setTimeout(() => navigate('mainmenu'), delay + 200)
+      window.setTimeout(() => navigate('mainmenu'), delay)
     }
 
-    const tick = () => {
-      loaded += 1
-      const pct = Math.min(100, Math.floor((loaded / total) * 100))
-      setProgress(pct)
-      if (loaded >= total) finishOnce()
+    if (urls.length === 0) {
+      finishOnce()
+      return
     }
 
-    // 真预加载：为每个 URL 触发 Image 请求
-    // 浏览器自动并发 6 个,其余排队 · 无需手动节流
-    for (const url of urls) {
-      const img = new Image()
-      img.onload = tick
-      img.onerror = tick // 失败也计数,避免卡进度
-      img.src = url
-    }
+    // §26 6 路并发批处理 · 完成一张补一张 · 比 fire-all-at-once 吞吐稳
+    void preloadBatched(
+      urls,
+      () => {
+        loaded += 1
+        setProgress(Math.min(100, Math.floor((loaded / total) * 100)))
+        if (loaded >= total) finishOnce()
+      },
+      6,
+    )
 
-    // 安全兜底 · 30 秒强制进入主菜单
     const safety = window.setTimeout(() => {
-      console.warn(`[loading] timeout · ${loaded}/${total} loaded`)
+      console.warn(`[loading] safety timeout · ${loaded}/${total} loaded`)
       finishOnce()
     }, MAX_DURATION)
 

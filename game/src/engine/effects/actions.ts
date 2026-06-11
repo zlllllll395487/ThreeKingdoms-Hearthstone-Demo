@@ -334,6 +334,30 @@ const attackDebuff: ActionFn = (engine, source, params, target) => {
   engine.log.push(logEffect(`${source.data.name}：${m.data.name} 攻击力 -${amount}`))
 }
 
+/**
+ * §22-iter3 · W18 火油用 · 给目标 + 左右相邻共最多 3 个 minion 添加 tag
+ * 未来 combo 卡（如"火攻"系列）可以检查 tag 给予额外伤害
+ */
+const applyTagToTargetAndAdjacent: ActionFn = (engine, source, params, target) => {
+  if (!target || target.kind !== 'minion') return
+  const tag = (params.tag as string) ?? 'tagged'
+  const enemyPlayer = getPlayer(engine, target.side)
+  const targetIdx = enemyPlayer.board.findIndex((b) => b.instanceId === target.instanceId)
+  if (targetIdx < 0) return
+  const affected = [targetIdx - 1, targetIdx, targetIdx + 1]
+    .filter((i) => i >= 0 && i < enemyPlayer.board.length)
+    .map((i) => enemyPlayer.board[i])
+  for (const m of affected) {
+    if (!m.tags) m.tags = new Set()
+    m.tags.add(tag)
+  }
+  engine.log.push(
+    logEffect(
+      `${source.data.name}：${affected.length} 个武将获得「${tag === 'oiled' ? '火油' : tag}」标记`,
+    ),
+  )
+}
+
 /** W20 反间计：将敌方武将弹回对方手牌（受 maxCost 限制）*/
 const returnToHand: ActionFn = (engine, source, params, target) => {
   if (!target || target.kind !== 'minion') return
@@ -442,6 +466,7 @@ export const ACTIONS: Record<string, ActionFn> = {
   cannotAttackThisTurn,
   cannotAttackAdjacent,
   attackDebuff,
+  applyTagToTargetAndAdjacent,
   returnToHand,
   steal,
   discover,

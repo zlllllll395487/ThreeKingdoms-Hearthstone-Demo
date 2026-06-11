@@ -40,7 +40,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "liaohua.png",
-    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
+    "description": "卫戍。（敌方必须先攻击带「卫戍」的武将）",
     "flavor": "蜀中无大将，廖化作先锋。"
   },
   {
@@ -56,7 +56,7 @@
     "keywords": ["taunt"],
     "portrait": "蜀汉御林军.png",
     "cardvisual": "御林军.png",
-    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
+    "description": "卫戍。（敌方必须先攻击带「卫戍」的武将）",
     "flavor": "宿卫之责。"
   },
   {
@@ -108,7 +108,7 @@
     ],
     "portrait": "破虏校尉.png",
     "cardvisual": "破虏校尉.png",
-    "description": "突袭。亡语：召唤一个 2/1 的「巫祝」。",
+    "description": "突袭。遗策：召唤一个 2/1 的「巫祝」。",
     "flavor": "破虏将军，誓灭群雄。"
   },
   {
@@ -150,7 +150,7 @@
     ],
     "portrait": "魏延.png",
     "cardvisual": "魏延.png",
-    "description": "突袭。战吼：选择一名友方武将，永久使其获得 +2 攻击力。",
+    "description": "突袭。出阵：选择一名友方武将，永久使其获得 +2 攻击力。",
     "flavor": "脑后有反骨。"
   },
   {
@@ -171,7 +171,7 @@
       }
     ],
     "portrait": "guanping.png",
-    "description": "战吼：召唤一个 1/1 的「义兵」。",
+    "description": "出阵：召唤一个 1/1 的「义兵」。",
     "flavor": "云长之义子。"
   },
   {
@@ -193,7 +193,7 @@
     ],
     "portrait": "严颜.png",
     "cardvisual": "严颜.png",
-    "description": "战吼：召唤两个 1/1 的「义兵」。",
+    "description": "出阵：召唤两个 1/1 的「义兵」。",
     "flavor": "断头将军。"
   },
   {
@@ -237,7 +237,7 @@
       }
     ],
     "portrait": "huangzhong.png",
-    "description": "战吼：对任意目标造成等同于此武将攻击力的伤害。",
+    "description": "出阵：对任意目标造成等同于此武将攻击力的伤害。",
     "flavor": "老当益壮。"
   },
   {
@@ -290,7 +290,7 @@
       }
     ],
     "portrait": "guanyu.png",
-    "description": "突袭。战吼：场上每存在一个其他友方武将，关羽便获得 +1/+1。",
+    "description": "突袭。出阵：场上每存在一个其他友方武将，关羽便获得 +1/+1。",
     "flavor": "美髯公，温酒斩华雄。"
   },
   {
@@ -312,7 +312,7 @@
       }
     ],
     "portrait": "zhangfei.png",
-    "description": "镇守。战吼：场上每存在一个其他友方武将，张飞便获得 +1/+1。",
+    "description": "卫戍。出阵：场上每存在一个其他友方武将，张飞便获得 +1/+1。",
     "flavor": "燕人张翼德在此！"
   },
   {
@@ -341,7 +341,7 @@
     "onceUsedKey": "zhaoyun_once",
     "portrait": "赵云.png",
     "cardvisual": "赵云.png",
-    "description": "突袭。战吼：场上每存在一个其他友方武将，赵云便获得 +1/+1。当首次受到致命伤害时，保留 1 点生命值（每张卡每局触发 1 次）。",
+    "description": "突袭。出阵：场上每存在一个其他友方武将，赵云便获得 +1/+1。当首次受到致命伤害时，保留 1 点生命值（每张卡每局触发 1 次）。",
     "flavor": "七进七出，独闯曹营。"
   },
   {

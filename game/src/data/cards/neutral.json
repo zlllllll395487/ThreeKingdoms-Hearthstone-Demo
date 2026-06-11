@@ -18,7 +18,7 @@
       }
     ],
     "portrait": "pangtong.png",
-    "description": "神算 1。战吼：随机将一张谋略牌加入你的手牌。",
+    "description": "神算 1。出阵：随机将一张谋略牌加入你的手牌。",
     "flavor": "凤雏，与卧龙齐名。"
   },
   {
@@ -40,7 +40,7 @@
       }
     ],
     "portrait": "liru.png",
-    "description": "神算 1。战吼：本局对战中你的法术伤害提升 1 点。",
+    "description": "神算 1。出阵：本局对战中你的法术伤害提升 1 点。",
     "flavor": "毒士李儒。"
   },
   {
@@ -55,7 +55,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "panfeng.png",
-    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
+    "description": "卫戍。（敌方必须先攻击带「卫戍」的武将）",
     "flavor": "吾有上将潘凤，可斩华雄！"
   },
   {
@@ -70,7 +70,7 @@
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "xingdaorong.png",
-    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
+    "description": "卫戍。（敌方必须先攻击带「卫戍」的武将）",
     "flavor": "零陵上将军。"
   },
   {
@@ -129,5 +129,51 @@
     "portrait": "xiuyang.png",
     "description": "抽 1 张牌，并为你的主公恢复 4 点生命值。",
     "flavor": "且作经年休养。"
+  },
+  {
+    "id": "N09",
+    "name": "斥候",
+    "cost": 1,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 1,
+    "health": 2,
+    "tribe": "infantry",
+    "portrait": "chihou.png",
+    "cardvisual": "chihou.png",
+    "description": "",
+    "flavor": "孤骑探营，遥望烽烟。"
+  },
+  {
+    "id": "N10",
+    "name": "藤甲兵",
+    "cost": 2,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "common",
+    "attack": 2,
+    "health": 3,
+    "tribe": "infantry",
+    "portrait": "tengjiabing.png",
+    "cardvisual": "tengjiabing.png",
+    "description": "",
+    "flavor": "南蛮藤甲，刀枪不入。"
+  },
+  {
+    "id": "N11",
+    "name": "白马义从",
+    "cost": 3,
+    "type": "minion",
+    "faction": "neutral",
+    "rarity": "rare",
+    "attack": 3,
+    "health": 3,
+    "tribe": "infantry",
+    "keywords": ["rush"],
+    "portrait": "baimayizong.png",
+    "cardvisual": "baimayizong.png",
+    "description": "突袭。",
+    "flavor": "白马银枪，公孙旧部。"
   }
 ]

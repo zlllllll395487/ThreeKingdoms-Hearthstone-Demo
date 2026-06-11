@@ -9,11 +9,11 @@
     "attack": 3,
     "health": 5,
     "tribe": "strategist",
-    "keywords": ["spellpower"],
+    "keywords": ["spellpower", "stealth"],
     "anchorTag": "anchor_fire",
     "portrait": "周瑜.png",
     "cardvisual": "周瑜.png",
-    "description": "神算 1。【特殊效果·火】当你施放火系谋略时触发额外联动效果。",
+    "description": "神算 1。韬光（敌方无法选为目标，直到他出手）。【特殊效果·火】当你施放火系谋略时触发额外联动效果。",
     "flavor": "雄姿英发，谈笑间，樯橹灰飞烟灭。"
   },
   {
@@ -30,7 +30,7 @@
     "anchorTag": "anchor_draw",
     "portrait": "鲁肃.png",
     "cardvisual": "鲁肃.png",
-    "description": "镇守。【特殊效果·抽牌】当你施放抽牌系谋略时触发额外联动效果。",
+    "description": "卫戍。【特殊效果·抽牌】当你施放抽牌系谋略时触发额外联动效果。",
     "flavor": "忠厚长者，运筹智士。"
   },
   {
@@ -41,13 +41,20 @@
     "faction": "wu",
     "rarity": "epic",
     "attack": 2,
-    "health": 3,
+    "health": 5,
     "tribe": "strategist",
     "keywords": ["spellpower"],
     "anchorTag": "anchor_heal",
+    "effects": [
+      {
+        "trigger": "battlecry",
+        "action": "buffMinion",
+        "params": { "targetSelector": "friendlyMinion", "attack": 0, "health": 3, "permanent": true }
+      }
+    ],
     "portrait": "大乔.png",
     "cardvisual": "大乔.png",
-    "description": "神算 1。【特殊效果·治疗】当你施放治疗系谋略时触发额外联动效果。",
+    "description": "神算 1。出阵：使一名友方武将获得 +0/+3。【特殊效果·治疗】当你施放治疗系谋略时触发额外联动效果。",
     "flavor": "江东二乔，国色天香。"
   },
   {
@@ -101,7 +108,7 @@
     ],
     "portrait": "吕蒙.png",
     "cardvisual": "吕蒙.png",
-    "description": "战吼【暗度陈仓】：在你的下一个回合开始时，获得 3 点额外法力水晶（可临时超过 10 点上限，仅本回合有效）。",
+    "description": "出阵【暗度陈仓】：在你的下一个回合开始时，获得 3 点额外法力水晶（可临时超过 10 点上限，仅本回合有效）。",
     "flavor": "白衣渡江，士别三日当刮目相待。"
   },
   {
@@ -111,14 +118,14 @@
     "type": "minion",
     "faction": "wu",
     "rarity": "common",
-    "attack": 3,
-    "health": 5,
+    "attack": 4,
+    "health": 6,
     "tribe": "infantry",
     "keywords": ["taunt"],
     "portrait": "周泰.png",
     "cardvisual": "周泰.png",
-    "description": "镇守。（敌方必须先攻击带「镇守」的武将）",
-    "flavor": "幼平赤诚护主。"
+    "description": "卫戍。（敌方必须先攻击带「卫戍」的武将）",
+    "flavor": "幼平赤诚护主，数十创不退。"
   },
   {
     "id": "W08",
@@ -372,7 +379,7 @@
   {
     "id": "W18",
     "name": "火油",
-    "cost": 1,
+    "cost": 2,
     "type": "spell",
     "faction": "wu",
     "rarity": "rare",
@@ -380,14 +387,19 @@
     "effects": [
       {
         "trigger": "onCast",
-        "action": "cannotAttackThisTurn",
-        "params": { "targetSelector": "enemyMinion" }
+        "action": "attackDebuff",
+        "params": { "amount": 2, "duration": "turn" }
+      },
+      {
+        "trigger": "onCast",
+        "action": "applyTagToTargetAndAdjacent",
+        "params": { "tag": "oiled" }
       }
     ],
     "portrait": "火油.png",
     "cardvisual": "火油.png",
-    "description": "选择一名敌方武将，使其本回合无法进行攻击。",
-    "flavor": "未燃之火，蓄势而发。"
+    "description": "选择一名敌方武将，使其本回合攻击力 -2。该武将及相邻敌方武将获得「火油」标记。",
+    "flavor": "油浇火势，蔓延邻舍。"
   },
   {
     "id": "W19",
@@ -552,7 +564,7 @@
     ],
     "portrait": "程普.png",
     "cardvisual": "程普.png",
-    "description": "战吼：选择一名敌方武将，永久降低其 1 点攻击力。",
+    "description": "出阵：选择一名敌方武将，永久降低其 1 点攻击力。",
     "flavor": "江东老将，督帅之能。"
   },
   {
@@ -592,5 +604,78 @@
     "cardvisual": "moyi.png",
     "description": "下回合开始时，额外抽 2 张牌。",
     "flavor": "运筹于内，决胜于外。"
+  },
+  {
+    "id": "W28",
+    "name": "截江断流",
+    "cost": 5,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "legendary",
+    "anchorRequirement": "anchor_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 2 }
+      }
+    ],
+    "linkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamageAll",
+        "params": { "side": "enemy", "amount": 1 }
+      }
+    ],
+    "portrait": "jiejiangduanliu.png",
+    "cardvisual": "jiejiangduanliu.png",
+    "description": "对所有敌方武将造成 2 点伤害。【特殊效果·周瑜】额外造成 1 点伤害（合计 3 点）。",
+    "flavor": "汉水汹涌，截江断流。"
+  },
+  {
+    "id": "W29",
+    "name": "天雷",
+    "cost": 3,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "comboFlagRequirement": "combo_fire",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamage",
+        "params": { "amount": 3, "targetSelector": "enemyAny" }
+      }
+    ],
+    "comboLinkedEffects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamage",
+        "params": { "amount": 2, "targetSelector": "lastDamageTarget" }
+      }
+    ],
+    "portrait": "tianlei.png",
+    "cardvisual": "tianlei.png",
+    "description": "对一名敌方目标造成 3 点伤害。【连击·火油】对同一目标额外造成 2 点伤害（合计 5 点）。",
+    "flavor": "雷霆万钧，势不可挡。"
+  },
+  {
+    "id": "W30",
+    "name": "冷箭",
+    "cost": 2,
+    "type": "spell",
+    "faction": "wu",
+    "rarity": "rare",
+    "effects": [
+      {
+        "trigger": "onCast",
+        "action": "dealDamage",
+        "params": { "amount": 2, "targetSelector": "enemyMinion" }
+      }
+    ],
+    "portrait": "lengjian.png",
+    "cardvisual": "lengjian.png",
+    "description": "对一名敌方武将造成 2 点伤害。",
+    "flavor": "暗箭难防，杀机于无形。"
   }
 ]

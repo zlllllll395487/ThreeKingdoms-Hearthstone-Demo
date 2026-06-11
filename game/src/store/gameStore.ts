@@ -345,13 +345,14 @@ async function runPlayerAutopilotTurn() {
     pendingTargetForCard: null,
   })
 
-  await delay(800) // 与 AI 回合开局节拍一致
+  // §24 托管节奏：略慢于 AI 回合 · 玩家看自己手牌自动出需要更明显间隔
+  await delay(1100) // 起拍 (800 → 1100)
 
   await takeAITurn(
     engine,
     async () => {
       useGameStore.getState().syncState()
-      await delay(700)
+      await delay(900) // 每动作间隔 (700 → 900)
     },
     (attackerId, target) => doAnimatedAttack('player', attackerId, target),
     'player', // §24 sideOverride
@@ -359,7 +360,7 @@ async function runPlayerAutopilotTurn() {
     'grandmaster', // §24 托管 = 宗师强度
   )
 
-  await delay(600)
+  await delay(800) // 收尾 (600 → 800)
 
   // 若玩家在托管期间没主动取消，照常 endTurn 进 AI 回合
   const stateBeforeEnd = engine.state

@@ -13,11 +13,11 @@ const HERO_BY_FACTION: Record<Faction, string> = {
   wu: '孙权',
 }
 
-/** §23 AI 难度展示 · 名称 / 短描述 */
-const DIFFICULTY_META: Array<{ key: AIDifficulty; label: string; sub: string }> = [
-  { key: 'novice', label: '新手', sub: '草莽之辈' },
-  { key: 'standard', label: '标准', sub: '军中谋士' },
-  { key: 'grandmaster', label: '宗师', sub: '卧龙之谋' },
+/** §23 AI 难度展示 · 名称 */
+const DIFFICULTY_META: Array<{ key: AIDifficulty; label: string }> = [
+  { key: 'novice', label: '新手' },
+  { key: 'standard', label: '标准' },
+  { key: 'grandmaster', label: '宗师' },
 ]
 
 const LS_DIFFICULTY_KEY = 'sgls.aiDifficulty'
@@ -55,6 +55,8 @@ export function FactionSelectScreen() {
   const wuCardUrl = getUiAssetUrl('faction_card_wu.png')
   const btnStartUrl = getUiAssetUrl('btn_start_battle_v2.png')
   const btnBackUrl = getUiAssetUrl('btn_back.png')
+  // §24 难度按钮底图 · 用户切的「难度ui按钮.png」（asset/新增组件0610/）
+  const btnDifficultyUrl = getUiAssetUrl('btn_difficulty.png')
 
   const bothSelected = !!playerFaction && !!aiFaction
 
@@ -154,8 +156,15 @@ export function FactionSelectScreen() {
               aria-pressed={aiDifficulty === d.key}
               aria-label={`对手难度：${d.label}`}
             >
+              {btnDifficultyUrl && (
+                <img
+                  src={btnDifficultyUrl}
+                  alt=""
+                  aria-hidden
+                  className={styles.difficultyBg}
+                />
+              )}
               <span className={styles.difficultyLabel}>{d.label}</span>
-              <span className={styles.difficultySub}>{d.sub}</span>
             </button>
           ))}
         </div>

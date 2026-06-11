@@ -165,6 +165,7 @@ export interface PlayerState {
   comboFlagsThisTurn: Set<ComboFlag>  // 本回合已激活的 combo flag
   onceUsedKeys: Set<string>         // 已用过的 onceUsedKey（每局生效）
   nextTurnManaBoost: number         // 下回合开始时 mana 临时 +N（屯田 / 暗度陈仓）
+  nextTurnDrawBoost: number         // §22-iter2 下回合开始时额外抽 +N 张（W27 谋议）
 }
 
 export type GamePhase = 'mulligan' | 'main' | 'ended'

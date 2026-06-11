@@ -22,8 +22,10 @@ export async function takeAITurn(
    * gameStore 注入版会做：setCharging → 200ms → weapon_slash sprite → engine.attack → syncState → 200ms → clearCharging
    */
   performAttack?: (attackerId: string, target: TargetRef) => Promise<boolean>,
+  /** §22 模拟器用 · 让 AI 帮 player 也走完一回合 · 默认 'ai' 保持向后兼容 */
+  sideOverride?: PlayerSide,
 ): Promise<void> {
-  const side: PlayerSide = 'ai'
+  const side: PlayerSide = sideOverride ?? 'ai'
 
   // ============================================
   // Phase A: 出牌（v5.5 启发式打分）
@@ -31,7 +33,7 @@ export async function takeAITurn(
   let safety = 0
   while (safety++ < 20) {
     if ((engine.state.phase as string) === 'ended') return
-    const playable = engine.state.ai.hand.filter((c) =>
+    const playable = engine.state[side].hand.filter((c) =>
       engine.canPlayCard(side, c.instanceId),
     )
     if (playable.length === 0) break
@@ -91,32 +93,76 @@ function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide)
   let score = 0
   const data = card.data
   const player = engine.state[side]
+  const enemySide: PlayerSide = side === 'player' ? 'ai' : 'player'
+  const enemy = engine.state[enemySide]
 
-  // base 身材
+  // §22.P1-1 · base 身材 · minion / weapon 都算
   if (data.type === 'minion') {
     score += (data.attack ?? 0) + (data.health ?? 0)
+  } else if (data.type === 'weapon') {
+    // §22.P0-7 · weapon: 攻 × 耐久 是核心价值（一发斩杀+多发清场）
+    const att = data.attack ?? 0
+    const dur = data.durability ?? 1
+    score += att * dur * 1.2
   }
 
   // 关键词加成
   const kwBonus: Record<string, number> = {
-    taunt: 1,
+    taunt: 1.5,
     rush: 1.5,
     charge: 2,
     windfury: 1.5,
     spellpower: 1,
+    divineShield: 2,
+    poisonous: 2.5,
+    lifesteal: 1.5,
   }
   for (const kw of (data.keywords ?? [])) {
     score += kwBonus[kw] ?? 0
   }
 
-  // 锚点武将加分（5 费周瑜 / 4 费鲁肃 / 3 费大乔 优先 setup）
+  // §22.P1-10 · 战吼 / 亡语 minion 比 vanilla 多加分
+  const effectsList = data.effects ?? []
+  const hasBattlecry = effectsList.some((e) => e.trigger === 'battlecry')
+  const hasDeathrattle = effectsList.some((e) => e.trigger === 'deathrattle')
+  if (data.type === 'minion' && hasBattlecry) score += 1.5
+  if (data.type === 'minion' && hasDeathrattle) score += 1
+
+  // §22-iter1 · 锚点武将加分 · setup 价值 = 基础 + 手牌里每张联动牌 +2.5
+  // 这样吴 AI 看到周瑜/鲁肃/大乔 + 手里有联动法术 → 优先放下锚点
   if (data.anchorTag) {
     score += 3
+    const matchingLinkedInHand = player.hand.filter(
+      (c) => c.data.anchorRequirement === data.anchorTag,
+    ).length
+    score += matchingLinkedInHand * 2.5
   }
 
-  // 联动卡激活：场上有匹配锚点 → 大幅加分
-  if (data.anchorRequirement && engine.hasAnchorOnBoard(side, data.anchorRequirement)) {
-    score += 5
+  // §22-iter1 · 联动卡价值评估
+  if (data.anchorRequirement) {
+    const anchorActive = engine.hasAnchorOnBoard(side, data.anchorRequirement)
+    if (anchorActive) {
+      // 锚点已激活 → 全功率释放
+      score += 6
+      // §22-iter1 关键修复：linkedEffects 自身价值也要算
+      const linkedEffects = (data as { linkedEffects?: Array<{ action: string; params?: Record<string, unknown>; trigger?: string }> }).linkedEffects ?? []
+      for (const eff of linkedEffects) {
+        if (eff.trigger === 'onCast' || eff.trigger === 'battlecry') {
+          score += scoreSpellEffect(eff, side, player, enemy) * 0.9 // 略折扣
+        }
+      }
+    } else {
+      // §22-iter1 · 锚点未激活 · 检查手牌是否能立刻 setup
+      const anchorInHand = player.hand.find(
+        (c) => c.data.anchorTag === data.anchorRequirement,
+      )
+      if (anchorInHand) {
+        // 手里有对应锚点武将 → 保留此卡，本回合先 setup（小折扣 +1）
+        score += 1
+      } else {
+        // 完全无锚点支持 → 仅基础效果 · 不加不减
+      }
+    }
   }
 
   // combo setup（W18 火油 / W20 反间计）
@@ -127,58 +173,170 @@ function scoreCardPlay(engine: GameEngine, card: CardInstance, side: PlayerSide)
     if (partner) score += 4
     else score += 1
   }
-  // combo 已 setup → 后置卡 +3
+  // §22-iter1 · combo 触发 · 也算 comboLinkedEffects 价值
   if (data.comboFlagRequirement && player.comboFlagsThisTurn.has(data.comboFlagRequirement)) {
-    score += 3
-  }
-
-  // 法术效果价值
-  if (data.type === 'spell') {
-    for (const eff of data.effects ?? []) {
-      score += scoreSpellEffect(engine, eff, side, player)
+    score += 4
+    const comboLinkedEffects = (data as { comboLinkedEffects?: Array<{ action: string; params?: Record<string, unknown>; trigger?: string }> }).comboLinkedEffects ?? []
+    for (const eff of comboLinkedEffects) {
+      if (eff.trigger === 'onCast' || eff.trigger === 'battlecry') {
+        score += scoreSpellEffect(eff, side, player, enemy) * 0.9
+      }
     }
   }
 
-  return score
+  // 战吼 / 法术效果价值（不仅 spell · battlecry/deathrattle 也算）
+  if (data.type === 'spell' || data.type === 'minion') {
+    for (const eff of effectsList) {
+      // 仅算 trigger=onCast/battlecry/deathrattle 这些 onPlay 时机的
+      if (eff.trigger === 'onCast' || eff.trigger === 'battlecry' || eff.trigger === 'deathrattle') {
+        score += scoreSpellEffect(eff, side, player, enemy)
+      }
+    }
+  }
+
+  // §22.P0-1 · tempo 价值 · 用 mana 利用率惩罚浪费
+  // 1 费打 3 分价值 vs 5 费打 3 分价值 → 1 费更高 tempo
+  // 公式：score / (cost + 1) · cost 越高分数被压
+  // 但保留 high-value 牌仍能高分（不至于全部偏好低费）
+  const cost = data.cost ?? 0
+  const efficiency = cost > 0 ? score / cost : score * 1.5
+  // 综合分 = 60% 绝对价值 + 40% tempo 效率
+  const finalScore = score * 0.6 + efficiency * 0.4 * cost
+  return finalScore
 }
 
 function scoreSpellEffect(
-  _engine: GameEngine,
-  eff: { action: string; params?: Record<string, unknown> },
-  _side: PlayerSide,
-  player: { deck: unknown[]; hero: { health: number; maxHealth: number } },
+  eff: { action: string; params?: Record<string, unknown>; trigger?: string },
+  side: PlayerSide,
+  player: {
+    deck: unknown[]
+    hand: unknown[]
+    hero: { health: number; maxHealth: number }
+    board: CardInstance[]
+  },
+  enemy: { board: CardInstance[]; hero: { health: number; maxHealth: number } },
 ): number {
   const p = eff.params ?? {}
   switch (eff.action) {
-    case 'dealDamage':
-    case 'dealDamageAll':
-      return ((p.amount as number) ?? 0) * 1.0
+    case 'dealDamage': {
+      const amount = (p.amount as number) ?? 0
+      // §22.P1-4 · 可斩杀目标 → 大幅加分
+      const killable = enemy.board.filter((m) => m.currentHealth <= amount).length
+      const heroKill = amount >= enemy.hero.health ? 50 : 0
+      return amount * 0.8 + killable * 3 + heroKill
+    }
+    case 'dealDamageHero': {
+      // §22-iter1 · W14 苦肉计 / W15 运筹帷幄 等"对己方主公伤害"
+      // side='self' → 残血时严重惩罚 · 安全时小代价
+      // side='enemy' → 像普通 dealDamage 打英雄
+      const amount = (p.amount as number) ?? 0
+      const targetSide = (p.side as string) ?? 'self'
+      if (targetSide === 'self') {
+        const hpAfter = player.hero.health - amount
+        if (hpAfter <= 0) return -1000 // 别自杀
+        if (hpAfter <= 5) return -30 // 残血禁用
+        if (hpAfter <= 15) return -8 // 中血代价大
+        return -3 // 安血代价小
+      }
+      // enemy
+      const heroKill = amount >= enemy.hero.health ? 50 : 0
+      return amount * 0.8 + heroKill
+    }
+    case 'dealDamageAll': {
+      // §22.P0-3 · AoE 必须乘 board size · 否则群伤永远被低估
+      const amount = (p.amount as number) ?? 0
+      const targetSide = (p.side as string) === 'self' ? player.board : enemy.board
+      const targetCount = targetSide.length
+      const killable = targetSide.filter((m) => m.currentHealth <= amount).length
+      return amount * targetCount * 0.7 + killable * 2
+    }
     case 'dealDamageEqualToAttack':
-      return 3
+      return 4
     case 'drawCards': {
-      // v5.5 防自杀：牌库空时禁抽牌（避免疲劳致死）
+      // §22.P1-5 · 手牌量加权 · 防自杀 + 防烧牌
       if (player.deck.length === 0) return -1000
-      return ((p.count as number) ?? 1) * 1.5
+      const count = (p.count as number) ?? 1
+      const handSize = player.hand.length
+      if (handSize >= 10) return -50 // 烧牌
+      if (handSize >= 8) return count * 0.5 // 手满风险
+      if (handSize <= 2) return count * 3 // 缺牌时高价值
+      return count * 1.8
     }
     case 'healHero': {
-      // 满血禁治疗
+      // §22.P1-8 · 残血时高权重
       if (player.hero.health >= player.hero.maxHealth) return -100
-      return ((p.amount as number) ?? 0) * 0.4
+      const amount = (p.amount as number) ?? 0
+      const missingHp = player.hero.maxHealth - player.hero.health
+      const effective = Math.min(amount, missingHp)
+      const hpPct = player.hero.health / player.hero.maxHealth
+      // 残血时（<30% HP）×3 权重
+      const weight = hpPct < 0.3 ? 1.5 : hpPct < 0.6 ? 0.8 : 0.4
+      return effective * weight
     }
     case 'freeze':
-    case 'cannotAttackThisTurn':
-      return 3 // 控制类
+    case 'cannotAttackThisTurn': {
+      // §22.P2-6 · 看目标价值（敌方最高 atk minion）
+      if (enemy.board.length === 0) return -100
+      const maxAtk = Math.max(...enemy.board.map((m) => m.currentAttack))
+      return maxAtk >= 4 ? 5 : maxAtk >= 2 ? 3 : 1.5
+    }
+    case 'freezeAll': {
+      // §22-iter1 · W23 连环计 · 全场冰冻 · 敌方 board 越大越值
+      const targetSide = (p.side as string) === 'self' ? player.board : enemy.board
+      if (targetSide.length === 0) return -50
+      const totalAtk = targetSide.reduce((s, m) => s + m.currentAttack, 0)
+      return totalAtk * 1.2 + targetSide.length * 2
+    }
+    case 'reduceNextSpellCost': {
+      // §22-iter1 · W17 借东风 · 下一张 spell -X mana · 看手牌 spell 数
+      const amount = (p.amount as number) ?? 0
+      const spellsInHand = (player.hand as { data: { type: string } }[]).filter(
+        (c) => c.data.type === 'spell',
+      ).length
+      if (spellsInHand === 0) return -10
+      return amount * 1.5 + spellsInHand * 0.5
+    }
     case 'discover':
-      return 4
+      return 4.5
     case 'returnToHand':
-    case 'steal':
-      return 4
+    case 'steal': {
+      // §22.P2-6 · maxCost 约束：找匹配 cost 的最强目标
+      const maxCost = (p.maxCost as number) ?? Infinity
+      const valid = enemy.board.filter((m) => m.data.cost <= maxCost)
+      if (valid.length === 0) return -100 // 无有效目标 → 别浪费
+      const best = valid.reduce(
+        (max, m) =>
+          (m.currentAttack + m.currentHealth) > (max.currentAttack + max.currentHealth) ? m : max,
+        valid[0],
+      )
+      return (best.currentAttack + best.currentHealth) * 0.7 + 2
+    }
     case 'refundMana':
       return ((p.amount as number) ?? 0) * 1.0
     case 'setNextTurnManaBoost':
-      return ((p.amount as number) ?? 0) * 0.8 // 贴现
+      return ((p.amount as number) ?? 0) * 0.9
+    case 'buffMinion': {
+      // §22.P1-9 · 看目标 · 友方最高 atk 武将
+      if (player.board.length === 0) return -100
+      const att = (p.attack as number) ?? 0
+      const hp = (p.health as number) ?? 0
+      const best = player.board.reduce(
+        (max, m) => (m.currentAttack > max.currentAttack ? m : max),
+        player.board[0],
+      )
+      // 高 atk 友方 +buff → 滚雪球，价值高
+      return (att + hp) * 1.2 + best.currentAttack * 0.3
+    }
+    case 'grantExtraAttack':
+      return player.board.length > 0 ? 3 : -100
+    case 'grantKeyword':
+      return player.board.length > 0 ? 2.5 : -100
+    case 'summonToken':
+      return ((p.count as number) ?? 1) * 2
+    case 'addPermanentSpellPower':
+      return 3
     default:
-      return 0.5
+      return 1
   }
 }
 

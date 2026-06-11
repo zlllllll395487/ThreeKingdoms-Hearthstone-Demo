@@ -250,6 +250,14 @@ const refundMana: ActionFn = (engine, source, params) => {
   engine.log.push(logEffect(`${source.data.name}：当回合法力 +${amount}`))
 }
 
+/** §22-iter2 · W27 谋议：下一回合开始时额外抽 +N 张 */
+const setNextTurnDrawBoost: ActionFn = (engine, source, params) => {
+  const amount = (params.amount as number) ?? 0
+  const player = getPlayer(engine, source.owner!)
+  player.nextTurnDrawBoost = (player.nextTurnDrawBoost ?? 0) + amount
+  engine.log.push(logEffect(`${source.data.name}：下回合 +${amount} 抽牌`))
+}
+
 /** S08 屯田 / W06 吕蒙暗度陈仓：下一回合开始时 mana +X */
 const setNextTurnManaBoost: ActionFn = (engine, source, params) => {
   const amount = (params.amount as number) ?? 0
@@ -427,6 +435,7 @@ export const ACTIONS: Record<string, ActionFn> = {
   drawCards,
   refundMana,
   setNextTurnManaBoost,
+  setNextTurnDrawBoost,
   addPermanentSpellPower,
   freeze,
   freezeAll,

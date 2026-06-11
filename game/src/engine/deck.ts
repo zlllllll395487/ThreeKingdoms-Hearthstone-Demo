@@ -101,3 +101,65 @@ export function drawCard(player: PlayerState): CardInstance | null {
   player.hand.push(card)
   return card
 }
+
+/**
+ * §22-iter2 · 带联动加权的抽牌
+ *
+ * 不破坏纯随机感（仅 soft bias）：
+ * - 友方场上有锚点武将 → 牌库中匹配该锚点的联动卡权重 ×1.8
+ * - 手牌里有 comboFlagSet 卡 → 牌库中匹配该 combo 触发的卡权重 ×1.5
+ * - 其他卡权重保持 1
+ *
+ * 计算总权重后用 weighted random 抽一张，从牌库中移除
+ * 没卡 → 触发疲劳（同 drawCard）
+ */
+export function drawCardWithSynergy(player: PlayerState): CardInstance | null {
+  if (player.deck.length === 0) {
+    player.fatigue += 1
+    player.hero.health -= player.fatigue
+    return null
+  }
+  if (player.hand.length >= 10) {
+    // 手牌满，弃顶牌
+    const top = player.deck.shift()!
+    player.graveyard.push(top)
+    return null
+  }
+
+  // 收集场上锚点武将的 anchorTag
+  const anchorsOnBoard = new Set<string>()
+  for (const m of player.board) {
+    if (m.data.anchorTag) anchorsOnBoard.add(m.data.anchorTag)
+  }
+  // 收集手牌里所有 comboFlagSet 标记
+  const comboSetInHand = new Set<string>()
+  for (const c of player.hand) {
+    if (c.data.comboFlagSet) comboSetInHand.add(c.data.comboFlagSet)
+  }
+
+  // 计算每张牌的权重
+  const weights = player.deck.map((c) => {
+    let w = 1.0
+    if (c.data.anchorRequirement && anchorsOnBoard.has(c.data.anchorRequirement)) {
+      w *= 1.8
+    }
+    if (c.data.comboFlagRequirement && comboSetInHand.has(c.data.comboFlagRequirement)) {
+      w *= 1.5
+    }
+    return w
+  })
+
+  const totalWeight = weights.reduce((s, w) => s + w, 0)
+  let r = Math.random() * totalWeight
+  let chosenIdx = 0
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i]
+    if (r <= 0) {
+      chosenIdx = i
+      break
+    }
+  }
+  const card = player.deck.splice(chosenIdx, 1)[0]
+  player.hand.push(card)
+  return card
+}

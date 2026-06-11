@@ -41,7 +41,6 @@ export function SubPageScreen({ screen }: SubPageScreenProps) {
   const previousScreen = useUIStore((s) => s.previousScreen)
   const bgFile = SUBPAGE_BG[screen]
   const bgUrl = bgFile ? getUiAssetUrl(bgFile) : null
-  const btnBackUrl = getUiAssetUrl('btn_back.png')
   // 优先返回上一屏；如无则按映射；最后兜底 mainmenu
   const backTarget: Screen =
     previousScreen ?? SUBPAGE_BACK_DEFAULT[screen] ?? 'mainmenu'

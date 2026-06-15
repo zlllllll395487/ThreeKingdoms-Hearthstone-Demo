@@ -68,59 +68,33 @@ export function getFxFrame(name: string, frame: number): string | null {
  *   - 若用户在拉完前就进 Codex,单图按需加载 (退化为普通体验,无 bug)
  */
 
-/** Phase 1 · 主菜单加载所需小图 (10-20 张,约 5 MB) */
-export function getEssentialPreloadUrls(): string[] {
-  const essentialNames = [
-    'menu_background.png',
-    'player_ui_block.png',
-    'coin_silver.png',
-    'coin_jade.png',
-    'coin_gem.png',
-    'icon_mail.png',
-    'icon_calendar.png',
-    'icon_friends.png',
-    'icon_chat.png',
-    'icon_more.png',
-    'card_battle.png',
-    'card_story.png',
-    'card_event.png',
-    'tab_deck.png',
-    'tab_recruit.png',
-    'tab_quest.png',
-    'tab_shop.png',
-    'tab_codex.png',
-    'btn_switch_bg.png',
-    'loading_bg.png',
-  ]
-  return essentialNames
-    .map((n) => uiModules[`/src/assets/ui/${n}`])
-    .filter((u): u is string => !!u)
-}
-
-/** Phase 2 · 后台预加载 · Codex / Battle / FactionSelect / Tutorial 用到的大图 */
-function getBackgroundPreloadUrls(): string[] {
+/**
+ * §26 LoadingScreen 全量预加载 · 返回需要预加载的所有 URL
+ *
+ * 包含:
+ * - 所有立绘 (89 张, 70 MB)
+ * - 所有卡面 cardvisual (71 张, 44 MB)
+ * - 所有屏背景 / 边框 / 弹窗 / 主菜单 UI / 主公图 (~50 张)
+ *
+ * 不含:
+ * - fx 序列帧 (战斗时再加载,占 10MB,加载时间是 ~150ms 一帧)
+ * - 极小 ui icon (单张 <50KB · 自然加载零延迟)
+ *
+ * 配合 vercel.json 加 Cache-Control 1 年 immutable · 加载一次永久缓存
+ */
+export function getAllPreloadUrls(): string[] {
   const portraits = Object.values(portraitModules)
-  // cardvisual_*.png (Codex 主要素材)
-  const cardvisuals = Object.entries(uiModules)
-    .filter(([path]) => path.includes('/cardvisual_'))
-    .map(([, url]) => url)
-  // 其它屏的背景 / 边框 / 弹窗
-  const screenUi = Object.entries(uiModules)
+  const ui = Object.entries(uiModules)
     .filter(([path]) => {
       const name = path.split('/').pop() ?? ''
-      return (
-        name.startsWith('frame_') ||
-        name.startsWith('modal_') ||
-        name.startsWith('faction_') ||
-        name.startsWith('tutorial_') ||
-        name.startsWith('hero_') ||
-        name === 'battle_bg.png' ||
-        name === 'battle_bg_portrait.png' ||
-        name === 'codex_bg.png'
-      )
+      // 排除明显不需要预加载的小型 icon (节省总时长)
+      const isSmallIcon =
+        name.startsWith('icon_') &&
+        !name.startsWith('icon_anchor_') // 锚点 icon 战斗时显示,要预加载
+      return !isSmallIcon
     })
     .map(([, url]) => url)
-  return [...portraits, ...cardvisuals, ...screenUi]
+  return [...portraits, ...ui]
 }
 
 /**
@@ -169,18 +143,10 @@ export async function preloadBatched(
   await Promise.all(workers)
 }
 
-let backgroundPreloadStarted = false
-
 /**
- * Phase 2 触发器 · 由 MainMenu 挂载时调用 · 重复调用安全无副作用
- *
- * 关键设置（避免优先级反转）：
- * - concurrent=3：只占 3 个连接槽位 · 留 3 个给前台 Codex/Battle/Tutorial 切屏请求
- * - fetchPriority='low'：浏览器自动让位 · 前台请求触发时后台暂停
+ * @deprecated §26 改回全量预加载策略 · 不再使用后台预加载
+ * 保留空函数避免破坏 MainMenu 调用 · 后续可删
  */
 export function startBackgroundPreload(): void {
-  if (backgroundPreloadStarted) return
-  backgroundPreloadStarted = true
-  const urls = getBackgroundPreloadUrls()
-  void preloadBatched(urls, undefined, 3, 'low')
+  // no-op · 所有资源已在 LoadingScreen 一次性加载完毕
 }

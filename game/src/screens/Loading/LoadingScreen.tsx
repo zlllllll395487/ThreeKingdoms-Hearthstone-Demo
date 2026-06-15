@@ -2,20 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import {
   getUiAssetUrl,
-  getEssentialPreloadUrls,
+  getAllPreloadUrls,
   preloadBatched,
 } from '@/data/assetLoader'
 import styles from './LoadingScreen.module.css'
 
 /**
- * 加载页 · §26 两阶段预加载 · Phase 1
+ * 加载页 · §26 全量预加载策略
  *
- * 只阻塞加载主菜单必需的小型资源（~20 张 · ~5 MB · 秒级完成）
- * 大图（立绘 / 卡面）在 MainMenu 挂载后由 startBackgroundPreload() 后台静默拉取
+ * 一次性加载所有 portraits / cardvisuals / 屏背景 / 边框 / 弹窗
+ * 配合 vercel.json Cache-Control immutable · 加载一次永久缓存
+ * 后续切屏 MainMenu / Codex / Battle / Tutorial 全部秒开,无再加载
  *
- * 进度条按真实加载数 / 总数刷新
- * - 最短显示 800ms（体验缓冲）
- * - 最长 8 秒兜底（即使网络极慢也不卡死）
+ * 并发 12 路 · HTTP/2 多路复用下吞吐最大化
+ * 最短显示 1 秒(体验缓冲) · 最长 60 秒兜底(慢网也能进游戏)
  */
 export function LoadingScreen() {
   const navigate = useUIStore((s) => s.navigate)
@@ -25,11 +25,11 @@ export function LoadingScreen() {
   const bgUrl = getUiAssetUrl('loading_bg.png')
 
   useEffect(() => {
-    const urls = getEssentialPreloadUrls()
+    const urls = getAllPreloadUrls()
     const total = urls.length || 1
     const startTime = Date.now()
-    const MIN_DURATION = 800
-    const MAX_DURATION = 8000
+    const MIN_DURATION = 1000
+    const MAX_DURATION = 60000
 
     let loaded = 0
 
@@ -46,7 +46,8 @@ export function LoadingScreen() {
       return
     }
 
-    // §26 6 路并发批处理 · 完成一张补一张 · 比 fire-all-at-once 吞吐稳
+    // 12 路并发 · HTTP/2 多路复用让所有请求共享 1 个 TCP 连接
+    // 浏览器 max-age=1y immutable → 后续访问直接走本地缓存,无网络请求
     void preloadBatched(
       urls,
       () => {
@@ -54,7 +55,7 @@ export function LoadingScreen() {
         setProgress(Math.min(100, Math.floor((loaded / total) * 100)))
         if (loaded >= total) finishOnce()
       },
-      6,
+      12,
     )
 
     const safety = window.setTimeout(() => {

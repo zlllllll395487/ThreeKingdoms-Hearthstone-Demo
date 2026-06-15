@@ -12,6 +12,7 @@ import { FactionSelectScreen } from '@/screens/FactionSelect/FactionSelectScreen
 import { ResultScreen } from '@/screens/Result/ResultScreen'
 import { TutorialScreen } from '@/screens/Tutorial/TutorialScreen'
 import { DevelopingModal } from '@/components/Modal/DevelopingModal'
+import { CustomCursor } from '@/components/CustomCursor/CustomCursor'
 
 /**
  * App · 根组件
@@ -101,6 +102,9 @@ function App() {
         {/* 全局弹窗 */}
         <DevelopingModal />
       </div>
+
+      {/* §27 自定义鼠标光标 · 跨屏全局 · 不参与 canvas scale 变换 */}
+      <CustomCursor />
     </div>
   )
 }

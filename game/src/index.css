@@ -157,3 +157,13 @@ body {
   line-height: 1.4;
 }
 
+
+/* §27 自定义鼠标光标 · 全局隐藏系统光标 · 交由 <CustomCursor> 组件渲染 */
+html,
+body,
+button,
+a,
+[role='button'],
+[data-clickable] {
+  cursor: none !important;
+}

@@ -44,11 +44,26 @@ interface UIStore {
   // 上一个屏幕（用于子页面返回）
   previousScreen: Screen | null
 
+  /**
+   * 待加载的目标屏 · 配合 Loading 屏使用
+   * navigateWithLoading 写入 → LoadingScreen 读出 → 资源就绪后 navigate 到此屏并清空
+   */
+  pendingScreen: Screen | null
+
   // 弹窗内容（null = 无弹窗）
   modalMessage: string | null
 
   // 屏幕切换
   navigate: (to: Screen) => void
+
+  /**
+   * 带加载页过场的屏幕切换
+   *
+   * 流程：currentScreen → 'loading' →（预加载 target 屏全部资源）→ target
+   * 期间显示 LoadingScreen，包含随机背景图与随机 Tip。
+   * 已加载过的资源会跳过，重复进入同一屏几乎瞬时完成。
+   */
+  navigateWithLoading: (to: Screen) => void
 
   // 弹窗操作
   showModal: (message: string) => void
@@ -97,6 +112,7 @@ export const useUIStore = create<UIStore>((set, get) => {
     // 如需恢复 intro：currentScreen: introSeen ? 'splash' : 'intro'
     currentScreen: 'splash',
     previousScreen: null,
+    pendingScreen: null,
     modalMessage: null,
     introSeen,
 
@@ -106,6 +122,16 @@ export const useUIStore = create<UIStore>((set, get) => {
         previousScreen: cur,
         currentScreen: to,
         modalMessage: null, // 切屏时关闭所有弹窗
+      })
+    },
+
+    navigateWithLoading: (to) => {
+      const cur = get().currentScreen
+      set({
+        previousScreen: cur,
+        currentScreen: 'loading',
+        pendingScreen: to,
+        modalMessage: null,
       })
     },
 

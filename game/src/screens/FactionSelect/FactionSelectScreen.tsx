@@ -33,6 +33,7 @@ const LS_DIFFICULTY_KEY = 'sgls.aiDifficulty'
  */
 export function FactionSelectScreen() {
   const navigate = useUIStore((s) => s.navigate)
+  const navigateWithLoading = useUIStore((s) => s.navigateWithLoading)
   const startGame = useGameStore((s) => s.startGame)
   const [playerFaction, setPlayerFaction] = useState<Faction | null>(null)
   const [aiFaction, setAiFaction] = useState<Faction | null>(null)
@@ -68,7 +69,7 @@ export function FactionSelectScreen() {
     }
     startGame({ playerFaction, aiFaction, aiDifficulty })
     // §25 修正：每次进入对战前都弹教程（玩家可随时按「跳过」直接进战斗）
-    navigate('tutorial')
+    navigateWithLoading('tutorial')
   }
 
   const renderFactionColumn = (

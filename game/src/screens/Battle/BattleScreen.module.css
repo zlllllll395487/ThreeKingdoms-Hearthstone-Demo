@@ -1198,6 +1198,35 @@
   50%      { opacity: 1; }
 }
 
+/* §24-bugfix · 取消托管提示 · 朱漆红字 + 奶白描边 + 顶部居中淡出 */
+.autopilotCancelHint {
+  position: absolute;
+  top: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  font-family: var(--font-kai);
+  font-size: 30px;
+  font-weight: bold;
+  color: #7a1a14;
+  letter-spacing: 3px;
+  padding: 16px 36px;
+  background: linear-gradient(180deg, rgba(245, 235, 215, 0.96) 0%, rgba(232, 216, 184, 0.94) 100%);
+  border: 1px solid rgba(180, 30, 25, 0.45);
+  box-shadow:
+    0 0 24px rgba(0, 0, 0, 0.45),
+    inset 0 0 8px rgba(255, 220, 130, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: autopilotCancelHintFade 3s ease-out forwards;
+}
+@keyframes autopilotCancelHintFade {
+  0%   { opacity: 0; transform: translate(-50%, -8px); }
+  10%  { opacity: 1; transform: translate(-50%, 0); }
+  80%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -4px); }
+}
+
 /* ============================================
    双击详情弹窗（全屏 portal · scale 2.2 显示 Card）
    ============================================ */

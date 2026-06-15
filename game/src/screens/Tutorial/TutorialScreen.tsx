@@ -155,7 +155,7 @@ const PAGES: PageContent[] = [
 ]
 
 export function TutorialScreen() {
-  const navigate = useUIStore((s) => s.navigate)
+  const navigateWithLoading = useUIStore((s) => s.navigateWithLoading)
   const [pageIdx, setPageIdx] = useState(0)
 
   const frameUrl = getUiAssetUrl('tutorial_frame_23.png')
@@ -190,12 +190,12 @@ export function TutorialScreen() {
   /** 跳过 / 末页开始对战 都直接进战斗（游戏已在 FactionSelect 确认时启动）*/
   function handleSkip() {
     markSeen()
-    navigate('battle')
+    navigateWithLoading('battle')
   }
 
   function handleStart() {
     markSeen()
-    navigate('battle')
+    navigateWithLoading('battle')
   }
 
   return (

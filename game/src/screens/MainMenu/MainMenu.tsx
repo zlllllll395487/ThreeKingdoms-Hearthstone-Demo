@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
-import { getUiAssetUrl, startBackgroundPreload } from '@/data/assetLoader'
+import { getUiAssetUrl } from '@/data/assetLoader'
 import { BackButton } from '@/components/BackButton/BackButton'
 import styles from './MainMenu.module.css'
 
@@ -8,18 +8,12 @@ import styles from './MainMenu.module.css'
  * 主菜单 · 商业化 Hub 布局
  */
 export function MainMenu() {
-  const navigate = useUIStore((s) => s.navigate)
+  const navigateWithLoading = useUIStore((s) => s.navigateWithLoading)
   const showModal = useUIStore((s) => s.showModal)
   const [showSwitchModal, setShowSwitchModal] = useState(false)
   const [showChatModal, setShowChatModal] = useState(false)
   const [showResourceModal, setShowResourceModal] = useState(false)
   // §25 修正：教程不在主菜单弹 · 移到 FactionSelect 确认后
-
-  // §26 后台预加载：MainMenu 挂载后立即静默拉取 Codex / Battle 大图
-  // 不阻塞 UI · 仅重复调用安全
-  useEffect(() => {
-    startBackgroundPreload()
-  }, [])
 
   const bgUrl = getUiAssetUrl('menu_background.png')
   const playerUiBlockUrl = getUiAssetUrl('player_ui_block.png')
@@ -87,7 +81,7 @@ export function MainMenu() {
       <div className={styles.topBar}>
         <button
           className={styles.playerBlock}
-          onClick={() => navigate('accountdetails')}
+          onClick={() => navigateWithLoading('accountdetails')}
           aria-label="账号详情"
         >
           {playerUiBlockUrl && (
@@ -128,7 +122,7 @@ export function MainMenu() {
           </div>
           <button
             className={styles.moreBtn}
-            onClick={() => navigate('tutorial')}
+            onClick={() => navigateWithLoading('tutorial')}
             aria-label="教程"
           >
             {iconMoreUrl && <img src={iconMoreUrl} alt="" />}
@@ -138,9 +132,9 @@ export function MainMenu() {
 
       {/* ============ 左侧栏 · 3 图标 ============ */}
       <div className={styles.sideNav}>
-        <SideButton iconUrl={iconMailUrl} onClick={() => navigate('mail')} badge="3" label="邮件" />
-        <SideButton iconUrl={iconCalendarUrl} onClick={() => navigate('signin')} label="签到" />
-        <SideButton iconUrl={iconFriendsUrl} onClick={() => navigate('friends')} label="好友" />
+        <SideButton iconUrl={iconMailUrl} onClick={() => navigateWithLoading('mail')} badge="3" label="邮件" />
+        <SideButton iconUrl={iconCalendarUrl} onClick={() => navigateWithLoading('signin')} label="签到" />
+        <SideButton iconUrl={iconFriendsUrl} onClick={() => navigateWithLoading('friends')} label="好友" />
       </div>
 
       {/* ============ 右侧动作卡叠层（无 war-room 底盘） ============ */}
@@ -148,7 +142,7 @@ export function MainMenu() {
         {/* 中层：对战主大卡 */}
         <button
           className={styles.cardBattle}
-          onClick={() => navigate('factionselect')}
+          onClick={() => navigateWithLoading('factionselect')}
           aria-label="对战"
         >
           {cardBattleUrl && <img src={cardBattleUrl} alt="对战" />}
@@ -157,7 +151,7 @@ export function MainMenu() {
         {/* 底层：限时活动 */}
         <button
           className={styles.cardEvent}
-          onClick={() => navigate('event')}
+          onClick={() => navigateWithLoading('event')}
           aria-label="限时活动"
         >
           {cardEventUrl && <img src={cardEventUrl} alt="限时活动" />}
@@ -166,7 +160,7 @@ export function MainMenu() {
         {/* 顶层：剧情模式（z-index 最高，盖在对战之上） */}
         <div
           className={styles.cardStory}
-          onClick={() => navigate('storymode')}
+          onClick={() => navigateWithLoading('storymode')}
           role="button"
         >
           {cardStoryUrl && <img src={cardStoryUrl} alt="剧情模式" />}
@@ -203,19 +197,19 @@ export function MainMenu() {
 
       {/* ============ 右下 5 Tab（悬浮，紧凑 Button Group） ============ */}
       <div className={styles.tabBar}>
-        <button className={styles.tab} onClick={() => navigate('decks')} aria-label="卡组">
+        <button className={styles.tab} onClick={() => navigateWithLoading('decks')} aria-label="卡组">
           {tabDeckUrl && <img src={tabDeckUrl} alt="卡组" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('recruit')} aria-label="招募">
+        <button className={styles.tab} onClick={() => navigateWithLoading('recruit')} aria-label="招募">
           {tabRecruitUrl && <img src={tabRecruitUrl} alt="招募" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('quest')} aria-label="任务">
+        <button className={styles.tab} onClick={() => navigateWithLoading('quest')} aria-label="任务">
           {tabQuestUrl && <img src={tabQuestUrl} alt="任务" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('shop')} aria-label="商城">
+        <button className={styles.tab} onClick={() => navigateWithLoading('shop')} aria-label="商城">
           {tabShopUrl && <img src={tabShopUrl} alt="商城" />}
         </button>
-        <button className={styles.tab} onClick={() => navigate('codex')} aria-label="图鉴">
+        <button className={styles.tab} onClick={() => navigateWithLoading('codex')} aria-label="图鉴">
           {tabCodexUrl && <img src={tabCodexUrl} alt="图鉴" />}
         </button>
       </div>

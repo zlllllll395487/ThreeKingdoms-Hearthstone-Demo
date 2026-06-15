@@ -44,6 +44,7 @@ export function BattleScreen() {
     pendingTargetForCard,
     aiThinking,
     autopilot,
+    autopilotCancelHint,
     startGame,
     selectCard,
     selectAttacker,
@@ -920,6 +921,12 @@ export function BattleScreen() {
       {hasPendingSpellTarget && (
         <div className={styles.targetHint}>
           {selectedSpellTargetsFriendly ? '请选择友方武将' : '请选择目标'}
+        </div>
+      )}
+      {/* §24-bugfix · 取消托管提示 · 本回合剩余动作仍会执行完 */}
+      {autopilotCancelHint && (
+        <div className={styles.autopilotCancelHint}>
+          已取消托管 · 本回合剩余动作将继续自动执行
         </div>
       )}
       {/* §19.7.12 · 选中武器卡时提示 "点击主公装备" */}

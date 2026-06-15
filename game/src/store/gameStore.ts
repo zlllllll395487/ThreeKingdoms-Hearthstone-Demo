@@ -33,6 +33,8 @@ interface GameStore {
   aiThinking: boolean
   /** §24 玩家方托管开关 · 开启后自动用宗师 AI 走玩家回合 · 用户可随时切换 */
   autopilot: boolean
+  /** §24-bugfix · 取消托管后本回合托管循环仍在执行时显示的提示，3 秒后自动清除 */
+  autopilotCancelHint: boolean
 
   // ============================================
   // Actions
@@ -90,6 +92,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   aiDifficulty: 'standard',
   autopilot: false,
+  autopilotCancelHint: false,
   toggleAutopilot: () => {
     const next = !get().autopilot
     set({ autopilot: next })
@@ -103,6 +106,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
         !s.aiThinking
       ) {
         void runPlayerAutopilotTurn()
+      }
+    } else {
+      // §24-bugfix · 取消托管时如果本回合托管循环已经启动，剩余动作仍会执行完
+      // 显示提示文字让玩家理解此行为，3 秒后自动消失
+      const s = get()
+      if (s.aiThinking && s.state?.activePlayer === 'player') {
+        set({ autopilotCancelHint: true })
+        window.setTimeout(() => {
+          useGameStore.setState({ autopilotCancelHint: false })
+        }, 3000)
       }
     }
   },

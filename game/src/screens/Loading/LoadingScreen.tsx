@@ -40,6 +40,11 @@ export function LoadingScreen() {
   })
   const [tip] = useState<string>(() => pickRandomTip())
 
+  // 美术资源（缺失则 CSS fallback）
+  const tipScrollUrl = getUiAssetUrl('loading_tip_scroll.png')
+  const tipLabelUrl = getUiAssetUrl('loading_tip_label.png')
+  const progressFrameUrl = getUiAssetUrl('loading_progress_frame.png')
+
   useEffect(() => {
     const target: Screen = pendingScreen ?? 'mainmenu'
     const startTime = Date.now()
@@ -78,14 +83,25 @@ export function LoadingScreen() {
 
       {/* 中部 Tip 卷轴 */}
       {tip && (
-        <div className={styles.tipBlock}>
-          <div className={styles.tipLabel}>{LABEL_BY_TARGET[pendingScreen ?? 'mainmenu'] ?? '调度兵马中'}</div>
+        <div
+          className={styles.tipBlock}
+          style={tipScrollUrl ? { backgroundImage: `url(${tipScrollUrl})` } : undefined}
+        >
+          <div
+            className={styles.tipLabel}
+            style={tipLabelUrl ? { backgroundImage: `url(${tipLabelUrl})` } : undefined}
+          >
+            {LABEL_BY_TARGET[pendingScreen ?? 'mainmenu'] ?? '调度兵马中'}
+          </div>
           <div className={styles.tipText}>{tip}</div>
         </div>
       )}
 
       {/* 底部进度条 */}
-      <div className={styles.bottomBar}>
+      <div
+        className={styles.bottomBar}
+        style={progressFrameUrl ? { backgroundImage: `url(${progressFrameUrl})` } : undefined}
+      >
         <div className={styles.textRow}>
           <span className={styles.statusText}>正在准备资源 · 请稍候片刻</span>
           <span className={styles.percentText}>{progress}%</span>

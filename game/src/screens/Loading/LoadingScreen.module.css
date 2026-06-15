@@ -1,4 +1,4 @@
-/* LoadingScreen · 分屏渐进预加载 */
+/* LoadingScreen · 分屏渐进预加载 · 古风美术接入版 */
 
 .container {
   position: relative;
@@ -35,25 +35,27 @@
 }
 
 /* ============================================
-   中部 Tip 卷轴
+   中部 Tip 卷轴 + 匾额
    ============================================ */
 
 .tipBlock {
   position: absolute;
   left: 50%;
-  bottom: 220px;
+  bottom: 200px;
   transform: translateX(-50%);
   z-index: 3;
-  width: min(1200px, 70%);
-  padding: 28px 56px 32px;
-  background:
-    linear-gradient(180deg, rgba(28, 18, 10, 0.78) 0%, rgba(20, 12, 6, 0.82) 100%);
-  border-top: 2px solid rgba(212, 160, 23, 0.55);
-  border-bottom: 2px solid rgba(212, 160, 23, 0.55);
-  box-shadow:
-    0 0 32px rgba(0, 0, 0, 0.6),
-    inset 0 0 24px rgba(212, 160, 23, 0.08);
-  text-align: center;
+  /* 卷轴原图 794×168，比例 4.73:1。展示宽度 1280px → 高度自动 ~271px */
+  width: min(1280px, 78%);
+  aspect-ratio: 794 / 168;
+  /* tipBlock 由 LoadingScreen.tsx 内联设置 backgroundImage 引用 loading_tip_scroll.png · 此处只兜底深色背板 */
+  background-color: transparent;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.55));
   animation: tipFadeIn 0.6s 0.2s ease-out backwards;
 }
 
@@ -62,24 +64,78 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
+/* 匾额：吊在卷轴上方，略与卷轴上沿重叠制造层次 */
 .tipLabel {
+  position: absolute;
+  top: -52px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 340px;
+  /* 匾额原图 794×205，比例 3.87:1 → 340px / 88px */
+  aspect-ratio: 794 / 205;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-serif);
-  font-size: 22px;
-  letter-spacing: 8px;
-  color: var(--color-gold);
-  margin-bottom: 18px;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 6px;
+  color: #f4d98b;
   text-shadow:
-    0 0 8px rgba(212, 160, 23, 0.5),
-    0 2px 6px rgba(0, 0, 0, 0.85);
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 8px rgba(212, 160, 23, 0.5);
+  /* 文字在木牌中部，向上 4px 视觉居中（牌底有铆钉视觉重量） */
+  padding-bottom: 4px;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
 }
 
 .tipText {
+  /* 文字落在卷轴中部，留出左右金属轴头空间（各约 12%） */
+  max-width: 74%;
   font-family: var(--font-serif);
-  font-size: 28px;
+  font-size: 26px;
+  font-weight: 600;
   letter-spacing: 3px;
-  line-height: 1.6;
+  line-height: 1.5;
+  color: #3a2412;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(248, 234, 200, 0.6);
+  /* 在卷轴竖直方向居中（卷轴两端轴头会让上下视觉略带留白） */
+  padding-top: 6px;
+}
+
+/* 美术资源缺失时的 fallback · CSS 渐变 + 金边卷轴风 */
+.tipBlock:not([style*="background-image"]) {
+  background:
+    linear-gradient(180deg, rgba(28, 18, 10, 0.78) 0%, rgba(20, 12, 6, 0.82) 100%);
+  border-top: 2px solid rgba(212, 160, 23, 0.55);
+  border-bottom: 2px solid rgba(212, 160, 23, 0.55);
+  box-shadow:
+    0 0 32px rgba(0, 0, 0, 0.6),
+    inset 0 0 24px rgba(212, 160, 23, 0.08);
+  aspect-ratio: auto;
+  padding: 28px 56px 32px;
+}
+.tipBlock:not([style*="background-image"]) .tipText {
   color: rgba(248, 240, 218, 0.96);
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.92);
+  max-width: 100%;
+}
+.tipLabel:not([style*="background-image"]) {
+  background: transparent;
+  width: auto;
+  aspect-ratio: auto;
+  font-size: 22px;
+  letter-spacing: 8px;
+  margin-bottom: 18px;
+  top: auto;
+  left: auto;
+  transform: none;
+  position: relative;
+  filter: none;
 }
 
 /* ============================================
@@ -94,6 +150,11 @@
   z-index: 5;
   display: flex;
   flex-direction: column;
+  /* progress_frame 由 LoadingScreen.tsx 内联设置 backgroundImage · cover 居中 */
+  background-color: rgba(8, 4, 2, 0.85);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .textRow {
@@ -103,7 +164,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 56px;
-  background: rgba(8, 4, 2, 0.85);
+  /* 与 progress_frame 背景叠加的半透明深色，保证文字对比 */
+  background: linear-gradient(180deg, rgba(8, 4, 2, 0.72) 0%, rgba(8, 4, 2, 0.86) 100%);
   border-top: 1px solid rgba(212, 160, 23, 0.45);
   backdrop-filter: blur(2px);
 }
@@ -132,7 +194,7 @@
 .progressTrack {
   width: 100%;
   height: 10px;
-  background: rgba(20, 14, 8, 0.9);
+  background: rgba(20, 14, 8, 0.95);
   position: relative;
   overflow: hidden;
 }

@@ -126,20 +126,16 @@ function getBackgroundPreloadUrls(): string[] {
 /**
  * 通用预加载工具 · N 路并发批处理
  *
- * 比"全部 new Image()"快的原因：
- *   - 全部 new Image()：浏览器会同时排 200 个待处理请求 · 解码管线 / 内存压力大
- *   - 8 路并发：始终只有 8 个 in-flight · 完成一个立刻补一个 · 吞吐稳定
- *
- * 默认并发数 8 · 浏览器 HTTP/2 多路复用下吞吐最佳
- *
  * @param urls 待加载的 URL 列表
  * @param onTick 每张完成时回调（可用于更新进度）
- * @param concurrent 并发上限 · 默认 8
+ * @param concurrent 并发上限 · 默认 6
+ * @param fetchPriority 浏览器请求优先级 · 'low' 让位给前台请求 · 默认 'auto'
  */
 export async function preloadBatched(
   urls: string[],
   onTick?: () => void,
-  concurrent = 8,
+  concurrent = 6,
+  fetchPriority: 'high' | 'low' | 'auto' = 'auto',
 ): Promise<void> {
   if (urls.length === 0) return
   let idx = 0
@@ -151,6 +147,11 @@ export async function preloadBatched(
       await new Promise<void>((resolve) => {
         const img = new Image()
         img.decoding = 'async'
+        if (fetchPriority !== 'auto') {
+          // fetchPriority 在新浏览器已支持 · 旧浏览器忽略
+          ;(img as HTMLImageElement & { fetchPriority?: string }).fetchPriority =
+            fetchPriority
+        }
         const done = () => {
           onTick?.()
           resolve()
@@ -170,11 +171,16 @@ export async function preloadBatched(
 
 let backgroundPreloadStarted = false
 
-/** Phase 2 触发器 · 由 MainMenu 挂载时调用 · 重复调用安全无副作用 */
+/**
+ * Phase 2 触发器 · 由 MainMenu 挂载时调用 · 重复调用安全无副作用
+ *
+ * 关键设置（避免优先级反转）：
+ * - concurrent=3：只占 3 个连接槽位 · 留 3 个给前台 Codex/Battle/Tutorial 切屏请求
+ * - fetchPriority='low'：浏览器自动让位 · 前台请求触发时后台暂停
+ */
 export function startBackgroundPreload(): void {
   if (backgroundPreloadStarted) return
   backgroundPreloadStarted = true
   const urls = getBackgroundPreloadUrls()
-  // 不阻塞 await · fire-and-forget · 用 8 路并发批处理
-  void preloadBatched(urls, undefined, 8)
+  void preloadBatched(urls, undefined, 3, 'low')
 }

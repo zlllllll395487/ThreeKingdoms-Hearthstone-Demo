@@ -69,32 +69,31 @@ export function getFxFrame(name: string, frame: number): string | null {
  */
 
 /**
- * §26 LoadingScreen 全量预加载 · 返回需要预加载的所有 URL
+ * §26 极简预加载 · 只加载主菜单必需的少量大图 (~10 张, <10 MB)
  *
- * 包含:
- * - 所有立绘 (89 张, 70 MB)
- * - 所有卡面 cardvisual (71 张, 44 MB)
- * - 所有屏背景 / 边框 / 弹窗 / 主菜单 UI / 主公图 (~50 张)
+ * Codex/Battle 的卡面/立绘改由 loading="lazy" + IntersectionObserver 按需加载
+ * 配合 vercel.json Cache-Control immutable · 加载过一次的永久缓存
  *
- * 不含:
- * - fx 序列帧 (战斗时再加载,占 10MB,加载时间是 ~150ms 一帧)
- * - 极小 ui icon (单张 <50KB · 自然加载零延迟)
- *
- * 配合 vercel.json 加 Cache-Control 1 年 immutable · 加载一次永久缓存
+ * 原因: 114 MB 全量预加载在 Vercel 跨洋 CDN 下吞吐太低,1% 也跑不动
+ *      改用"看到才加载"+"持久缓存"组合方案更现实
  */
 export function getAllPreloadUrls(): string[] {
-  const portraits = Object.values(portraitModules)
-  const ui = Object.entries(uiModules)
-    .filter(([path]) => {
-      const name = path.split('/').pop() ?? ''
-      // 排除明显不需要预加载的小型 icon (节省总时长)
-      const isSmallIcon =
-        name.startsWith('icon_') &&
-        !name.startsWith('icon_anchor_') // 锚点 icon 战斗时显示,要预加载
-      return !isSmallIcon
-    })
-    .map(([, url]) => url)
-  return [...portraits, ...ui]
+  const essentialNames = [
+    'loading_bg.png',
+    'menu_background.png',
+    'player_ui_block.png',
+    'card_battle.png',
+    'card_story.png',
+    'card_event.png',
+    'tab_codex.png',
+    'tab_deck.png',
+    'tab_recruit.png',
+    'tab_quest.png',
+    'tab_shop.png',
+  ]
+  return essentialNames
+    .map((n) => uiModules[`/src/assets/ui/${n}`])
+    .filter((u): u is string => !!u)
 }
 
 /**

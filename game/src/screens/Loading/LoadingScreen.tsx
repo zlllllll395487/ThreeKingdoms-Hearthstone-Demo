@@ -29,7 +29,7 @@ export function LoadingScreen() {
     const total = urls.length || 1
     const startTime = Date.now()
     const MIN_DURATION = 1000
-    const MAX_DURATION = 60000
+    const MAX_DURATION = 5000
 
     let loaded = 0
 
@@ -46,8 +46,6 @@ export function LoadingScreen() {
       return
     }
 
-    // 12 路并发 · HTTP/2 多路复用让所有请求共享 1 个 TCP 连接
-    // 浏览器 max-age=1y immutable → 后续访问直接走本地缓存,无网络请求
     void preloadBatched(
       urls,
       () => {
@@ -55,7 +53,7 @@ export function LoadingScreen() {
         setProgress(Math.min(100, Math.floor((loaded / total) * 100)))
         if (loaded >= total) finishOnce()
       },
-      12,
+      6,
     )
 
     const safety = window.setTimeout(() => {

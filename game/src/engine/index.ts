@@ -210,6 +210,8 @@ export class GameEngine {
       'buffMinion',
       'grantExtraAttack',
       'grantKeyword',
+      'applyTagToTargetAndAdjacent',
+      'applyDamageVulnerability',
     ])
     return (card.data.effects ?? []).some(
       (e) =>
@@ -511,12 +513,16 @@ export class GameEngine {
     // 简化：只对 minion 攻击有效，本函数不处理
   }
 
-  dealDamageToMinion(m: CardInstance, amount: number): void {
+  dealDamageToMinion(m: CardInstance, amount: number, opts?: { ignoreAmplifier?: boolean }): void {
     if (amount <= 0) return
     if (m.currentKeywords.has('divineShield')) {
       m.currentKeywords.delete('divineShield')
       this.log.push(logDamage(m.data.name + '（铁壁吸收）', 0))
       return
+    }
+    // §22-iter7 · 伤害放大（W18 火油 applyDamageVulnerability 施加）
+    if (!opts?.ignoreAmplifier && m.damageVulnerability && m.damageVulnerability > 0) {
+      amount += m.damageVulnerability
     }
     m.currentHealth -= amount
     this.log.push(logDamage(m.data.name, amount))
@@ -605,6 +611,13 @@ export class GameEngine {
 
     // v5.5 清空本方 combo flag（仅本回合有效）
     this.state[side].comboFlagsThisTurn.clear()
+
+    // §22-iter7 · 清空双方 damageVulnerability（W18 火油 buff 仅本回合有效）
+    for (const s of ['player', 'ai'] as PlayerSide[]) {
+      for (const m of this.state[s].board) {
+        if (m.damageVulnerability) m.damageVulnerability = 0
+      }
+    }
 
     // 切换
     const nextSide: PlayerSide = side === 'player' ? 'ai' : 'player'
@@ -712,6 +725,7 @@ const T1_BLOCKED_ACTIONS = new Set([
   'grantExtraAttack',
   'grantKeyword',
   'applyTagToTargetAndAdjacent',
+  'applyDamageVulnerability',
 ])
 
 function cardPlayableOnT1(card: CardInstance): boolean {

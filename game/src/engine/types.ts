@@ -39,7 +39,7 @@ export type EffectTrigger =
   | 'aura'              // 持续光环（v5.5 新增，未来用）
 
 /** v5.5 锚点标签（吴阵营 anchor 系统） */
-export type AnchorTag = 'anchor_fire' | 'anchor_draw' | 'anchor_heal'
+export type AnchorTag = 'anchor_fire' | 'anchor_draw' | 'anchor_heal' | 'anchor_ramp'
 
 /** v5.5 卡-卡联动 flag */
 export type ComboFlag = 'combo_fire' | 'combo_betrayal'
@@ -125,8 +125,9 @@ export interface CardInstance {
   hasBeenSilenced: boolean
   summonedThisTurn?: boolean  // rush 限制英雄攻击用
   frozen?: boolean            // v5.5 冰冻态（W12/W23/W26）
-  cannotAttackThisTurn?: boolean  // v5.5 本回合无法攻击（W18 火油 / W26 画地为牢）
-  tags?: Set<string>          // §22-iter3 任意标记（如 'oiled' 火油标记）· 为未来 combo 联动卡留接口
+  cannotAttackThisTurn?: boolean  // v5.5 本回合无法攻击（W26 画地为牢）
+  tags?: Set<string>          // §22-iter3 任意标记（如 'oiled' 火油标记）· 用于 combo 联动卡条件判定
+  damageVulnerability?: number  // §22-iter7 本回合内每次受击额外伤害放大（W18 火油施加），endTurn 清零
 
   // 阵营归属（场上时记录控制者）
   owner?: 'player' | 'ai'

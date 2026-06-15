@@ -99,6 +99,7 @@
     "attack": 3,
     "health": 4,
     "tribe": "strategist",
+    "anchorTag": "anchor_ramp",
     "effects": [
       {
         "trigger": "battlecry",
@@ -108,7 +109,7 @@
     ],
     "portrait": "吕蒙.png",
     "cardvisual": "吕蒙.png",
-    "description": "出阵【暗度陈仓】：在你的下一个回合开始时，获得 3 点额外法力水晶（可临时超过 10 点上限，仅本回合有效）。",
+    "description": "出阵【暗度陈仓】：在你的下一个回合开始时，获得 3 点额外法力水晶（可临时超过 10 点上限，仅本回合有效）。【特殊效果·法力联动】当你施放法力联动谋略时触发额外效果。",
     "flavor": "白衣渡江，士别三日当刮目相待。"
   },
   {
@@ -155,24 +156,36 @@
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 4, "targetType": "minion" }
+        "params": {
+          "side": "enemy",
+          "amount": 3,
+          "targetType": "minion",
+          "maxTargets": 4,
+          "lowTargetBonus": { "threshold": 2, "bonus": 1 }
+        }
       }
     ],
     "linkedEffects": [
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 2, "targetType": "minion" }
+        "params": {
+          "side": "enemy",
+          "amount": 1,
+          "targetType": "minion",
+          "maxTargets": 4,
+          "lowTargetBonus": { "threshold": 2, "bonus": 1 }
+        }
       },
       {
         "trigger": "onCast",
         "action": "refundMana",
-        "params": { "amount": 3 }
+        "params": { "amount": 2 }
       }
     ],
     "portrait": "火烧赤壁.png",
     "cardvisual": "火烧赤壁.png",
-    "description": "对所有敌方武将造成 4 点伤害。【特殊效果·周瑜在场时】：改为造成 6 点伤害，并退还 3 点法力（仅本回合有效）。",
+    "description": "随机对最多 4 名敌方武将造成 3 点伤害；当可选目标 ≤2 时伤害提升至 4 点。【特殊效果·周瑜在场时】：每个目标额外造成 1 点伤害（合计 4 / 5），并退还 2 点法力（仅本回合有效）。",
     "flavor": "火光烛天，江风助势。"
   },
   {
@@ -246,7 +259,12 @@
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 2, "targetType": "minion" }
+        "params": {
+          "side": "enemy",
+          "amount": 2,
+          "targetType": "minion",
+          "maxTargets": 3
+        }
       }
     ],
     "linkedEffects": [
@@ -263,7 +281,7 @@
     ],
     "portrait": "草船借箭.png",
     "cardvisual": "草船借箭.png",
-    "description": "对所有敌方武将造成 2 点伤害。【特殊效果·鲁肃在场时】：抽 2 张牌，并退还 1 点法力（仅本回合有效）。",
+    "description": "随机对最多 3 名敌方武将造成 2 点伤害。【特殊效果·鲁肃在场时】：抽 2 张牌，并退还 1 点法力（仅本回合有效）。",
     "flavor": "雾锁长江，孔明从容。"
   },
   {
@@ -387,18 +405,13 @@
     "effects": [
       {
         "trigger": "onCast",
-        "action": "attackDebuff",
-        "params": { "amount": 2, "duration": "turn" }
-      },
-      {
-        "trigger": "onCast",
-        "action": "applyTagToTargetAndAdjacent",
-        "params": { "tag": "oiled" }
+        "action": "applyDamageVulnerability",
+        "params": { "amount": 1, "tag": "oiled" }
       }
     ],
     "portrait": "火油.png",
     "cardvisual": "火油.png",
-    "description": "选择一名敌方武将，使其本回合攻击力 -2。该武将及相邻敌方武将获得「火油」标记。",
+    "description": "选择一名敌方武将，使其与相邻敌方武将本回合受到的伤害 +1，并获得「火油」标记。",
     "flavor": "油浇火势，蔓延邻舍。"
   },
   {
@@ -408,24 +421,24 @@
     "type": "spell",
     "faction": "wu",
     "rarity": "epic",
-    "comboFlagRequirement": "combo_fire",
     "effects": [
       {
         "trigger": "onCast",
         "action": "dealDamage",
-        "params": { "amount": 3, "targetSelector": "enemyAny" }
-      }
-    ],
-    "comboLinkedEffects": [
-      {
-        "trigger": "onCast",
-        "action": "dealDamage",
-        "params": { "amount": 3, "targetSelector": "lastDamageTarget" }
+        "params": {
+          "amount": 3,
+          "targetSelector": "enemyAny",
+          "conditional": {
+            "ifTargetHasTag": "oiled",
+            "useAmountInstead": 6,
+            "ignoreAmplifier": true
+          }
+        }
       }
     ],
     "portrait": "赤焰焚营.png",
     "cardvisual": "赤焰焚营.png",
-    "description": "对任意目标造成 3 点伤害。【连击·火油】：若本回合内曾施放火油，改为造成 6 点伤害。",
+    "description": "选择一名敌方目标造成 3 点伤害；若目标带有「火油」标记，改为造成 6 点伤害。",
     "flavor": "火借风威，烧尽连营。"
   },
   {
@@ -612,24 +625,36 @@
     "type": "spell",
     "faction": "wu",
     "rarity": "legendary",
-    "anchorRequirement": "anchor_fire",
+    "anchorRequirement": "anchor_ramp",
     "effects": [
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 2 }
+        "params": {
+          "side": "enemy",
+          "amount": 2,
+          "targetType": "minion",
+          "maxTargets": 4,
+          "lowTargetBonus": { "threshold": 2, "bonus": 1 }
+        }
       }
     ],
     "linkedEffects": [
       {
         "trigger": "onCast",
         "action": "dealDamageAll",
-        "params": { "side": "enemy", "amount": 1 }
+        "params": {
+          "side": "enemy",
+          "amount": 1,
+          "targetType": "minion",
+          "maxTargets": 4,
+          "lowTargetBonus": { "threshold": 2, "bonus": 1 }
+        }
       }
     ],
     "portrait": "jiejiangduanliu.png",
     "cardvisual": "jiejiangduanliu.png",
-    "description": "对所有敌方武将造成 2 点伤害。【特殊效果·周瑜】额外造成 1 点伤害（合计 3 点）。",
+    "description": "随机对最多 4 名敌方武将造成 2 点伤害；当可选目标 ≤2 时伤害提升至 3 点。【特殊效果·吕蒙在场时】：每个目标额外造成 1 点伤害（合计 3 / 4）。",
     "flavor": "汉水汹涌，截江断流。"
   },
   {

@@ -47,40 +47,96 @@ const equipWeapon: ActionFn = (engine, source, params) => {
 // 伤害类 actions
 // ============================================
 
-/** 对全场某方目标造成伤害 */
+/**
+ * 对全场某方目标造成伤害
+ *
+ * §22-iter7 扩展：
+ * - maxTargets: 若提供，从候选武将中随机选最多 N 个作为命中目标（PRNG 由 sim seeded-random 注入）
+ * - lowTargetBonus: { threshold, bonus } 若候选目标数 ≤ threshold，每目标额外伤害 bonus
+ */
 const dealDamageAll: ActionFn = (engine, source, params) => {
   const sideParam = params.side as 'self' | 'enemy'
   const targetSide: PlayerSide =
     sideParam === 'self' ? source.owner! : getEnemySide(source.owner!)
   const amount = (params.amount as number) ?? 0
   const targetType = (params.targetType as string) ?? 'minion'
+  const maxTargets = params.maxTargets as number | undefined
+  const lowTargetBonus = params.lowTargetBonus as
+    | { threshold: number; bonus: number }
+    | undefined
   const player = getPlayer(engine, targetSide)
   const bonus = engine.spellPowerBonus[source.owner!]
-  const finalAmount = source.data.type === 'spell' ? amount + bonus : amount
+  let finalAmount = source.data.type === 'spell' ? amount + bonus : amount
+
+  // 选取候选武将
+  let targets: CardInstance[] = [...player.board]
+  if (typeof maxTargets === 'number' && targets.length > maxTargets) {
+    // Fisher-Yates 洗牌取前 maxTargets 个 · Math.random 在 sim 下被 seeded
+    const shuffled = [...targets]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    targets = shuffled.slice(0, maxTargets)
+  }
+
+  // 寡目标加成：以受限后的实际命中数为准
+  if (lowTargetBonus && targets.length > 0 && targets.length <= lowTargetBonus.threshold) {
+    finalAmount += lowTargetBonus.bonus
+  }
+
   if (targetType === 'minion' || targetType === 'all') {
-    for (const m of [...player.board]) {
+    for (const m of targets) {
       engine.dealDamageToMinion(m, finalAmount)
     }
   }
   if (targetType === 'all') {
     engine.dealDamageToHero(targetSide, finalAmount)
   }
-  engine.log.push(logEffect(`${source.data.name}：对${sideParam === 'self' ? '己方' : '敌方'}全体武将造成 ${finalAmount} 点伤害`))
+  engine.log.push(
+    logEffect(
+      `${source.data.name}：对${sideParam === 'self' ? '己方' : '敌方'}${
+        typeof maxTargets === 'number' ? `${targets.length} 名` : '全体'
+      }武将造成 ${finalAmount} 点伤害`,
+    ),
+  )
 }
 
-/** 对单体目标造成伤害（需 target） */
+/**
+ * 对单体目标造成伤害（需 target）
+ *
+ * §22-iter7 扩展：
+ * - conditional: { ifTargetHasTag, useAmountInstead, ignoreAmplifier } 命中带指定 tag 的目标时改用替代伤害值
+ *   ignoreAmplifier 为 true 时跳过 damageVulnerability 放大（避免与火油 buff 二次叠加）
+ */
 const dealDamage: ActionFn = (engine, source, params, target) => {
-  const amount = (params.amount as number) ?? 0
+  let amount = (params.amount as number) ?? 0
   const bonus = engine.spellPowerBonus[source.owner!]
-  const finalAmount = source.data.type === 'spell' ? amount + bonus : amount
   if (!target) return
+
+  const conditional = params.conditional as
+    | { ifTargetHasTag?: string; useAmountInstead?: number; ignoreAmplifier?: boolean }
+    | undefined
+  let ignoreAmplifier = false
+
+  if (conditional && conditional.ifTargetHasTag && target.kind === 'minion') {
+    const m = engine.findInstance(target.instanceId, target.side)
+    if (m && m.tags?.has(conditional.ifTargetHasTag)) {
+      if (typeof conditional.useAmountInstead === 'number') {
+        amount = conditional.useAmountInstead
+      }
+      ignoreAmplifier = conditional.ignoreAmplifier === true
+    }
+  }
+
+  const finalAmount = source.data.type === 'spell' ? amount + bonus : amount
   if (target.kind === 'hero') {
     engine.dealDamageToHero(target.side, finalAmount)
     engine.lastDamageTarget = { kind: 'hero', side: target.side }
   } else {
     const m = engine.findInstance(target.instanceId, target.side)
     if (m) {
-      engine.dealDamageToMinion(m, finalAmount)
+      engine.dealDamageToMinion(m, finalAmount, { ignoreAmplifier })
       engine.lastDamageTarget = { kind: 'minion', side: target.side, instanceId: target.instanceId }
     }
   }
@@ -335,8 +391,40 @@ const attackDebuff: ActionFn = (engine, source, params, target) => {
 }
 
 /**
- * §22-iter3 · W18 火油用 · 给目标 + 左右相邻共最多 3 个 minion 添加 tag
- * 未来 combo 卡（如"火攻"系列）可以检查 tag 给予额外伤害
+ * §22-iter7 · W18 火油用 · 给目标 + 左右相邻共最多 3 个敌方武将施加伤害放大
+ *
+ * 参数：
+ * - amount: damageVulnerability 放大值（每次受击额外伤害）
+ * - tag: 同步打上的标记字符串（默认 'oiled'）
+ *
+ * scope 与 targetType 固定为「主目标 + 相邻 + 仅敌方武将」，沿用 applyTagToTargetAndAdjacent 的位置判定。
+ * 放大效果在 endTurn 时清零，作用期为施法者本回合。
+ */
+const applyDamageVulnerability: ActionFn = (engine, source, params, target) => {
+  if (!target || target.kind !== 'minion') return
+  const amount = (params.amount as number) ?? 1
+  const tag = (params.tag as string) ?? 'oiled'
+  const enemyPlayer = getPlayer(engine, target.side)
+  const targetIdx = enemyPlayer.board.findIndex((b) => b.instanceId === target.instanceId)
+  if (targetIdx < 0) return
+  const affected = [targetIdx - 1, targetIdx, targetIdx + 1]
+    .filter((i) => i >= 0 && i < enemyPlayer.board.length)
+    .map((i) => enemyPlayer.board[i])
+  for (const m of affected) {
+    m.damageVulnerability = (m.damageVulnerability ?? 0) + amount
+    if (!m.tags) m.tags = new Set()
+    m.tags.add(tag)
+  }
+  engine.log.push(
+    logEffect(
+      `${source.data.name}：${affected.length} 名武将本回合受击伤害 +${amount}`,
+    ),
+  )
+}
+
+/**
+ * §22-iter3 · W18 旧版用 · 给目标 + 左右相邻共最多 3 个 minion 添加 tag
+ * 保留向前兼容，未来 combo 卡可继续使用
  */
 const applyTagToTargetAndAdjacent: ActionFn = (engine, source, params, target) => {
   if (!target || target.kind !== 'minion') return
@@ -467,6 +555,7 @@ export const ACTIONS: Record<string, ActionFn> = {
   cannotAttackAdjacent,
   attackDebuff,
   applyTagToTargetAndAdjacent,
+  applyDamageVulnerability,
   returnToHand,
   steal,
   discover,

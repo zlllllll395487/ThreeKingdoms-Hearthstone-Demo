@@ -380,7 +380,19 @@ function scoreSpellEffect(
   const p = eff.params ?? {}
   switch (eff.action) {
     case 'dealDamage': {
-      const amount = (p.amount as number) ?? 0
+      let amount = (p.amount as number) ?? 0
+      // §22-iter7 · conditional 若敌方场上有匹配 tag 的目标，按替代伤害评估
+      const conditional = p.conditional as
+        | { ifTargetHasTag?: string; useAmountInstead?: number }
+        | undefined
+      if (
+        conditional &&
+        conditional.ifTargetHasTag &&
+        typeof conditional.useAmountInstead === 'number' &&
+        enemy.board.some((m) => m.tags?.has(conditional.ifTargetHasTag!))
+      ) {
+        amount = conditional.useAmountInstead
+      }
       // §22.P1-4 · 可斩杀目标 → 大幅加分
       const killable = enemy.board.filter((m) => m.currentHealth <= amount).length
       const heroKill = amount >= enemy.hero.health ? 50 : 0
@@ -405,11 +417,26 @@ function scoreSpellEffect(
     }
     case 'dealDamageAll': {
       // §22.P0-3 · AoE 必须乘 board size · 否则群伤永远被低估
-      const amount = (p.amount as number) ?? 0
+      // §22-iter7 · 支持 maxTargets 上限 + lowTargetBonus 寡目标加伤
+      const baseAmount = (p.amount as number) ?? 0
       const targetSide = (p.side as string) === 'self' ? player.board : enemy.board
-      const targetCount = targetSide.length
-      const killable = targetSide.filter((m) => m.currentHealth <= amount).length
-      return amount * targetCount * 0.7 + killable * 2
+      const maxTargets = p.maxTargets as number | undefined
+      const lowTargetBonus = p.lowTargetBonus as
+        | { threshold: number; bonus: number }
+        | undefined
+      const hitCount =
+        typeof maxTargets === 'number'
+          ? Math.min(targetSide.length, maxTargets)
+          : targetSide.length
+      const effectiveAmount =
+        lowTargetBonus && hitCount > 0 && hitCount <= lowTargetBonus.threshold
+          ? baseAmount + lowTargetBonus.bonus
+          : baseAmount
+      // killable 评估：随机选 N 时无法精确预知命中，按整体可斩杀数 × 命中比率近似
+      const killableAll = targetSide.filter((m) => m.currentHealth <= effectiveAmount).length
+      const hitRatio = targetSide.length > 0 ? hitCount / targetSide.length : 0
+      const killable = Math.round(killableAll * hitRatio)
+      return effectiveAmount * hitCount * 0.7 + killable * 2
     }
     case 'dealDamageEqualToAttack':
       return 4
@@ -446,17 +473,23 @@ function scoreSpellEffect(
     }
     case 'attackDebuff':
     case 'applyTagToTargetAndAdjacent': {
-      // §22-trace-fix-3 · 火油 -2 atk + oiled · 价值看"我方是否会被攻击"
-      // 我方场上无 minion AND 敌方场上无嘲讽威胁 AND HP > 20 → 几乎无价值
+      // §22-trace-fix-3 · 旧火油 -2 atk + oiled · 价值看"我方是否会被攻击"
       if (enemy.board.length === 0) return -1000
       const amount = (p.amount as number) ?? 2
-      // 我方可能承受伤害的"压力指标"
       const myMinionCount = player.board.length
       const hpDangerFactor = player.hero.health <= 10 ? 2 : player.hero.health <= 18 ? 1 : 0.4
-      // 我方有 minion 需要保护 OR HP 偏低 → 价值高
       const protectFactor = myMinionCount > 0 ? 1.5 : hpDangerFactor
-      // -2 atk 价值 ≈ amount * 1.0 * protectFactor，再加 oiled tag combo 预留 +1
       return amount * 0.9 * protectFactor + 1
+    }
+    case 'applyDamageVulnerability': {
+      // §22-iter7 · W18 火油 · 主目标 + 相邻共最多 3 个敌方武将 + N 受击额外伤害
+      // 价值取决于：本回合我方能否对这些目标接续输出（手牌伤害 / 场上随从 / 武器）
+      if (enemy.board.length === 0) return -1000
+      const amount = (p.amount as number) ?? 1
+      // 简化：假设平均命中 2 个相邻目标 × amount 等效附加伤害
+      // 再叠加 oiled tag 触发组合的预期收益 +2
+      const avgHits = Math.min(3, enemy.board.length)
+      return amount * avgHits * 1.0 + 2
     }
     case 'freezeAll': {
       // §22-iter1 · W23 连环计 · 全场冰冻 · 敌方 board 越大越值
@@ -732,7 +765,7 @@ function chooseSpellTarget(
 
   // §22-trace-fix-1 · 控场卡（送回手/抢夺/冰冻/不能攻击/降攻）选 maxCost 内"最强威胁"
   // 不再用"血量最低"·因为反间计送 1/2 vanilla 是浪费
-  const controlActions = ['returnToHand', 'steal', 'freeze', 'cannotAttackThisTurn', 'attackDebuff', 'applyTagToTargetAndAdjacent']
+  const controlActions = ['returnToHand', 'steal', 'freeze', 'cannotAttackThisTurn', 'attackDebuff', 'applyTagToTargetAndAdjacent', 'applyDamageVulnerability']
   const controlEff = effects.find((e) => controlActions.includes(e.action))
   if (controlEff) {
     const maxCost = ((controlEff.params as Record<string, unknown> | undefined)?.maxCost as number | undefined) ?? Infinity
@@ -749,8 +782,27 @@ function chooseSpellTarget(
   // 伤害类法术：优先斩杀（hp ≤ amount），其次最高威胁
   const dmgEff = effects.find((e) => e.action === 'dealDamage')
   if (dmgEff) {
-    const amount = ((dmgEff.params as Record<string, unknown> | undefined)?.amount as number | undefined) ?? 0
-    const lethal = enemy.board.filter((m) => m.currentHealth <= amount)
+    const params = (dmgEff.params as Record<string, unknown> | undefined) ?? {}
+    const baseAmount = (params.amount as number | undefined) ?? 0
+    // §22-iter7 · 评估 conditional：若敌方场上有匹配 tag 的武将，按替代伤害评估并优先选中
+    const cond = params.conditional as
+      | { ifTargetHasTag?: string; useAmountInstead?: number }
+      | undefined
+    if (
+      cond &&
+      cond.ifTargetHasTag &&
+      typeof cond.useAmountInstead === 'number'
+    ) {
+      const taggedTargets = enemy.board.filter((m) => m.tags?.has(cond.ifTargetHasTag!))
+      if (taggedTargets.length > 0) {
+        const amount = cond.useAmountInstead
+        const lethalTagged = taggedTargets.filter((m) => m.currentHealth <= amount)
+        const pool = lethalTagged.length > 0 ? lethalTagged : taggedTargets
+        pool.sort((a, b) => b.currentAttack - a.currentAttack)
+        return { kind: 'minion', side: enemySide, instanceId: pool[0].instanceId }
+      }
+    }
+    const lethal = enemy.board.filter((m) => m.currentHealth <= baseAmount)
     if (lethal.length > 0) {
       // 可斩杀 → 选 atk 最高（清最威胁）
       lethal.sort((a, b) => b.currentAttack - a.currentAttack)

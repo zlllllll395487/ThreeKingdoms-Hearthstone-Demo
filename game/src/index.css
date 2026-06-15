@@ -158,12 +158,26 @@ body {
 }
 
 
-/* §27 自定义鼠标光标 · 全局隐藏系统光标 · 交由 <CustomCursor> 组件渲染 */
+/* §27 自定义鼠标光标 · 全局隐藏系统光标 · 交由 <CustomCursor> 组件渲染
+ *
+ * 覆盖所有交互式语义元素，避免新增 <div role="checkbox"> 之类的元素
+ * 在 module CSS 里设了 cursor: pointer 后系统光标复活造成双光标。
+ */
 html,
 body,
 button,
 a,
+input,
+label,
+select,
+textarea,
 [role='button'],
+[role='checkbox'],
+[role='radio'],
+[role='link'],
+[role='switch'],
+[role='tab'],
+[role='menuitem'],
 [data-clickable] {
   cursor: none !important;
 }

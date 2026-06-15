@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useUIStore } from '@/store/uiStore'
+import { useUIStore, type Screen } from '@/store/uiStore'
+import { useGameStore } from '@/store/gameStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import styles from './TutorialScreen.module.css'
 
@@ -156,7 +157,16 @@ const PAGES: PageContent[] = [
 
 export function TutorialScreen() {
   const navigateWithLoading = useUIStore((s) => s.navigateWithLoading)
+  const engine = useGameStore((s) => s.engine)
   const [pageIdx, setPageIdx] = useState(0)
+
+  // 教程屏有两条入口：
+  //   - 主菜单「更多」按钮 → engine 为 null，离开时回主菜单
+  //   - FactionSelect 确认 → engine 已存在，离开时进战斗
+  const cameFromGame = engine !== null
+  const returnTarget: Screen = cameFromGame ? 'battle' : 'mainmenu'
+  const skipLabel = cameFromGame ? '跳过' : '关闭'
+  const lastPageBtnLabel = cameFromGame ? '开始对战' : '返回主菜单'
 
   const frameUrl = getUiAssetUrl('tutorial_frame_23.png')
   const btnLongOn = getUiAssetUrl('tutorial_btn_long_on.png')
@@ -187,15 +197,15 @@ export function TutorialScreen() {
     tutorialSeenInSession = true
   }
 
-  /** 跳过 / 末页开始对战 都直接进战斗（游戏已在 FactionSelect 确认时启动）*/
+  /** 跳过 / 末页主按钮：按入口动态决定返回目标 */
   function handleSkip() {
     markSeen()
-    navigateWithLoading('battle')
+    navigateWithLoading(returnTarget)
   }
 
   function handleStart() {
     markSeen()
-    navigateWithLoading('battle')
+    navigateWithLoading(returnTarget)
   }
 
   return (
@@ -212,7 +222,7 @@ export function TutorialScreen() {
         {btnShortOn && (
           <img src={btnShortOn} alt="" aria-hidden className={styles.skipBg} />
         )}
-        <span className={styles.skipText}>跳过</span>
+        <span className={styles.skipText}>{skipLabel}</span>
       </button>
 
       {/* 主弹窗 · 2:3 frame */}
@@ -304,12 +314,12 @@ export function TutorialScreen() {
             type="button"
             className={`${styles.navBtn} ${styles.navStart}`}
             onClick={handleStart}
-            aria-label="开始对战"
+            aria-label={lastPageBtnLabel}
           >
             {btnLongOn && (
               <img src={btnLongOn} alt="" aria-hidden className={styles.navBg} />
             )}
-            <span className={styles.navText}>开始对战</span>
+            <span className={styles.navText}>{lastPageBtnLabel}</span>
           </button>
         )}
       </div>

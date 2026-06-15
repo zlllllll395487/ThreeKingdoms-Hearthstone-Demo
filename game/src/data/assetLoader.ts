@@ -89,10 +89,6 @@ function uiUrlsByNames(names: string[]): string[] {
     .filter((u): u is string => !!u)
 }
 
-/** 取全部立绘 URL（Codex / Battle 需要） */
-function allPortraitUrls(): string[] {
-  return Object.values(portraitModules)
-}
 
 // ============================================
 // Loading 屏背景池
@@ -261,8 +257,11 @@ const SUBPAGE_FILE_MAP: Partial<Record<Screen, string>> = {
 /**
  * 返回某目标屏进入前应预加载的全部资源 URL
  *
- * - codex / battle 还会附带全部立绘 + 关键词印章 + 阵营印章 + 数值球
- * - 子页面只需对应 subpage_*.png 一张背景
+ * 预加载只覆盖「屏幕骨架与必现的小 UI 元素」，单卡的 cardvisual / 立绘
+ * 已由 Card 组件 loading="lazy" 按可视区域懒加载，不再强制预加载，
+ * 避免 100+ 张大图独立请求 → HTTP 队列拥塞 → LoadingScreen 超时强跳。
+ *
+ * 子页面只需对应 subpage_*.png 一张背景。
  */
 export function getPreloadUrlsForScreen(target: Screen): string[] {
   switch (target) {
@@ -272,13 +271,13 @@ export function getPreloadUrlsForScreen(target: Screen): string[] {
     case 'codex':
       return [
         ...uiUrlsByNames(CODEX_UI_NAMES),
-        ...uiUrlsByPrefix('cardvisual_'),
+        // 卡牌渲染所需的通用小 UI 元素（数值球 / 关键词印章 / 阵营印章）
         ...uiUrlsByPrefix('kw_'),
         ...uiUrlsByPrefix('emblem_'),
         ...uiUrlsByPrefix('cost_'),
         ...uiUrlsByPrefix('attack_'),
         ...uiUrlsByPrefix('health_'),
-        ...allPortraitUrls(),
+        // cardvisual 与 portraits 改由 Card 组件 loading="lazy" 懒加载
       ]
 
     case 'factionselect':
@@ -290,14 +289,15 @@ export function getPreloadUrlsForScreen(target: Screen): string[] {
     case 'battle':
       return [
         ...uiUrlsByNames(BATTLE_UI_NAMES),
-        ...uiUrlsByPrefix('cardvisual_'),
+        // 卡牌通用小 UI 元素
         ...uiUrlsByPrefix('kw_'),
         ...uiUrlsByPrefix('emblem_'),
         ...uiUrlsByPrefix('cost_'),
         ...uiUrlsByPrefix('attack_'),
         ...uiUrlsByPrefix('health_'),
-        ...allPortraitUrls(),
         ...Object.values(fxModules),
+        // cardvisual 与 portraits 同样改为懒加载
+        // FX 序列帧体积小且战斗中频繁触发，保留预加载
       ]
 
     case 'result':

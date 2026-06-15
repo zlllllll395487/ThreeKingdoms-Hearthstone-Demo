@@ -1,156 +1,164 @@
-# 三国炉石 · 接手指南（HANDOFF）
+# 三国炉石 · 接手手册（HANDOFF）
 
-> 给下一个开发者 / 新对话 / 新 AI 的快速接手文档。读完这份能在 10 分钟内继续开发。
-
----
-
-## 一、项目是什么
-
-**三国题材 Hearthstone 风格卡牌对战游戏的 Web Demo**。独立开发者项目，目标 4-6 周完成 M0 demo（蜀阵营 + 17 张卡 + 13 关键词 + AI vs 人对战）。
-
-详细的玩法和卡牌设计在：
-- [docs/03-三国炉石核心玩法策划案-v2.md](docs/03-三国炉石核心玩法策划案-v2.md)
-- [docs/04-三国炉石基础卡牌设计表-v2.md](docs/04-三国炉石基础卡牌设计表-v2.md)
-- [docs/05-Demo实施方案.md](docs/05-Demo实施方案.md)
-- [docs/06-美术资源清单.md](docs/06-美术资源清单.md)
-- [docs/08-P1-P2武将立绘完整Prompt集合.md](docs/08-P1-P2武将立绘完整Prompt集合.md)
+> 协作者或新对话接手本项目时的速通文档。预期阅读时长 10 分钟。
 
 ---
 
-## 二、当前阶段
+## 一、项目概述
 
-**W1 视觉打磨 100% 完成**：
+三国题材 Hearthstone 风格卡牌对战游戏的 Web 端 Demo。独立开发者项目，目标是在 4–6 周内完成 M0 阶段交付（蜀阵营 + 17 张卡 + 13 关键词 + AI 对人对战）。
 
-- ✅ 启动流程：intro 视频（立即可跳过）→ splash 进入游戏 → loading 3s → mainmenu
-- ✅ 六屏全接入真图：Splash / Loading / MainMenu / Codex / Battle / Result
-- ✅ 17 张卡牌的 Card 组件完整渲染（边框 / 立绘 / 数值球 / 名字横幅 / 关键词印章 模块化层叠）
-- ✅ DevelopingModal 全局"开发中"弹窗用 PNG 面板
+核心策划文档：
 
-**W2-W4 战场逻辑未开始**：
-- BattleScreen 当前是占位（兵戈图标 + 两军对垒标题 + 模拟结算按钮）
-- ResultScreen 当前随机显示胜/负，无真实战绩
+| 文档 | 内容 |
+|:--|:--|
+| [docs/09-三国炉石策划终稿-v5.md](docs/09-三国炉石策划终稿-v5.md) | 玩法策划终稿（v5 定稿，覆盖玩法 + 卡牌 + 数值） |
+| [docs/05-Demo实施方案.md](docs/05-Demo实施方案.md) | Demo 实施路线图 |
+| [docs/10-三国炉石美术Prompt清单-v5.md](docs/10-三国炉石美术Prompt清单-v5.md) | 美术资源 prompt 清单 |
+| [docs/12-卡牌验收清单-v5.2.md](docs/12-卡牌验收清单-v5.2.md) | 卡牌验收清单 |
+| [docs/13-数值与玩法审查-v5.3.md](docs/13-数值与玩法审查-v5.3.md) | 数值与玩法审查报告 |
+| [docs/AUDIT-2026-06-15.md](docs/AUDIT-2026-06-15.md) | 项目综合审计报告 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构与目录结构 |
+| [docs/SECTIONS.md](docs/SECTIONS.md) | § 任务编号字典 |
+| [docs/HANDOFF-AI.md](docs/HANDOFF-AI.md) | AI 协作专用接手指南 |
+| [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md) | 美术资源清单 |
 
 ---
 
-## 三、立刻能跑通的命令
+## 二、项目阶段
+
+| 阶段 | 状态 |
+|:--|:-:|
+| W1 视觉打磨 | Done |
+| W2–W4 战场逻辑（含 §19 全部子项） | Done |
+| §22 数值平衡（iter1 → iter6.1，阵营差 5.6%） | Done |
+| §23 AI 难度系统（生手 / 标准 / 宗师） | Done |
+| §24 战斗内自动托管 | Done |
+| §25 教程屏（竖屏 1080×1920） | Done |
+| §26 资源预加载优化 | Done |
+| §27 自定义鼠标光标（长枪 PNG + 光晕 + 波纹） | Done |
+| §28 commit 历史规范化（Conventional Commits） | Done |
+| GitHub Pages 自动部署 workflow | Done |
+| W09 / W13 / W28 吴方 AoE 二轮微调（iter7） | In Progress |
+| W5 体验层面打磨 | Pending |
+
+详情参阅 [game/PROGRESS.md](game/PROGRESS.md)。
+
+---
+
+## 三、本地开发命令
 
 ```bash
 cd d:/三国炉石/game
-npm install              # 首次 / 克隆后
-npm run dev              # 启动 → http://localhost:5173/
-npx tsc --noEmit         # TS 检查（必须 0 错误）
+npm install              # 首次或克隆后安装依赖
+npm run dev              # 启动开发服务器，监听 http://localhost:5173/
+npm run build            # 生产构建至 game/dist/
+npm run preview          # 本地预览生产构建
+npx tsc --noEmit         # TypeScript 静态检查，要求 0 错误
 ```
 
-刷新时如果 splash 卡住：
-- 浏览器 DevTools → Application → Local Storage → 清掉 `sgls_intro_seen` 重看 intro
+若 splash 屏在刷新后不再播放 intro，可在浏览器开发者工具 → Application → Local Storage 中清除 `sgls_intro_seen` 后再次刷新。
+
+AI 对战模拟（1000 局批量约 1.5 秒）：
+
+```bash
+cd game
+npx tsx --tsconfig=./tsconfig.app.json scripts/sim/run-sims.ts \
+  --games 1000 --label myrun
+```
+
+输出报告位于 `docs/sim-reports/sim-YYYY-MM-DD-myrun.md`。
 
 ---
 
-## 四、关键文件速查表
+## 四、关键文件速查
 
 ```
 game/src/
-├─ App.tsx                              ← 根：1920×1080 固定画布 + 屏幕路由分支
-├─ index.css                            ← 全局 CSS + Google Fonts 引入 + --color-* / --font-* 变量
-├─ store/uiStore.ts                     ← Zustand store · currentScreen / showModal / introSeen
-├─ engine/types.ts                      ← CardData / Rarity / Screen 类型
+├─ App.tsx                              根组件：横屏 / 竖屏画布切换 + 屏幕路由
+├─ index.css                            全局样式 + Google Fonts + CSS 变量
+├─ store/uiStore.ts                     Zustand store · currentScreen / showModal / introSeen
+├─ engine/
+│  ├─ types.ts                          CardData / Rarity / Screen / AnchorTag 等类型定义
+│  ├─ index.ts                          战斗规则主入口（伤害结算 / 抽牌 / 起手保证）
+│  ├─ ai.ts                             AI 决策（启发式评分 + trace 接口）
+│  ├─ effects/actions.ts                法术与技能 action 实现
+│  └─ deck.ts                           牌库与抽牌（含联动加权）
 ├─ data/
-│  ├─ cards/shu.json                    ← 蜀阵营 9 张卡
-│  ├─ cards/neutral.json                ← 中立 7 张
-│  ├─ cards/weapons.json                ← 兵器 1 张（青龙偃月刀）
-│  ├─ cardLibrary.ts                    ← 卡牌查询接口
-│  └─ assetLoader.ts                    ← Vite import.meta.glob 把所有 PNG 映射为 URL
-├─ screens/
-│  ├─ Splash/SplashScreen.tsx           ← 进入游戏 lobby（动效 + 协议勾选）
-│  ├─ Intro/IntroVideo.tsx              ← 开屏 mp4 播放器
-│  ├─ Loading/LoadingScreen.tsx         ← 3 秒进度条
-│  ├─ MainMenu/MainMenu.tsx             ← Hub 主菜单（玩家块/货币/三卡叠层/Tab）
-│  ├─ Codex/CodexScreen.tsx             ← 卡牌图鉴
-│  ├─ Battle/BattleScreen.tsx           ← 对战占位（W2 实装）
-│  └─ Result/ResultScreen.tsx           ← 战后结算占位
+│  ├─ cards/{shu,wu,neutral,weapons}.json   卡牌数据
+│  ├─ cardLibrary.ts                    卡牌查询接口
+│  └─ assetLoader.ts                    Vite import.meta.glob 资源映射
+├─ screens/                             各屏幕组件
+│  ├─ Splash / Intro / Loading / MainMenu / Codex
+│  ├─ SubPage                           5 个子页面（剧情 / 任务 / 商城 / 设置 / 活动）
+│  ├─ FactionSelect / Tutorial / Battle / Result
 ├─ components/
-│  ├─ Card/Card.tsx                     ← 卡牌组件（按 rarity 加载边框 + 模块化层叠）
-│  └─ Modal/DevelopingModal.tsx         ← 全局开发中弹窗
+│  ├─ Card/                             卡牌渲染（按 rarity 加载边框）
+│  ├─ Modal/DevelopingModal.tsx         全局开发中弹窗
+│  └─ CustomCursor/                     §27 自定义鼠标光标
 └─ assets/
-   ├─ ui/                               ← 121 张 UI PNG（见 ASSETS.md）
-   ├─ portraits/                        ← 11 张武将立绘（见 ASSETS.md）
-   └─ video/intro.mp4                   ← 15s 开场视频
+   ├─ ui/                               约 260 张 UI 资源（主体 PNG + Loading 背景 WebP）
+   ├─ portraits/                        89 张立绘（WebP）
+   └─ video/intro.mp4
 ```
 
 ---
 
-## 五、设计画布约束（重要！）
+## 五、设计画布约束
 
-- **固定 1920×1080** 设计，在 `App.tsx` 内用 CSS transform scale 自适应缩放
-- 所有屏幕组件用 `width: 100% / height: 100%` 而不是 `100vh`（否则在缩放容器内会爆掉）
-- 单位优先用 px / %（相对于 1920×1080 设计画布），不要用 vw / vh
-
----
-
-## 六、资产命名规范
-
-- UI PNG: `kebab_case.png` 或 `snake_case.png` — 全英文，分类前缀（`btn_` / `card_` / `tab_` / `icon_` / `frame_` / `kw_` / `coin_`）
-- 武将立绘: `<pinyin>.png` — 全小写拼音（如 `guanyu.png`）
-- 详细映射见 [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md)
+- 设计画布尺寸：横屏 1920×1080 与竖屏 1080×1920，根据屏幕类型在 `App.tsx` 中动态切换
+- 缩放策略：CSS transform scale 等比缩放，多余空间以黑色 letterbox 填充
+- 所有屏幕组件须使用 `width: 100% / height: 100%`，避免使用 `100vh`，否则在缩放容器内会出现尺寸异常
+- 单位优先使用 px 或百分比（相对于设计画布），不使用 vw / vh
 
 ---
 
-## 七、当前待办（按优先级）
+## 六、资源命名规范
 
-### 🔴 立绘待出 · 7 张
-- `taoyuan.png` (桃园结义场景)
-- `rende.png` (仁德之政场景)
-- `wanjian.png` (万箭齐发场景)
-- `mubing.png` (募兵令场景)
-- `xiuyang.png` (休养生息场景)
-- `moushi.png` (谋士人物)
-- `qinglongdao.png` (青龙偃月刀兵器)
+| 类别 | 命名约定 | 示例 |
+|:--|:--|:--|
+| UI PNG | 小写英文 + 下划线，按类型前缀分类 | `btn_back.png` / `card_frame_legendary.png` / `tab_codex.png` |
+| 武将立绘 | 全小写拼音 | `guanyu.png` / `zhouyu.png` |
+| 关键词印章 | `kw_` 前缀 + 英文关键词 | `kw_taunt.png` / `kw_charge.png` |
+| 阵营印章 | `emblem_` 前缀 + 阵营英文 | `emblem_shu.png` / `emblem_wu.png` |
 
-prompt 在 chat 历史里已生成，可在下次对话里 grep 找到，或重新生成。
-
-### 🟠 玩家 UI 12 件套 sprite（M1 优先级）
-头像框 / 默认头像 / 等级章 / 名牌 / 称号绶带 / 经验条 / VIP / 在线状态点 等。当前用 `player_ui_block.png` 单图整合版临时替代。
-
-### 🟡 W2 战场实装（下一里程碑）
-- 双方各 7 格战场布局
-- 拖拽出牌 + 法力扣除
-- 攻击 / 死亡结算
-- 6 个核心关键词实装：突袭 / 镇守 / 威名 / 遗志 / 神圣护盾 / 嘲讽
-
-详见 [docs/05-Demo实施方案.md](docs/05-Demo实施方案.md)。
+完整资源映射参见 [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md)。
 
 ---
 
-## 八、AI 协作惯例（与本项目）
+## 七、协作惯例
 
-- 用户偏好**简洁中文**回复 + 表格列差异
-- **不要预设跑特效**：用户偏好简单稳定的方案（如 splash → loading 用了进度条而不是水墨转场）
-- **直接用用户给的图，不自创 CSS 仿造**：用户多次强调"不要自己用代码设计 UI"
-- **不要静默假设**：改 CSS 数值时先解释为什么，再改
-- **TodoWrite 跟踪进度**：3 件以上任务必须开 todo
-- **TS 检查每次必跑**：`npx tsc --noEmit` 应 0 错误
-
----
-
-## 九、与 Claude / Anthropic 工具协作时的注意点
-
-- 用户环境会自动注入"版权安全提示"文本到部分 turn 末尾 — 这是工具行为，不是用户消息，遇到时**不要回应**直接继续流程
-- 用户的 plan 文件在 `C:\Users\zhall\.claude\plans\rustling-spinning-octopus.md`（仅 Claude Code 工具可访问）
-- 用户偏好 plan mode → 直接编辑 plan 文件再 ExitPlanMode 流程
+| 项 | 约定 |
+|:--|:--|
+| 回复风格 | 简洁中文，差异以表格列出 |
+| 设计原则 | 直接使用已交付的美术 PNG，禁止以代码自创 UI 仿造 |
+| 静默假设 | 涉及数值改动须先说明原因再实施 |
+| 任务跟踪 | 3 件以上任务必须使用 TodoWrite 维护清单 |
+| TypeScript 检查 | 每次提交前执行 `npx tsc --noEmit`，要求 0 错误 |
+| Commit 信息 | 遵循 Conventional Commits 规范（`type(scope): summary`），使用正式书面语 |
+| 文档语气 | 正式书面语，避免口语、slang 与中英混杂行话 |
 
 ---
 
-## 十、迁移到其他设备 / AI 的步骤
+## 八、与 Claude / Anthropic 工具协作的注意事项
 
-1. **克隆仓库**到新设备
-2. **新对话开局**让 AI 先读：
-   - 这份 HANDOFF.md
-   - `game/PROGRESS.md`
-   - `game/src/assets/ASSETS.md`
-3. **运行**：`cd game && npm install && npm run dev`
-4. **核对**：splash → loading → mainmenu 流程能跑通即接手成功
-5. **下一步**：按 PROGRESS.md 的待办继续
+- 用户环境会在部分 turn 末尾注入「版权安全提示」文本。该文本属于工具行为，并非用户输入，遇到时应直接继续后续流程而无须回应
+- 用户的 plan 文件位于 `C:\Users\zhall\.claude\plans\`，仅 Claude Code 工具可访问
+- 用户偏好 Plan Mode 流程：先编辑 plan 文件，再 ExitPlanMode 进入执行阶段
 
 ---
 
-*最后更新：2026-05-27*
+## 九、迁移至其他设备或新对话的步骤
+
+1. 克隆仓库至新设备
+2. 新对话开局时，引导 AI 先阅读以下三份文档：
+   - 本份 HANDOFF.md
+   - [game/PROGRESS.md](game/PROGRESS.md)
+   - [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md)
+3. 执行 `cd game && npm install && npm run dev`
+4. 验证 splash → loading → mainmenu 流程可正常跑通
+5. 按 PROGRESS.md 列出的待办项继续推进
+
+---
+
+*最后更新：2026-06-15*

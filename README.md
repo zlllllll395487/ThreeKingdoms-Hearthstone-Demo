@@ -1,66 +1,109 @@
-# 三国炉石 (Three Kingdoms Hearthstone) · Demo
+# 三国炉石（Three Kingdoms Hearthstone）· Demo
 
-> 三国题材的 Hearthstone 风格卡牌对战游戏。Web 端 React + TypeScript + Vite 实现。
+> 三国题材卡牌对战游戏的 Web 端实现，基于 React 19 + TypeScript 6 + Vite 8 构建。
+> 内置 AI 对战模拟框架支撑数值平衡决策，至 iter6.1 阵营差收敛至 5.6%。
 
-## 项目结构
+## 在线体验
 
-```
-d:/三国炉石/
-├─ docs/                      ← 设计文档（玩法策划、卡牌设计、实施方案、美术清单）
-├─ assetofsanguo/             ← AI 出图原始素材（工作目录，按需迁移到 game/src/assets/）
-│  ├─ 组件3.0/                ← 最新 UI 组件套
-│  ├─ 组件Splash/             ← Splash 专属 UI
-│  ├─ 组件ui按钮/             ← Battle / Result 屏按钮
-│  ├─ 切图结果/               ← 卡牌边框 / 数值球 / 关键词印章 切片
-│  ├─ portraits 原图          ← 武将立绘原文件（guanyu.png 等）
-│  └─ 开屏动画.mp4            ← intro 视频原文件
-├─ game/                      ← React 应用主目录（详见 game/README.md）
-└─ remove_background.py       ← 工具脚本（图像背景去除）
-```
+仓库公开后 GitHub Actions 自动部署至：
+
+**https://zlllllll395487.github.io/ThreeKingdoms-Hearthstone-Demo/**
+
+启动流程：splash「进入游戏」→ loading → 主菜单 →「对战」→ 选阵营 + 难度 → 教程（可跳过）→ 战斗。
+
+## 界面预览
+
+| 主菜单 | 战斗 | 卡牌图鉴 |
+|:-:|:-:|:-:|
+| ![主菜单](docs/screenshots/01_mainmenu.png) | ![战斗](docs/screenshots/02_battle.png) | ![图鉴](docs/screenshots/03_codex.png) |
+
+更多截图与阵营选择屏见 [docs/screenshots/](docs/screenshots/)。
+
+## 仓库结构
+
+| 目录 | 用途 |
+|:--|:--|
+| `docs/` | 设计文档（玩法策划、卡牌设计、实施方案、美术清单、审计报告、模拟报告） |
+| `assetofsanguo/` | 美术素材原始工作目录，按需迁移至 `game/src/assets/` |
+| `game/` | React 应用主体（详见 `game/README.md`） |
+| `.github/workflows/` | GitHub Actions 配置（GitHub Pages 自动部署） |
+| `remove_background.py` | 图像背景去除辅助脚本 |
 
 ## 快速开始
 
 ```bash
 cd d:/三国炉石/game
-npm install            # 首次或克隆后
-npm run dev            # 启动开发服务器 → http://localhost:5173/
-npx tsc --noEmit       # TypeScript 检查（应 0 错误）
+npm install            # 首次或克隆后安装依赖
+npm run dev            # 启动开发服务器，默认监听 http://localhost:5173/
+npm run build          # 生产构建至 game/dist/
+npx tsc --noEmit       # TypeScript 静态检查，要求 0 错误
 ```
 
-## 接手新对话 / 新设备 / 新 AI
+## 接手指引
 
-按顺序读这三份文档即可顺利接手：
+新协作者或新对话接手时，按以下顺序阅读三份核心文档：
 
-1. **[HANDOFF.md](HANDOFF.md)** — 给下一个开发者 / AI 的简明接手指南（必读）
-2. **[game/PROGRESS.md](game/PROGRESS.md)** — 项目当前进度 + 待办清单
-3. **[game/src/assets/ASSETS.md](game/src/assets/ASSETS.md)** — 121 张 UI + 11 张立绘资源清单
+1. [HANDOFF.md](HANDOFF.md) — 接手手册，含目录结构、约束、待办与协作惯例
+2. [game/PROGRESS.md](game/PROGRESS.md) — 项目进度档案，按阶段记录已完成与待办项
+3. [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md) — 美术资源清单（约 260 张 UI 与 89 张立绘）
 
-设计文档在 `docs/`，按编号阅读。
+设计文档位于 `docs/`，按编号顺序阅读。
 
 ## 技术栈
 
-- React 18 + TypeScript 5 + Vite 5
-- Zustand（屏幕路由 + 弹窗状态）
-- Tailwind CSS 4 + CSS Modules
-- Google Fonts：Ma Shan Zheng / ZCOOL XiaoWei / Long Cang / Noto Serif SC
-- Vite `import.meta.glob` 静态资源加载
+| 类别 | 选型 | 版本 |
+|:--|:--|:--|
+| 框架 | React | ^19.2 |
+| 语言 | TypeScript | ~6.0 |
+| 构建工具 | Vite | ^8.0 |
+| 状态管理 | Zustand | ^5.0 |
+| 样式 | Tailwind CSS + CSS Modules | ^4.3 |
+| 动画 | Framer Motion | ^12.39 |
+| 字体 | Google Fonts：Ma Shan Zheng / ZCOOL XiaoWei / Long Cang / Noto Serif SC | — |
+| 资源加载 | Vite `import.meta.glob` | — |
 
 ## 设计规格
 
-- **画布**：1920×1080 固定，浏览器自适应等比缩放，超出留黑边
-- **流程**：intro 视频（可跳过）→ splash 进入游戏 → loading 3 秒 → mainmenu
-- **状态机**：`src/store/uiStore.ts` 内 `currentScreen` 决定渲染哪个屏幕
-- **卡牌**：`src/components/Card/Card.tsx` 按 rarity 加载对应边框 PNG，立绘 / 数值球 / 名字横幅模块化层叠
+- **设计画布**：横屏 1920×1080 与竖屏 1080×1920 双尺寸切换，浏览器自适应等比缩放，超出部分以黑色 letterbox 填充
+- **启动流程**：intro 视频（可跳过）→ splash 进入游戏 → loading 加载 → mainmenu 主菜单
+- **状态机**：`src/store/uiStore.ts` 中 `currentScreen` 字段决定当前渲染的屏幕组件
+- **画布切换**：Battle 与 Tutorial 屏使用竖屏 1080×1920（手游 portrait 体验），其余屏幕使用横屏 1920×1080
+- **卡牌组件**：`src/components/Card/Card.tsx` 按稀有度加载对应边框 PNG，立绘、数值球、名字横幅、关键词印章采用模块化层叠渲染
 
-## 当前阶段
+## 项目阶段
 
-**W1（视觉打磨）已完成** — Splash / Loading / MainMenu / Codex / Battle 占位 / Result 全部接入真实 PNG 美术资源。
+| 阶段 | 内容 | 状态 |
+|:--|:--|:-:|
+| W1 视觉打磨 | 6 屏全部接入真实美术资源 | Done |
+| W2 战场逻辑（含 §19 全部子项） | 完整对战体验落地，含 §19.6 反馈系统与 §19.7 验收期改动 | Done |
+| §22 数值平衡 iter6.1 | AI 对战模拟驱动，阵营差由 baseline 的 65.3% 收敛至 5.6% | Done |
+| §22-iter7 吴方 AoE 二轮微调 | 吕蒙新增 anchor_ramp / 火油机制改造 / 火烧赤壁等 4 张 AoE 调整 | Done（待玩家体验验收） |
+| §23 AI 难度系统 | 生手 / 标准 / 宗师三档，本地存储记忆 | Done |
+| §24 战斗内自动托管 | 战斗中一键切换 AI 自动决策 | Done |
+| §25 教程屏 | 竖屏 1080×1920 教程页 | Done |
+| §26 资源预加载（首版） | 主菜单核心资源预加载 | Done |
+| §27 自定义鼠标光标 | 长枪 PNG 光标 + hover 金色光晕 + 点击波纹 | Done |
+| §28 commit 历史规范化 | 历史 commit 按 Conventional Commits 重写 | Done |
+| §29 分屏渐进预加载 | Loading 屏重做，按目标屏阻塞加载所需资源 + 30 条 Tip 文案池 + 4 张随机背景 | Done |
+| §30 立绘与 Loading 背景 WebP 化 | 89 张立绘 + 4 张背景转 WebP，体积砍 76%，cardvisual 保留 PNG | Done |
+| GitHub Pages 自动部署 | workflow 已就绪 | Done |
+| W5 体验层面打磨 | 战斗细节动效 / 音效系统 / 卡牌交互手感 | Pending |
 
-**W2-W4（战场逻辑）已完成** — 完整对战体验落地（含 §19.6 Phase A/B/C/D 反馈系统、§19.7 验收期 20+ 改动）。
+## 已简化的炉石机制
 
-**当前阶段：v5.6 数值平衡（§22）**
+本 Demo 为简化版炉石玩法，以下原版机制尚未实装。新协作者阅读代码时请注意区分「未实装 / 简化」与「bug」：
 
-项目内置 AI 对战模拟框架，单次 1000 局批量耗时约 1.5 秒，为卡牌数值与机制平衡决策提供实证依据。详见下文「数值平衡与模拟对局体系」章节。
+| 机制 | 状态 |
+|:--|:--|
+| Mulligan（开局换牌） | 未实装。当前为固定起手 3 / 4 张 + 起手保证机制 |
+| 主公技（Hero Power） | 未实装。`PlayerState.heroPowerUsed` 字段已预留 |
+| The Coin（先后手补偿） | 未实装。后手方仅获得多 1 张起手卡 |
+| 选择发现（Discover）UI | 简化为随机抽取。详见 `engine/effects/actions.ts` 中 `discover` action TODO |
+| 兵器选择目标 | 简化为攻击英雄；多目标选择待实装 |
+| 战吼 / 亡语选择性目标 | 已实装核心，复杂目标筛选（如「随机敌方武将」「另一张随从」）暂未细分 |
+| Battlepet / Mercenary 机制 | 不在 Demo 范围内 |
+
+项目内置 AI 对战模拟框架，单次 1000 局批量耗时约 1.5 秒，为卡牌数值与机制平衡决策提供实证依据，详见下文「数值平衡与模拟对局体系」章节。
 
 ---
 

@@ -42,3 +42,15 @@ game/_assets_original/
 
 # 样品对比目录
 game/_compress_samples/
+
+# WebP 转换前原 PNG 备份（仅本地保留，方便回滚）
+backup-original-png/
+
+# 压缩对比预览（开发者参考用）
+compression-preview/
+
+# 临时调试文件
+_tmp_*.txt
+preview-*.html
+onl.py
+" -*"

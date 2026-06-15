@@ -1,8 +1,18 @@
 # 资源清单 · ASSETS
 
-> `game/src/assets/` 下所有 PNG / MP4 资源的分类索引。121 张 UI + 11 张立绘 + 1 视频。
+> `game/src/assets/` 下所有图片 / 视频 / 序列帧资源的分类索引。
+> 当前规模：约 260 张 UI 资源（主体 PNG）+ 89 张立绘（全部 WebP）+ Loading 背景 4 张（WebP）+ FX 序列帧若干 + 1 视频。
 
-资源加载机制：`src/data/assetLoader.ts` 用 Vite `import.meta.glob` 把 `ui/` 和 `portraits/` 下所有 PNG 自动映射为 URL，组件通过 `getUiAssetUrl('name.png')` / `getPortraitUrl('name.png')` 取用。
+资源加载机制：`src/data/assetLoader.ts` 用 Vite `import.meta.glob` 把 `ui/` 与 `portraits/` 下全部 `.png` / `.webp` 自动映射为 URL，组件通过 `getUiAssetUrl('name.png')` / `getPortraitUrl('name.png')` 取用。调用方传 `.png` 文件名时，若磁盘只有 `.webp` 版本会自动 fallback 命中。
+
+资源压缩策略：
+
+| 类目 | 处理 | 原因 |
+|:--|:--|:--|
+| `portraits/*` | 转 WebP q=88 | 89 张立绘均无 alpha 通道，转 WebP 零画质权衡，体积砍 74% |
+| `ui/loading_bg*` | 转 WebP q=88 | 全屏摄影图体积大，Loading 屏自身必须秒开 |
+| `ui/cardvisual_*` | **保留 PNG** | 图鉴主视觉，画质优先 |
+| `ui/frame_ / kw_ / emblem_ / cost_ / attack_ / health_ / btn_ / icon_ / coin_ / modal_ / tab_ / subpage_ 等` | **保留 PNG** | 含 alpha，且体积已不大 |
 
 ---
 
@@ -212,4 +222,4 @@
 
 ---
 
-*最后更新：2026-05-27 · 121 UI + 11 portraits + 1 video*
+*最后更新：2026-06-15 · 约 260 张 UI（PNG 主体 + Loading 背景 4 张 WebP） + 89 张立绘（WebP） + FX 序列帧 + 1 视频*

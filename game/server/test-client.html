@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>三国炉石 · 在线对战连通测试（里程碑 0）</title>
+  <style>
+    :root { --gold: #d4a017; --paper: #f5ebd5; --ink: #2a1608; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 24px;
+      font-family: "PingFang SC", "Microsoft YaHei", serif;
+      background: linear-gradient(160deg, #1a120a 0%, #0d0805 100%);
+      color: var(--paper); display: flex; justify-content: center;
+    }
+    .panel {
+      width: 100%; max-width: 560px;
+      background: rgba(28, 18, 10, 0.85);
+      border: 1px solid rgba(212, 160, 23, 0.4);
+      border-radius: 8px; padding: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    h1 { font-size: 20px; margin: 0 0 4px; color: var(--gold); letter-spacing: 2px; }
+    .sub { font-size: 12px; opacity: 0.6; margin-bottom: 20px; }
+    label { display: block; font-size: 12px; opacity: 0.7; margin: 12px 0 4px; }
+    input {
+      width: 100%; padding: 10px 12px; font-size: 14px;
+      background: #0e0b08; border: 1px solid rgba(212,160,23,0.35);
+      color: var(--paper); border-radius: 4px; outline: none;
+    }
+    input:focus { border-color: var(--gold); }
+    .row { display: flex; gap: 8px; align-items: flex-end; }
+    .row input { flex: 1; }
+    button {
+      padding: 10px 18px; font-size: 14px; cursor: pointer;
+      background: linear-gradient(180deg, #8a6a3a, #5a4422);
+      color: var(--paper); border: 1px solid var(--gold);
+      border-radius: 4px; letter-spacing: 1px; white-space: nowrap;
+    }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    button:hover:not(:disabled) { filter: brightness(1.15); }
+    .status { font-size: 13px; margin: 16px 0; padding: 10px 12px;
+      background: rgba(0,0,0,0.3); border-radius: 4px; border-left: 3px solid var(--gold); }
+    .roomcode {
+      font-size: 32px; letter-spacing: 8px; color: var(--gold);
+      text-align: center; padding: 12px; margin: 12px 0;
+      background: rgba(212,160,23,0.08); border-radius: 6px; font-weight: bold;
+    }
+    .log {
+      height: 240px; overflow-y: auto; margin-top: 16px; padding: 12px;
+      background: #0a0705; border: 1px solid rgba(212,160,23,0.2);
+      border-radius: 4px; font-size: 13px; line-height: 1.6;
+    }
+    .log div { margin-bottom: 4px; }
+    .log .me { color: #9fd9a0; }
+    .log .them { color: #f0c060; }
+    .log .sys { color: #888; font-style: italic; }
+    .log .err { color: #e06050; }
+    hr { border: none; border-top: 1px solid rgba(212,160,23,0.2); margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>在线对战 · 连通测试</h1>
+    <div class="sub">里程碑 0 · 验证内网穿透 + WebSocket + 房间系统</div>
+
+    <label>服务器地址（通过网址打开时自动填好；file:// 打开或远程连朋友时手动改）</label>
+    <div class="row">
+      <input id="wsUrl" value="ws://localhost:8787" />
+      <button id="btnConnect">连接</button>
+    </div>
+
+    <div class="status" id="status">未连接</div>
+
+    <hr />
+
+    <div class="row">
+      <button id="btnCreate" disabled>建房</button>
+      <input id="joinCode" placeholder="输入房间码加入" maxlength="4" style="text-transform: uppercase;" />
+      <button id="btnJoin" disabled>加入</button>
+    </div>
+
+    <div class="roomcode" id="roomcode" style="display:none;"></div>
+
+    <label>发送测试消息（房间内两人都会收到）</label>
+    <div class="row">
+      <input id="echoText" placeholder="随便打点字验证互通" />
+      <button id="btnSend" disabled>发送</button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    let ws = null
+    let mySlot = null
+
+    const $ = (id) => document.getElementById(id)
+    const logEl = $('log')
+
+    // 通过 http(s) 打开时，ws 地址自动用当前 host（手机同 WiFi 零配置）
+    // file:// 打开时 location.host 为空，保留默认 localhost:8787
+    if (location.host) {
+      const proto = location.protocol === 'https:' ? 'wss://' : 'ws://'
+      $('wsUrl').value = proto + location.host
+    }
+
+    function log(text, cls = 'sys') {
+      const d = document.createElement('div')
+      d.className = cls
+      d.textContent = text
+      logEl.appendChild(d)
+      logEl.scrollTop = logEl.scrollHeight
+    }
+
+    function setStatus(text) { $('status').textContent = text }
+
+    function setConnectedUI(connected) {
+      $('btnCreate').disabled = !connected
+      $('btnJoin').disabled = !connected
+      $('btnSend').disabled = !connected
+    }
+
+    $('btnConnect').onclick = () => {
+      const url = $('wsUrl').value.trim()
+      if (ws) ws.close()
+      log('正在连接 ' + url + ' ...', 'sys')
+      ws = new WebSocket(url)
+
+      ws.onopen = () => {
+        setStatus('已连接 · 可以建房或加入')
+        setConnectedUI(true)
+        log('连接成功', 'sys')
+      }
+      ws.onclose = () => {
+        setStatus('连接已断开')
+        setConnectedUI(false)
+        log('连接关闭', 'err')
+      }
+      ws.onerror = () => {
+        log('连接出错（地址是否正确？服务器是否启动？）', 'err')
+      }
+      ws.onmessage = (e) => {
+        let msg
+        try { msg = JSON.parse(e.data) } catch { return }
+        handleServerMessage(msg)
+      }
+    }
+
+    function handleServerMessage(msg) {
+      switch (msg.type) {
+        case 'roomCreated':
+          mySlot = msg.yourSlot
+          $('roomcode').style.display = 'block'
+          $('roomcode').textContent = msg.roomCode
+          setStatus('建房成功 · 你是 host · 把房间码 ' + msg.roomCode + ' 发给对手 · 协议 v' + msg.protocolVersion)
+          log('建房成功，房间码 ' + msg.roomCode, 'sys')
+          break
+        case 'joinedRoom':
+          mySlot = msg.yourSlot
+          setStatus('加入成功 · 你是 guest · 房间 ' + msg.roomCode)
+          log('加入房间 ' + msg.roomCode + ' 成功', 'sys')
+          break
+        case 'opponentJoined':
+          setStatus('对手已加入 · 连通链路就绪')
+          log('★ 对手已加入房间', 'sys')
+          break
+        case 'opponentLeft':
+          log('对手离开了房间', 'err')
+          break
+        case 'echo':
+          const who = msg.from === mySlot ? '我' : '对手'
+          log('[' + who + '/' + msg.from + '] ' + msg.text, msg.from === mySlot ? 'me' : 'them')
+          break
+        case 'error':
+          log('错误：' + msg.message, 'err')
+          break
+        default:
+          log('未知消息：' + JSON.stringify(msg), 'sys')
+      }
+    }
+
+    function sendMsg(obj) {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj))
+    }
+
+    $('btnCreate').onclick = () => sendMsg({ type: 'createRoom' })
+    $('btnJoin').onclick = () => {
+      const code = $('joinCode').value.trim().toUpperCase()
+      if (code) sendMsg({ type: 'joinRoom', roomCode: code })
+    }
+    $('btnSend').onclick = () => {
+      const text = $('echoText').value.trim()
+      if (text) { sendMsg({ type: 'echo', text }); $('echoText').value = '' }
+    }
+    $('echoText').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnSend').click() })
+  </script>
+</body>
+</html>

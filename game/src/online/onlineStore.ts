@@ -106,14 +106,14 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
     try {
       ws = new WebSocket(serverUrl)
     } catch {
-      set({ connPhase: 'error', errorMsg: '无法创建连接，请检查服务器地址' })
+      // 连接类错误只更新 connPhase（顶部状态行显示「✕ 连接失败 [重试]」），不弹长提示框
+      set({ connPhase: 'error' })
       return
     }
 
-    ws.onopen = () => set({ connPhase: 'connected' })
+    ws.onopen = () => set({ connPhase: 'connected', errorMsg: null })
     ws.onclose = () => set({ connPhase: 'idle' })
-    ws.onerror = () =>
-      set({ connPhase: 'error', errorMsg: '连接失败（服务器是否已启动？地址是否正确？）' })
+    ws.onerror = () => set({ connPhase: 'error' })
     ws.onmessage = (e) => {
       let msg: ServerMessage
       try {

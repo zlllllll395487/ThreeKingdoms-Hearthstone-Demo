@@ -1,11 +1,15 @@
-/* 在线对战大厅 · 竖屏 1080×1920 · 复用古风美术资源 */
+/* 在线对战大厅 · 竖屏 1080×1920 · 复用古风美术资源
+ *
+ * 配色原则：背景 battle_bg_portrait 是米黄亮色羊皮纸，
+ * 故米黄区文字一律用「深墨字 + 奶白描边」（像墨写在宣纸上），
+ * 不用金/米亮色（亮配亮会糊）。顶部红幕暗区的标题才用金色。
+ */
 
 .container {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* battle_bg_portrait.png 竖屏背景由 tsx 内联设置 · 此处兜底深色 */
   background-color: #160d06;
   background-size: cover;
   background-position: center;
@@ -14,7 +18,6 @@
   flex-direction: column;
   align-items: center;
   font-family: var(--font-serif);
-  color: #f5ebd5;
 }
 
 .vignette {
@@ -22,8 +25,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 45%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 22%, rgba(0, 0, 0, 0) 78%, rgba(0, 0, 0, 0.55) 100%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 16%, rgba(0, 0, 0, 0) 82%, rgba(0, 0, 0, 0.4) 100%);
 }
 
 .backBtn {
@@ -33,52 +35,65 @@
   z-index: 10;
 }
 
+/* 标题 · 顶部红幕暗区 · 金字深描边 */
 .title {
-  margin-top: 110px;
+  margin-top: 96px;
   font-family: var(--font-title);
-  font-size: 76px;
-  letter-spacing: 18px;
-  color: var(--color-gold);
-  text-shadow: 0 0 28px rgba(212, 160, 23, 0.55), 0 4px 10px rgba(0, 0, 0, 0.9);
+  font-size: 70px;
+  letter-spacing: 16px;
+  color: #f5d479;
+  text-shadow: 0 0 24px rgba(160, 100, 20, 0.7), 0 4px 10px rgba(0, 0, 0, 0.95), 0 2px 0 rgba(80, 40, 0, 0.8);
   z-index: 2;
 }
 
 .connRow {
-  margin-top: 14px;
-  font-size: 26px;
-  letter-spacing: 2px;
+  margin-top: 16px;
+  font-size: 28px;
+  letter-spacing: 3px;
   display: flex;
   align-items: center;
   gap: 16px;
   z-index: 2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  font-weight: bold;
 }
-.connRow[data-phase='connected'] { color: #7fd98a; }
-.connRow[data-phase='error'] { color: #e88070; }
-.connRow[data-phase='connecting'] { color: #f0c060; }
-.connRow[data-phase='idle'] { color: #b09880; }
+.connRow[data-phase='connected'] { color: #1c6e28; }
+.connRow[data-phase='error'] { color: #9a2a1c; }
+.connRow[data-phase='connecting'] { color: #8a5a10; }
+.connRow[data-phase='idle'] { color: #5a4a30; }
+.connRow {
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
+}
 
 .retryBtn {
   padding: 4px 16px;
   font-size: 22px;
-  background: rgba(212, 160, 23, 0.2);
-  border: 1px solid var(--color-gold);
+  background: rgba(140, 90, 16, 0.15);
+  border: 1px solid #8a5a10;
   border-radius: 4px;
-  color: var(--color-gold);
+  color: #6a4410;
   cursor: pointer;
+  font-weight: bold;
 }
 
+/* 米黄区段标题 · 深墨 + 奶白描边 */
 .sectionLabel {
-  margin-top: 44px;
-  font-size: 36px;
-  letter-spacing: 6px;
-  color: rgba(245, 235, 213, 0.95);
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  margin-top: 40px;
+  font-family: var(--font-title);
+  font-size: 42px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: #2a1608;
   z-index: 2;
+  text-shadow:
+    -2px -2px 0 rgba(255, 248, 225, 0.95), 2px -2px 0 rgba(255, 248, 225, 0.95),
+    -2px 2px 0 rgba(255, 248, 225, 0.95), 2px 2px 0 rgba(255, 248, 225, 0.95),
+    0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .factionRow {
-  margin-top: 24px;
+  margin-top: 26px;
   display: flex;
   gap: 44px;
   z-index: 2;
@@ -89,22 +104,22 @@
   width: 300px;
   height: 410px;
   padding: 0;
-  border: 3px solid rgba(120, 90, 50, 0.7);
+  border: 3px solid rgba(110, 80, 44, 0.85);
   border-radius: 10px;
   background: #0e0b08;
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.18s ease, border-color 0.18s ease;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
 }
 .factionCard:hover:not(:disabled) { transform: translateY(-6px); }
 .factionCard:disabled { cursor: default; }
-.factionCard:disabled:not(.factionSelected) { opacity: 0.45; }
+.factionCard:disabled:not(.factionSelected) { opacity: 0.5; }
 .factionCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .factionSelected {
   border-color: var(--color-gold);
-  box-shadow: 0 0 36px rgba(212, 160, 23, 0.8), 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 36px rgba(212, 160, 23, 0.85), 0 8px 24px rgba(0, 0, 0, 0.55);
 }
 .factionGlow {
   position: absolute;
@@ -119,11 +134,12 @@
   left: 0;
   right: 0;
   padding: 14px 0;
-  font-size: 32px;
+  font-family: var(--font-title);
+  font-size: 34px;
   letter-spacing: 4px;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.88));
-  color: #f5ebd5;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.9));
+  color: #f5e7c1;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95);
 }
 
 /* ════════ 图片按钮通用 ════════ */
@@ -151,7 +167,7 @@
 .artBtnPrimary:disabled,
 .artBtnJoin:disabled,
 .startBtnArt:disabled {
-  filter: grayscale(0.6) brightness(0.7);
+  filter: grayscale(0.55) brightness(0.72);
   cursor: not-allowed;
 }
 
@@ -162,80 +178,113 @@
 }
 .artBtnTextGold {
   font-family: var(--font-title);
-  font-size: 42px;
-  letter-spacing: 10px;
-  color: #5a3410;
-  text-shadow: 0 1px 0 rgba(255, 235, 180, 0.6);
+  font-size: 46px;
+  font-weight: bold;
+  letter-spacing: 12px;
+  color: #4a2a08;
+  text-shadow: 0 1px 0 rgba(255, 240, 190, 0.7);
 }
 
 /* 加入 / 等待 · btn_secondary 竹木面（比例 ~500:190） */
 .artBtnJoin {
-  width: 200px;
+  width: 220px;
   aspect-ratio: 500 / 190;
   flex-shrink: 0;
 }
 .artBtnTextWood {
   font-family: var(--font-title);
-  font-size: 36px;
-  letter-spacing: 6px;
-  color: #f3e3c0;
-  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.85);
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  color: #f7ecd2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 /* 开始对战 · btn_battle_start 自带金字双龙（比例 ~768:220） */
 .startBtnArt {
-  width: 640px;
+  width: 660px;
   aspect-ratio: 768 / 220;
 }
 
 /* ── 建房 / 加入 区 ── */
 .actionArea {
-  margin-top: 56px;
+  margin-top: 54px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 26px;
+  gap: 28px;
   z-index: 2;
 }
-.orDivider { font-size: 28px; color: rgba(245, 235, 213, 0.6); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.orDivider {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: bold;
+  color: #3a2412;
+  letter-spacing: 6px;
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
+}
 
 .joinRow { display: flex; gap: 16px; align-items: stretch; }
 .codeInput {
   width: 420px;
-  padding: 20px 24px;
-  font-size: 40px;
-  letter-spacing: 12px;
+  padding: 18px 24px;
+  font-size: 44px;
+  font-weight: bold;
+  letter-spacing: 14px;
   text-align: center;
   text-transform: uppercase;
-  background: rgba(14, 11, 8, 0.85);
-  border: 2px solid rgba(212, 160, 23, 0.5);
+  background: rgba(34, 22, 10, 0.55);
+  border: 2px solid rgba(160, 110, 40, 0.7);
   border-radius: 8px;
-  color: #f5ebd5;
+  color: #f7ecd2;
   outline: none;
 }
-.codeInput:focus { border-color: var(--color-gold); box-shadow: 0 0 16px rgba(212, 160, 23, 0.3); }
-.codeInput::placeholder { letter-spacing: 4px; font-size: 30px; color: rgba(245,235,213,0.4); }
+.codeInput:focus { border-color: var(--color-gold); box-shadow: 0 0 18px rgba(212, 160, 23, 0.4); }
+.codeInput::placeholder { letter-spacing: 4px; font-size: 30px; font-weight: normal; color: rgba(247, 236, 210, 0.5); }
 
 /* ── 房间状态 ── */
 .roomArea {
-  margin-top: 44px;
+  margin-top: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 760px;
   z-index: 2;
 }
-.roomCodeLabel { font-size: 28px; letter-spacing: 4px; color: rgba(245, 235, 213, 0.75); text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.roomCodeLabel {
+  font-family: var(--font-title);
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #3a2412;
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
+}
+/* 房间码 · 深墨大字 + 厚奶白描边（叠金龙线 / 米黄底都清晰） */
 .roomCode {
   font-family: var(--font-title);
-  font-size: 100px;
-  letter-spacing: 24px;
-  color: var(--color-gold);
-  text-shadow: 0 0 36px rgba(212, 160, 23, 0.7), 0 4px 8px rgba(0, 0, 0, 0.9);
-  margin: 8px 0;
-  padding-left: 24px;
+  font-size: 88px;
+  font-weight: bold;
+  letter-spacing: 20px;
+  color: #2a1608;
+  margin: 6px 0;
+  padding-left: 20px;
+  text-shadow:
+    -2.5px -2.5px 0 rgba(255, 248, 225, 1), 2.5px -2.5px 0 rgba(255, 248, 225, 1),
+    -2.5px 2.5px 0 rgba(255, 248, 225, 1), 2.5px 2.5px 0 rgba(255, 248, 225, 1),
+    0 0 18px rgba(255, 248, 225, 0.8), 0 5px 10px rgba(0, 0, 0, 0.4);
 }
-.roomHint { font-size: 24px; color: rgba(245, 235, 213, 0.55); margin-bottom: 36px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.roomHint {
+  font-size: 26px;
+  color: #4a3420;
+  margin-bottom: 36px;
+  text-shadow:
+    -1px -1px 0 rgba(255, 248, 225, 0.85), 1px -1px 0 rgba(255, 248, 225, 0.85),
+    -1px 1px 0 rgba(255, 248, 225, 0.85), 1px 1px 0 rgba(255, 248, 225, 0.85);
+}
 
 .vsRow {
   display: flex;
@@ -245,51 +294,100 @@
   margin-bottom: 48px;
 }
 .vsSide { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
-.vsWho { font-size: 30px; color: rgba(245, 235, 213, 0.75); letter-spacing: 4px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.vsWho {
+  font-family: var(--font-title);
+  font-size: 34px;
+  font-weight: bold;
+  color: #3a2412;
+  letter-spacing: 4px;
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
+}
+/* 阵营大字 · 深墨 + 厚奶白描边 */
 .vsFaction {
   font-family: var(--font-title);
-  font-size: 92px;
-  color: var(--color-gold);
+  font-size: 96px;
+  font-weight: bold;
+  color: #2a1608;
   line-height: 1;
-  text-shadow: 0 0 24px rgba(212, 160, 23, 0.5), 0 4px 8px rgba(0, 0, 0, 0.9);
+  text-shadow:
+    -3px -3px 0 rgba(255, 248, 225, 1), 3px -3px 0 rgba(255, 248, 225, 1),
+    -3px 3px 0 rgba(255, 248, 225, 1), 3px 3px 0 rgba(255, 248, 225, 1),
+    0 5px 12px rgba(0, 0, 0, 0.4);
 }
-.vsReady { font-size: 26px; color: #7fd98a; letter-spacing: 2px; }
-.vsReady[data-ready='false'] { color: #f0c060; }
-.vsMid { font-family: var(--font-title); font-size: 68px; color: #d05548; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
-
-.waitHost { font-size: 36px; letter-spacing: 4px; color: #f0c060; padding: 24px 0; text-shadow: 0 2px 4px rgba(0,0,0,0.85); }
-
-.errorMsg {
-  margin-top: 28px;
-  padding: 14px 32px;
+.vsReady {
   font-size: 28px;
-  color: #f5c0b0;
-  background: rgba(180, 40, 30, 0.35);
-  border: 1px solid rgba(220, 80, 60, 0.6);
-  border-radius: 6px;
+  font-weight: bold;
+  color: #1c6e28;
+  letter-spacing: 2px;
+  text-shadow:
+    -1px -1px 0 rgba(255, 248, 225, 0.85), 1px -1px 0 rgba(255, 248, 225, 0.85),
+    -1px 1px 0 rgba(255, 248, 225, 0.85), 1px 1px 0 rgba(255, 248, 225, 0.85);
+}
+.vsReady[data-ready='false'] { color: #8a5a10; }
+.vsMid {
+  font-family: var(--font-title);
+  font-size: 72px;
+  font-weight: bold;
+  color: #a82a1e;
+  text-shadow:
+    -2.5px -2.5px 0 rgba(255, 248, 225, 0.95), 2.5px -2.5px 0 rgba(255, 248, 225, 0.95),
+    -2.5px 2.5px 0 rgba(255, 248, 225, 0.95), 2.5px 2.5px 0 rgba(255, 248, 225, 0.95);
+}
+
+.waitHost {
+  font-family: var(--font-title);
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #6a4410;
+  padding: 24px 0;
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
+}
+
+/* 错误提示 · 去红框 · 深墨字 + 奶白描边（与整体一致，不突兀） */
+.errorMsg {
+  margin-top: 24px;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #8a2418;
   z-index: 2;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow:
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
 }
 
 /* ── 高级 · 服务器地址 ── */
 .advanced {
   position: absolute;
-  bottom: 44px;
+  bottom: 40px;
   width: 760px;
   font-size: 24px;
-  color: rgba(245, 235, 213, 0.65);
   z-index: 2;
 }
-.advanced summary { cursor: pointer; letter-spacing: 2px; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+.advanced summary {
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-align: center;
+  color: #4a3420;
+  font-weight: bold;
+  text-shadow:
+    -1px -1px 0 rgba(255, 248, 225, 0.8), 1px -1px 0 rgba(255, 248, 225, 0.8),
+    -1px 1px 0 rgba(255, 248, 225, 0.8), 1px 1px 0 rgba(255, 248, 225, 0.8);
+}
 .advancedRow { display: flex; gap: 12px; margin-top: 16px; }
 .serverInput {
   flex: 1;
   padding: 14px 18px;
   font-size: 24px;
-  background: rgba(14, 11, 8, 0.85);
-  border: 1px solid rgba(212, 160, 23, 0.4);
+  background: rgba(34, 22, 10, 0.55);
+  border: 1px solid rgba(160, 110, 40, 0.6);
   border-radius: 6px;
-  color: #f5ebd5;
+  color: #f7ecd2;
   outline: none;
 }
 .serverInput:focus { border-color: var(--color-gold); }
@@ -297,7 +395,7 @@
   padding: 12px 28px;
   font-size: 24px;
   letter-spacing: 2px;
-  color: #f3e3c0;
+  color: #f7ecd2;
   background: linear-gradient(180deg, #6a512c, #463316);
   border: 1px solid rgba(212, 160, 23, 0.6);
   border-radius: 6px;

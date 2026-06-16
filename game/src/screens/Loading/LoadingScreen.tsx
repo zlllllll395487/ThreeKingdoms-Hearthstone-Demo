@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useUIStore, type Screen } from '@/store/uiStore'
 import {
   getAllLoadingBgUrls,
@@ -93,7 +93,7 @@ export function LoadingScreen() {
           >
             {LABEL_BY_TARGET[pendingScreen ?? 'mainmenu'] ?? '调度兵马中'}
           </div>
-          <div className={styles.tipText}>{tip}</div>
+          <div className={styles.tipText}>{renderTip(tip)}</div>
         </div>
       )}
 
@@ -114,6 +114,33 @@ export function LoadingScreen() {
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * Tip 文本结构化渲染
+ *
+ * 文案池里有 3 类格式：
+ *   1. 「四字短语 —— 释义」     (机制/技巧条目)
+ *   2. 「【关键词】 —— 释义」    (关键词速查条目，方括号包关键词)
+ *   3. 「半文言引文」             (风味典故，引号包整段)
+ *
+ * 前两类把破折号前的首段包成 .tipKeyword（加粗加大变深 + 呼吸动效），
+ * 建立视觉层级。第三类整段普通显示。
+ */
+function renderTip(tip: string): ReactNode {
+  const dashIdx = tip.indexOf(' —— ')
+  if (dashIdx < 0) {
+    // 纯引文 / 无破折号 → 整段普通显示
+    return tip
+  }
+  const keyword = tip.slice(0, dashIdx)
+  const rest = tip.slice(dashIdx)
+  return (
+    <>
+      <span className={styles.tipKeyword}>{keyword}</span>
+      {rest}
+    </>
   )
 }
 

@@ -13,7 +13,8 @@ import styles from './OnlineLobbyScreen.module.css'
  *   选阵营 → 创建房间（得房间码）/ 输码加入 → 两人到齐 → 房主点开始
  *   → 双方进教程页 → 对战页（对战逻辑里程碑 2）
  *
- * 本屏只负责大厅与配对，真正对战逻辑见后续里程碑。
+ * 美术：复用 battle_bg_portrait 竖屏背景 + btn_primary（创建）/ btn_secondary（加入）
+ * / btn_battle_start（自带「开始对战」金字）三种按钮模板。
  */
 
 const FACTION_META: Record<OnlineFaction, { label: string; card: string; hero: string }> = {
@@ -42,6 +43,12 @@ export function OnlineLobbyScreen() {
   const joinRoom = useOnlineStore((s) => s.joinRoom)
   const startGame = useOnlineStore((s) => s.startGame)
   const reset = useOnlineStore((s) => s.reset)
+
+  // 美术资源
+  const bgUrl = getUiAssetUrl('battle_bg_portrait.png')
+  const btnPrimaryUrl = getUiAssetUrl('btn_primary.png')
+  const btnSecondaryUrl = getUiAssetUrl('btn_secondary.png')
+  const btnBattleStartUrl = getUiAssetUrl('btn_battle_start.png')
 
   // 进屏自动连接服务器；离屏断开重置
   useEffect(() => {
@@ -73,8 +80,10 @@ export function OnlineLobbyScreen() {
     navigate('mainmenu')
   }
 
+  const bgStyle = bgUrl ? { backgroundImage: `url(${bgUrl})` } : undefined
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={bgStyle}>
       <div className={styles.vignette} />
 
       <BackButton onClick={handleBack} ariaLabel="返回主菜单" className={styles.backBtn}>
@@ -121,13 +130,16 @@ export function OnlineLobbyScreen() {
       {!inRoom && (
         <div className={styles.actionArea}>
           <button
-            className={styles.primaryBtn}
+            className={styles.artBtnPrimary}
+            style={btnPrimaryUrl ? { backgroundImage: `url(${btnPrimaryUrl})` } : undefined}
             onClick={createRoom}
             disabled={connPhase !== 'connected'}
           >
-            创建房间
+            <span className={styles.artBtnTextGold}>创建房间</span>
           </button>
+
           <div className={styles.orDivider}>— 或 —</div>
+
           <div className={styles.joinRow}>
             <input
               className={styles.codeInput}
@@ -137,11 +149,12 @@ export function OnlineLobbyScreen() {
               onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
             />
             <button
-              className={styles.secondaryBtn}
+              className={styles.artBtnJoin}
+              style={btnSecondaryUrl ? { backgroundImage: `url(${btnSecondaryUrl})` } : undefined}
               onClick={() => joinRoom(codeInput)}
               disabled={connPhase !== 'connected'}
             >
-              加入
+              <span className={styles.artBtnTextWood}>加入</span>
             </button>
           </div>
         </div>
@@ -175,13 +188,23 @@ export function OnlineLobbyScreen() {
           </div>
 
           {mySlot === 'host' ? (
-            <button
-              className={styles.startBtn}
-              onClick={startGame}
-              disabled={!bothReady}
-            >
-              {bothReady ? '开始对战' : '等待对手加入…'}
-            </button>
+            bothReady ? (
+              // 自带「开始对战」金字双龙
+              <button
+                className={styles.startBtnArt}
+                style={btnBattleStartUrl ? { backgroundImage: `url(${btnBattleStartUrl})` } : undefined}
+                onClick={startGame}
+                aria-label="开始对战"
+              />
+            ) : (
+              <button
+                className={styles.artBtnJoin}
+                style={btnSecondaryUrl ? { backgroundImage: `url(${btnSecondaryUrl})` } : undefined}
+                disabled
+              >
+                <span className={styles.artBtnTextWood}>等待对手加入…</span>
+              </button>
+            )
           ) : (
             <div className={styles.waitHost}>
               {bothReady ? '等待房主开始…' : '等待配对…'}
@@ -201,7 +224,7 @@ export function OnlineLobbyScreen() {
             value={serverUrl}
             onChange={(e) => setServerUrl(e.target.value)}
           />
-          <button className={styles.secondaryBtn} onClick={connect}>重连</button>
+          <button className={styles.smallBtn} onClick={connect}>重连</button>
         </div>
       </details>
     </div>

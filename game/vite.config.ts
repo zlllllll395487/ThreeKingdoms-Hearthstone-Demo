@@ -12,4 +12,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    // 5173 被 Windows 列入保留端口（Hyper-V/WSL/Docker），报 EACCES，改用 5174
+    port: 5174,
+    host: true, // 监听局域网 IP，手机同 WiFi 也能访问 dev
+  },
 })

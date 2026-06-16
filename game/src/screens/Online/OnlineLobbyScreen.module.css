@@ -48,7 +48,7 @@
 
 .connRow {
   margin-top: 16px;
-  font-size: 28px;
+  font-size: 34px;
   letter-spacing: 3px;
   display: flex;
   align-items: center;
@@ -278,12 +278,13 @@
     0 0 18px rgba(255, 248, 225, 0.8), 0 5px 10px rgba(0, 0, 0, 0.4);
 }
 .roomHint {
-  font-size: 26px;
+  font-size: 32px;
+  font-weight: bold;
   color: #4a3420;
   margin-bottom: 36px;
   text-shadow:
-    -1px -1px 0 rgba(255, 248, 225, 0.85), 1px -1px 0 rgba(255, 248, 225, 0.85),
-    -1px 1px 0 rgba(255, 248, 225, 0.85), 1px 1px 0 rgba(255, 248, 225, 0.85);
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
 }
 
 .vsRow {
@@ -296,10 +297,10 @@
 .vsSide { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
 .vsWho {
   font-family: var(--font-title);
-  font-size: 34px;
+  font-size: 42px;
   font-weight: bold;
   color: #3a2412;
-  letter-spacing: 4px;
+  letter-spacing: 6px;
   text-shadow:
     -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
     -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
@@ -317,13 +318,13 @@
     0 5px 12px rgba(0, 0, 0, 0.4);
 }
 .vsReady {
-  font-size: 28px;
+  font-size: 34px;
   font-weight: bold;
   color: #1c6e28;
   letter-spacing: 2px;
   text-shadow:
-    -1px -1px 0 rgba(255, 248, 225, 0.85), 1px -1px 0 rgba(255, 248, 225, 0.85),
-    -1px 1px 0 rgba(255, 248, 225, 0.85), 1px 1px 0 rgba(255, 248, 225, 0.85);
+    -1.5px -1.5px 0 rgba(255, 248, 225, 0.9), 1.5px -1.5px 0 rgba(255, 248, 225, 0.9),
+    -1.5px 1.5px 0 rgba(255, 248, 225, 0.9), 1.5px 1.5px 0 rgba(255, 248, 225, 0.9);
 }
 .vsReady[data-ready='false'] { color: #8a5a10; }
 .vsMid {

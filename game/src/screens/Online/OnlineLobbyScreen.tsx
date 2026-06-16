@@ -197,13 +197,8 @@ export function OnlineLobbyScreen() {
                 aria-label="开始对战"
               />
             ) : (
-              <button
-                className={styles.artBtnJoin}
-                style={btnSecondaryUrl ? { backgroundImage: `url(${btnSecondaryUrl})` } : undefined}
-                disabled
-              >
-                <span className={styles.artBtnTextWood}>等待对手加入…</span>
-              </button>
+              // 等待用纯文字提示（不塞窄按钮，避免文字撑爆）
+              <div className={styles.waitHost}>等待对手加入…</div>
             )
           ) : (
             <div className={styles.waitHost}>

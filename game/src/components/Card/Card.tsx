@@ -25,6 +25,9 @@ function getNumberImage(prefix: 'cost' | 'attack' | 'health', n: number): string
 /**
  * 从立绘文件名派生卡牌完整图文件名
  * 例：portrait="guanyu.png" → "cardvisual_guanyu.png"
+ *
+ * 返回 .png 名仅作 key；cardvisual 实际已全部转 WebP（见 docs/DECISIONS.md D-003），
+ * 调用方 getUiAssetUrl 内的 tryWebpFallback 会透明命中 .webp。
  */
 function getCardVisualFile(portraitFile: string | undefined): string | null {
   if (!portraitFile) return null

@@ -21,7 +21,7 @@ const portraitModules = import.meta.glob('/src/assets/portraits/*.{png,webp}', {
   import: 'default',
 }) as Record<string, string>
 
-// UI 资源 · 大部分保留 PNG，仅 loading_bg* 转为 WebP
+// UI 资源 · frame / kw / emblem / 数值球 / btn 等保留 PNG；cardvisual 与 loading_bg* 已转 WebP（见 docs/DECISIONS.md D-003）
 const uiModules = import.meta.glob('/src/assets/ui/*.{png,webp}', {
   eager: true,
   query: '?url',
@@ -91,12 +91,12 @@ function uiUrlsByNames(names: string[]): string[] {
 }
 
 /**
- * 取某阵营全部卡牌的 cardvisual_*.png 与 portrait 资源 URL
+ * 取某阵营全部卡牌的 cardvisual 与 portrait 资源 URL
  *
  * 用于 Codex 首屏阵营 Tab 的可见资源预加载，让 LoadingScreen 进度条诚实
  * 反映「打开图鉴默认 tab 已就绪」。
- * 卡牌 portrait 字段可能是中文（如「魏延.png」）也可能是拼音（如 huangzhong.png），
- * 这里两种都尝试匹配 .png / .webp。
+ * cardvisual 与 portrait 现均为 WebP（见 docs/DECISIONS.md D-003 / D-005），
+ * 但卡牌 JSON 的 portrait 字段仍写 .png，统一经 tryWebpFallback 转向命中 .webp。
  */
 function factionCardvisualAndPortraitUrls(faction: 'shu' | 'wei' | 'wu' | 'qun' | 'neutral'): string[] {
   const cards = getCardsByFaction(faction)
@@ -104,10 +104,10 @@ function factionCardvisualAndPortraitUrls(faction: 'shu' | 'wei' | 'wu' | 'qun' 
   for (const c of cards) {
     if (!c.portrait) continue
     const base = c.portrait.replace(/\.(png|webp)$/i, '')
-    // cardvisual_ 仍是 PNG（图鉴主视觉保持原画质）
-    const cv = uiModules[`/src/assets/ui/cardvisual_${base}.png`]
+    // cardvisual 已转 WebP（D-003），用 tryWebpFallback 命中 .webp
+    const cv = tryWebpFallback(uiModules, `/src/assets/ui/cardvisual_${base}.png`)
     if (cv) urls.push(cv)
-    // 立绘已转 WebP，调用方仍写 .png 时由 tryWebpFallback 转向
+    // 立绘已转 WebP（D-005），调用方仍写 .png 时由 tryWebpFallback 转向
     const pt = tryWebpFallback(portraitModules, `/src/assets/portraits/${c.portrait}`)
     if (pt) urls.push(pt)
   }
@@ -342,8 +342,8 @@ export function getPreloadUrlsForScreen(target: Screen): string[] {
         ...uiUrlsByPrefix('attack_'),
         ...uiUrlsByPrefix('health_'),
         ...Object.values(fxModules),
-        // cardvisual 与 portraits 同样改为懒加载
-        // FX 序列帧体积小且战斗中频繁触发，保留预加载
+        // cardvisual 与 portraits 不预加载，由 Card 组件 <img> 挂载时按 HTTP/2 并行下载
+        // （注意：非 loading="lazy"，见 D-002；FX 序列帧体积小且战斗中频繁触发，保留预加载）
       ]
 
     case 'result':

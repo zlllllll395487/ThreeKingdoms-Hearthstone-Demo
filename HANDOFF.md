@@ -2,6 +2,11 @@
 
 > 协作者或新对话接手本项目时的速通文档。预期阅读时长 10 分钟。
 
+> **新 AI / 新对话接手请优先读这三份**（docs-as-code，随 commit 实时更新）：
+> 1. [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) — 项目当前真相单页快照
+> 2. [docs/DECISIONS.md](docs/DECISIONS.md) — 决策日志（含反转记录），看到反直觉代码先查这里
+> 3. [docs/AI-ONBOARDING-PROMPT.md](docs/AI-ONBOARDING-PROMPT.md) — 粘贴即用的开场 prompt + 自检题
+
 ---
 
 ## 一、项目概述
@@ -18,6 +23,9 @@
 | [docs/12-卡牌验收清单-v5.2.md](docs/12-卡牌验收清单-v5.2.md) | 卡牌验收清单 |
 | [docs/13-数值与玩法审查-v5.3.md](docs/13-数值与玩法审查-v5.3.md) | 数值与玩法审查报告 |
 | [docs/AUDIT-2026-06-15.md](docs/AUDIT-2026-06-15.md) | 项目综合审计报告 |
+| [docs/CURRENT-STATE.md](docs/CURRENT-STATE.md) | 项目当前真相单页快照（接手第一份读） |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | 决策日志 D-001~（含反转记录） |
+| [docs/AI-ONBOARDING-PROMPT.md](docs/AI-ONBOARDING-PROMPT.md) | 新 AI 接手粘贴即用 prompt |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构与目录结构 |
 | [docs/SECTIONS.md](docs/SECTIONS.md) | § 任务编号字典 |
 | [docs/HANDOFF-AI.md](docs/HANDOFF-AI.md) | AI 协作专用接手指南 |

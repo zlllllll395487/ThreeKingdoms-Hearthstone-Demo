@@ -53,7 +53,9 @@ export function OnlineLobbyScreen() {
   // 进屏自动连接服务器；离屏断开重置
   useEffect(() => {
     connect()
-    return () => reset()
+    // 注意：不在 cleanup 里 reset —— 点「开始对战」导航去教程时大厅会卸载，
+    // 若此处 reset 会把 inMatch 清掉 + 断连，导致教程过完误回主菜单。
+    // 「返回主菜单」的清理由 handleBack 显式 reset。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

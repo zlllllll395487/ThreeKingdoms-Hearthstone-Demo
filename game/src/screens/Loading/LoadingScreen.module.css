@@ -64,7 +64,8 @@
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* 匾额：吊在卷轴上方，略与卷轴上沿重叠制造层次 */
+/* 匾额：吊在卷轴上方，略与卷轴上沿重叠制造层次
+ * 全部 caption 均为 4 字短语，可放大字号让匾额舒展不挤压 */
 .tipLabel {
   position: absolute;
   top: -52px;
@@ -80,15 +81,18 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-serif);
-  font-size: 24px;
+  font-size: 30px;
   font-weight: bold;
-  letter-spacing: 6px;
+  letter-spacing: 10px;
   color: #f4d98b;
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.95),
     0 0 8px rgba(212, 160, 23, 0.5);
-  /* 文字在木牌中部，向上 4px 视觉居中（牌底有铆钉视觉重量） */
+  /* 4 字 + 10px 字距 → 总宽 ~160px，木牌内 ~240px 可用宽，居中富余
+   * 牌底有铆钉视觉重量，文字向上 4px 视觉居中 + 还原匾额左侧凹陷
+   * letter-spacing 让最后一字也有右侧空间，整体偏左 5px 校正 */
   padding-bottom: 4px;
+  padding-left: 10px;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
 }
 
@@ -146,7 +150,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  /* 离屏幕最下边缘 28px，避免不同显示器 / 圆角设备裁切；让进度条有呼吸感 */
+  bottom: 28px;
   z-index: 5;
   display: flex;
   flex-direction: column;

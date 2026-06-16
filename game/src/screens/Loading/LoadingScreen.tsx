@@ -103,7 +103,7 @@ export function LoadingScreen() {
         style={progressFrameUrl ? { backgroundImage: `url(${progressFrameUrl})` } : undefined}
       >
         <div className={styles.textRow}>
-          <span className={styles.statusText}>正在准备资源 · 请稍候片刻</span>
+          <span className={styles.statusText}>兵马未动，粮草先行</span>
           <span className={styles.percentText}>{progress}%</span>
         </div>
         <div className={styles.progressTrack}>
@@ -117,24 +117,28 @@ export function LoadingScreen() {
   )
 }
 
+/**
+ * 匾额文案 · 严守 4 字格式，剔除现代词汇与重字语病
+ * 由文案主策重构（前版混入「档案 / 接通 / 收发 / 阵前列阵」等违和词）
+ */
 const LABEL_BY_TARGET: Partial<Record<Screen, string>> = {
-  mainmenu: '调度兵马中',
-  codex: '整理卷宗武略',
-  factionselect: '调遣麾下旌旗',
-  tutorial: '研读三韬六略',
-  battle: '列阵于阵前',
-  result: '清点战果',
-  storymode: '研读剧本',
-  quest: '召集军务',
-  shop: '盘点军资',
-  event: '准备桃园',
-  recruit: '招募英雄',
-  decks: '整编卡组',
-  serverselect: '接通烽燧',
-  account: '整理印信',
-  accountdetails: '查阅档案',
-  mail: '收发军报',
-  signin: '记录功勋',
-  friends: '联络同袍',
-  news: '汇集时讯',
+  mainmenu: '中军大帐',
+  codex: '兵书阵卷',
+  factionselect: '誓师点将',
+  tutorial: '兵法研习',
+  battle: '两军对垒',
+  result: '论功行赏',
+  storymode: '青史长卷',
+  quest: '悬赏招榜',
+  shop: '军需辎重',
+  event: '岁时节庆',
+  recruit: '招贤纳士',
+  decks: '点将编伍',
+  serverselect: '烽火传信',
+  account: '执掌帅印',
+  accountdetails: '功过名册',
+  mail: '飞鸽传书',
+  signin: '辕门点卯',
+  friends: '袍泽之交',
+  news: '九州风云',
 }

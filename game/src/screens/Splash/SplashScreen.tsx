@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUIStore } from '@/store/uiStore'
-import { getUiAssetUrl } from '@/data/assetLoader'
+import {
+  getLoadingScreenArtUrls,
+  getUiAssetUrl,
+  preloadBatched,
+} from '@/data/assetLoader'
 import styles from './SplashScreen.module.css'
 
 /**
@@ -11,6 +15,12 @@ export function SplashScreen() {
   const showModal = useUIStore((s) => s.showModal)
   const [agreed, setAgreed] = useState(false)
   const [shake, setShake] = useState(false)
+
+  // Splash 挂载即在后台预加载 Loading 屏自身的美术资源（卷轴 / 匾额 / 进度条边框 / 4 张背景）。
+  // 待用户点「进入游戏」时这些资源已在浏览器缓存中即时就绪，避免横幅闪烁加载。
+  useEffect(() => {
+    void preloadBatched(getLoadingScreenArtUrls(), undefined, 8, 'low')
+  }, [])
 
   const bgUrl = getUiAssetUrl('splash_bg.png')
   const logoUrl = getUiAssetUrl('logo_main.png')

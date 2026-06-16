@@ -181,3 +181,22 @@ textarea,
 [data-clickable] {
   cursor: none !important;
 }
+
+/* 全局禁止图片拖拽与选中
+ * - 鼠标长按时浏览器默认会显示半透明的图片拖拽预览并选中元素
+ * - 游戏 UI 中所有图片都不希望被用户拖出窗口或选中
+ * - onClick 等交互不受影响，仍可正常触发
+ */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 全局禁止文本与元素选中（避免长按拖动后选中卡牌文字、Tip 文案等） */
+body,
+button,
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}

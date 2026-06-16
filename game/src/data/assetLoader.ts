@@ -127,6 +127,24 @@ export function getAllLoadingBgUrls(): string[] {
   return uiUrlsByPrefix('loading_bg')
 }
 
+/**
+ * 取 Loading 屏自身渲染需要的全部美术资源 URL
+ *
+ * 包括所有 loading_bg* 随机背景 + 卷轴底板 + 匾额 + 进度条边框。
+ * 由 SplashScreen 挂载时后台预加载，确保用户从 Splash 进入 Loading 屏的瞬间，
+ * 卷轴 / 匾额 / 背景图都已在浏览器缓存中即时就绪。
+ */
+export function getLoadingScreenArtUrls(): string[] {
+  return [
+    ...getAllLoadingBgUrls(),
+    ...uiUrlsByNames([
+      'loading_tip_scroll.png',
+      'loading_tip_label.png',
+      'loading_progress_frame.png',
+    ]),
+  ]
+}
+
 // ============================================
 // 分屏资源清单 · 每屏进入前必须就绪的资源
 // ============================================
@@ -282,9 +300,10 @@ const SUBPAGE_FILE_MAP: Partial<Record<Screen, string>> = {
 /**
  * 返回某目标屏进入前应预加载的全部资源 URL
  *
- * 预加载只覆盖「屏幕骨架与必现的小 UI 元素」，单卡的 cardvisual / 立绘
- * 已由 Card 组件 loading="lazy" 按可视区域懒加载，不再强制预加载，
- * 避免 100+ 张大图独立请求 → HTTP 队列拥塞 → LoadingScreen 超时强跳。
+ * 预加载只覆盖「屏幕骨架与必现的小 UI 元素」+ 默认 tab 的卡牌资源。
+ * 其它阵营 tab 的卡牌由浏览器在 <img> 挂载时按 HTTP/2 并行下载（已禁用
+ * loading="lazy"，因 transform: scale() 父容器会让 Chrome 的 IntersectionObserver
+ * 误判可见性，lazy 永不触发导致卡牌空白）。
  *
  * 子页面只需对应 subpage_*.png 一张背景。
  */
@@ -303,7 +322,7 @@ export function getPreloadUrlsForScreen(target: Screen): string[] {
         ...uiUrlsByPrefix('attack_'),
         ...uiUrlsByPrefix('health_'),
         // 首个 Tab（蜀）的 cardvisual + portrait 预加载，让进度条诚实反映「打开图鉴默认 tab 就绪」
-        // 其它阵营 tab 的卡牌在用户切换时由 Card 组件 loading="lazy" 懒加载
+        // 其它阵营 tab 的卡牌在 Tab 切换、Card 挂载时由浏览器自然下载
         ...factionCardvisualAndPortraitUrls('shu'),
       ]
 

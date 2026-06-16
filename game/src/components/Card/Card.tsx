@@ -85,14 +85,20 @@ function CardBody({ card, scale, onClick, onVisualClick }: CardBodyProps) {
       style={{ transform: `scale(${scale})` }}
       onClick={onClick}
     >
-      {/* cardvisual 烫入（立绘 + 边框 + 空名带 + 空 parchment）*/}
+      {/* cardvisual 烫入（立绘 + 边框 + 空名带 + 空 parchment）
+       *
+       * 注意：禁用 loading="lazy" — 我们的根组件用 transform: scale() 等比缩放设计画布，
+       * Chrome 的 native lazy loading 基于 IntersectionObserver，在 transform 父容器内
+       * 计算可见区域出错，导致 <img> 永远不触发加载，卡牌渲染为空白。
+       * 改用 eager + decoding="async"，让浏览器立即下载但异步解码，避免阻塞渲染。
+       */}
       <div className={styles.cardVisual} onClick={onVisualClick}>
         {cardVisualUrl ? (
           <img
             src={cardVisualUrl}
             alt={card.name}
             className={styles.cardVisualImg}
-            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className={styles.cardVisualPlaceholder}>

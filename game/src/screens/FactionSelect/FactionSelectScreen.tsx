@@ -134,6 +134,16 @@ export function FactionSelectScreen() {
         返回
       </BackButton>
 
+      {/* 玩家对战入口 · 右上角 · 与返回按钮对称 · 进在线大厅 */}
+      <BackButton
+        variant="long"
+        onClick={() => navigate('online')}
+        ariaLabel="玩家对战"
+        className={styles.onlineButton}
+      >
+        玩家对战
+      </BackButton>
+
       <h1 className={styles.title}>选择对战阵营</h1>
 
       <div className={styles.columnsRow}>

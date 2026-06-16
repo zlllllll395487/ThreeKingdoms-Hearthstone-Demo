@@ -20,7 +20,7 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { networkInterfaces } from 'node:os'
-import type { ClientMessage, ServerMessage, PlayerSlot } from '@/online/protocol'
+import type { ClientMessage, ServerMessage, PlayerSlot, OnlineFaction } from '@/online/protocol'
 import { PROTOCOL_VERSION } from '@/online/protocol'
 
 // ── 引擎加载验证 ── 证明引擎与卡牌数据能在 Node 环境加载 ──
@@ -49,9 +49,24 @@ interface Room {
   code: string
   host: WebSocket
   guest: WebSocket | null
+  hostFaction: OnlineFaction
+  guestFaction: OnlineFaction | null
 }
 
 const rooms = new Map<string, Room>()
+
+/** 广播房间状态给房间内所有人 · 让双方互相看到对方阵营与是否就位 */
+function broadcastRoomState(room: Room): void {
+  const msg: ServerMessage = {
+    type: 'roomState',
+    host: { slot: 'host', faction: room.hostFaction },
+    guest: room.guest && room.guestFaction
+      ? { slot: 'guest', faction: room.guestFaction }
+      : null,
+  }
+  send(room.host, msg)
+  if (room.guest) send(room.guest, msg)
+}
 
 /** 生成 4 位大写字母 + 数字房间码，去掉易混淆字符（0/O/1/I/L） */
 function genRoomCode(): string {
@@ -128,12 +143,13 @@ wss.on('connection', (ws) => {
     switch (msg.type) {
       case 'createRoom': {
         const code = genRoomCode()
-        const room: Room = { code, host: ws, guest: null }
+        const room: Room = { code, host: ws, guest: null, hostFaction: msg.faction, guestFaction: null }
         rooms.set(code, room)
         myRoom = room
         mySlot = 'host'
         send(ws, { type: 'roomCreated', roomCode: code, yourSlot: 'host', protocolVersion: PROTOCOL_VERSION })
-        console.log(`[server] 建房 ${code}（当前房间数 ${rooms.size}）`)
+        broadcastRoomState(room)
+        console.log(`[server] 建房 ${code}（${msg.faction}，当前房间数 ${rooms.size}）`)
         break
       }
 
@@ -148,11 +164,26 @@ wss.on('connection', (ws) => {
           return
         }
         room.guest = ws
+        room.guestFaction = msg.faction
         myRoom = room
         mySlot = 'guest'
         send(ws, { type: 'joinedRoom', roomCode: room.code, yourSlot: 'guest', protocolVersion: PROTOCOL_VERSION })
-        send(room.host, { type: 'opponentJoined' })
-        console.log(`[server] guest 加入 ${room.code}`)
+        broadcastRoomState(room)
+        console.log(`[server] guest 加入 ${room.code}（${msg.faction}）`)
+        break
+      }
+
+      case 'startGame': {
+        if (!myRoom || mySlot !== 'host') {
+          send(ws, { type: 'error', message: '只有房主可以开始对战' })
+          return
+        }
+        if (!myRoom.guest) {
+          send(ws, { type: 'error', message: '对手尚未加入' })
+          return
+        }
+        broadcast(myRoom, { type: 'gameStarting' })
+        console.log(`[server] 房间 ${myRoom.code} 开始对战`)
         break
       }
 

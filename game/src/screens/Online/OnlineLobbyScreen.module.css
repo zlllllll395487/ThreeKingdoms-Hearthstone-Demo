@@ -1,0 +1,260 @@
+/* 在线对战大厅 · 竖屏 1080×1920 */
+
+.container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 30%, #2a1d10 0%, #160d06 60%, #0a0603 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--font-serif);
+  color: #f5ebd5;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.7) 100%);
+}
+
+.backBtn {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  z-index: 10;
+}
+
+.title {
+  margin-top: 120px;
+  font-family: var(--font-title);
+  font-size: 72px;
+  letter-spacing: 16px;
+  color: var(--color-gold);
+  text-shadow: 0 0 24px rgba(212, 160, 23, 0.5), 0 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+.connRow {
+  margin-top: 16px;
+  font-size: 26px;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.connRow[data-phase='connected'] { color: #7fd98a; }
+.connRow[data-phase='error'] { color: #e06050; }
+.connRow[data-phase='connecting'] { color: #f0c060; }
+.connRow[data-phase='idle'] { color: #999; }
+
+.retryBtn {
+  padding: 4px 16px;
+  font-size: 22px;
+  background: rgba(212, 160, 23, 0.2);
+  border: 1px solid var(--color-gold);
+  border-radius: 4px;
+  color: var(--color-gold);
+  cursor: pointer;
+}
+
+.sectionLabel {
+  margin-top: 56px;
+  font-size: 36px;
+  letter-spacing: 6px;
+  color: rgba(245, 235, 213, 0.9);
+}
+
+.factionRow {
+  margin-top: 28px;
+  display: flex;
+  gap: 48px;
+}
+
+.factionCard {
+  position: relative;
+  width: 320px;
+  height: 440px;
+  padding: 0;
+  border: 3px solid rgba(120, 90, 50, 0.6);
+  border-radius: 10px;
+  background: #0e0b08;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.factionCard:hover:not(:disabled) { transform: translateY(-6px); }
+.factionCard:disabled { cursor: default; opacity: 0.55; }
+.factionCard img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.factionSelected {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 32px rgba(212, 160, 23, 0.7);
+}
+.factionGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  box-shadow: inset 0 0 40px rgba(212, 160, 23, 0.55);
+  pointer-events: none;
+}
+.factionName {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 0;
+  font-size: 34px;
+  letter-spacing: 4px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.85));
+  color: #f5ebd5;
+}
+
+/* ── 建房 / 加入 ── */
+.actionArea {
+  margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 640px;
+}
+
+.primaryBtn {
+  width: 100%;
+  padding: 24px 0;
+  font-family: var(--font-title);
+  font-size: 40px;
+  letter-spacing: 8px;
+  color: #f5e7c1;
+  background: linear-gradient(180deg, #a8742f 0%, #6e4a1c 100%);
+  border: 2px solid #d4a017;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.primaryBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.orDivider { font-size: 28px; color: rgba(245, 235, 213, 0.5); letter-spacing: 4px; }
+
+.joinRow { display: flex; gap: 16px; width: 100%; }
+.codeInput {
+  flex: 1;
+  padding: 20px 24px;
+  font-size: 40px;
+  letter-spacing: 12px;
+  text-align: center;
+  text-transform: uppercase;
+  background: #0e0b08;
+  border: 2px solid rgba(212, 160, 23, 0.4);
+  border-radius: 8px;
+  color: #f5ebd5;
+  outline: none;
+}
+.codeInput:focus { border-color: var(--color-gold); }
+
+.secondaryBtn {
+  padding: 20px 40px;
+  font-size: 34px;
+  letter-spacing: 4px;
+  color: #f5e7c1;
+  background: linear-gradient(180deg, #6a512c, #463316);
+  border: 2px solid rgba(212, 160, 23, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.secondaryBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── 房间状态 ── */
+.roomArea {
+  margin-top: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 720px;
+}
+.roomCodeLabel { font-size: 28px; letter-spacing: 4px; color: rgba(245, 235, 213, 0.7); }
+.roomCode {
+  font-family: var(--font-title);
+  font-size: 96px;
+  letter-spacing: 24px;
+  color: var(--color-gold);
+  text-shadow: 0 0 32px rgba(212, 160, 23, 0.6);
+  margin: 8px 0;
+  padding-left: 24px;
+}
+.roomHint { font-size: 24px; color: rgba(245, 235, 213, 0.5); margin-bottom: 40px; }
+
+.vsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 56px;
+}
+.vsSide { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
+.vsWho { font-size: 30px; color: rgba(245, 235, 213, 0.7); letter-spacing: 4px; }
+.vsFaction {
+  font-family: var(--font-title);
+  font-size: 88px;
+  color: var(--color-gold);
+  line-height: 1;
+}
+.vsReady { font-size: 26px; color: #7fd98a; letter-spacing: 2px; }
+.vsReady[data-ready='false'] { color: #f0c060; }
+.vsMid { font-family: var(--font-title); font-size: 64px; color: #c44; }
+
+.startBtn {
+  width: 100%;
+  padding: 28px 0;
+  font-family: var(--font-title);
+  font-size: 48px;
+  letter-spacing: 12px;
+  color: #f5e7c1;
+  background: linear-gradient(180deg, #b8302a 0%, #7a1a14 100%);
+  border: 3px solid #d4a017;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 24px rgba(212, 160, 23, 0.3);
+}
+.startBtn:disabled {
+  background: linear-gradient(180deg, #4a4036, #2c2620);
+  border-color: rgba(120, 90, 50, 0.5);
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.waitHost { font-size: 36px; letter-spacing: 4px; color: #f0c060; padding: 28px 0; }
+
+.errorMsg {
+  margin-top: 32px;
+  padding: 14px 32px;
+  font-size: 28px;
+  color: #f0b0a0;
+  background: rgba(180, 40, 30, 0.2);
+  border: 1px solid rgba(220, 80, 60, 0.5);
+  border-radius: 6px;
+}
+
+/* ── 高级 · 服务器地址 ── */
+.advanced {
+  position: absolute;
+  bottom: 48px;
+  width: 760px;
+  font-size: 24px;
+  color: rgba(245, 235, 213, 0.6);
+}
+.advanced summary { cursor: pointer; letter-spacing: 2px; text-align: center; }
+.advancedRow { display: flex; gap: 12px; margin-top: 16px; }
+.serverInput {
+  flex: 1;
+  padding: 14px 18px;
+  font-size: 24px;
+  background: #0e0b08;
+  border: 1px solid rgba(212, 160, 23, 0.35);
+  border-radius: 6px;
+  color: #f5ebd5;
+  outline: none;
+}
+.serverInput:focus { border-color: var(--color-gold); }

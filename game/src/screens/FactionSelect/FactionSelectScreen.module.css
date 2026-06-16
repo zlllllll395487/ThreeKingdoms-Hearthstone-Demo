@@ -51,6 +51,14 @@
   z-index: 10;
 }
 
+/* 玩家对战入口 · 右上角 · 与返回按钮对称（复用 BackButton 样式） */
+.onlineButton {
+  position: absolute;
+  top: 28px;
+  right: 32px;
+  z-index: 10;
+}
+
 /* 主标题 */
 .title {
   position: absolute;

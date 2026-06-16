@@ -16,7 +16,7 @@ import type {
   RoomMemberInfo,
 } from './protocol'
 import { deserializeState } from './stateCodec'
-import { useGameStore } from '@/store/gameStore'
+import { useGameStore, registerOnlineActionSender } from '@/store/gameStore'
 
 const LS_SERVER_URL = 'sgls.online.serverUrl'
 
@@ -188,6 +188,10 @@ function sendMsg(msg: ClientMessage): void {
     ws.send(JSON.stringify(msg))
   }
 }
+
+// 里程碑 2b · 把「发动作意图给服务器」的能力注入 gameStore（避免 gameStore 反向依赖 onlineStore）。
+// gameStore 在线模式下的玩家动作经此发往权威服务器，服务器裁决后回推 matchState。
+registerOnlineActionSender((action) => sendMsg({ type: 'action', action }))
 
 function handleServerMessage(
   msg: ServerMessage,

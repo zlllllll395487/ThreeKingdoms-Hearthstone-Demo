@@ -12,12 +12,28 @@ import { create } from 'zustand'
 import { GameEngine, type TargetRef } from '@/engine'
 import type { GameState } from '@/engine/types'
 import type { LogEntry } from '@/engine/events'
+import type { GameAction } from '@/online/protocol'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
 import { getDeckByFaction } from '@/data/decks'
 import { takeAITurn, type AIDifficulty } from '@/engine/ai'
 import { useFxStore } from '@/store/fxStore'
 import { getTargetCenter } from '@/utils/targetRegistry'
 import { getCanvasScale } from '@/utils/canvasScale'
+
+// ============================================
+// 里程碑 2b · 在线动作发送器（由 onlineStore 注册）
+//
+// gameStore 不直接依赖 onlineStore（避免双向耦合）：onlineStore 在模块初始化时
+// 调 registerOnlineActionSender 注入「把动作意图发给服务器」的函数。在线模式下
+// 玩家动作不改本地影子引擎，只 sendOnline 给权威服务器，等服务器回推 matchState。
+// ============================================
+let onlineActionSender: ((action: GameAction) => void) | null = null
+export function registerOnlineActionSender(fn: ((action: GameAction) => void) | null): void {
+  onlineActionSender = fn
+}
+function sendOnline(action: GameAction): void {
+  onlineActionSender?.(action)
+}
 
 interface GameStore {
   engine: GameEngine | null
@@ -177,11 +193,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   applyServerMatchState: (state) => {
-    // 在线模式：state 来自服务器（已视角翻转 + 脱敏），不持有本地权威 engine
+    // 在线模式：state 来自服务器（已视角翻转 + 脱敏）。
+    // 用该 state 构造一个「影子引擎」——仅供 UI 判定复用（canPlayCard /
+    // cardNeedsTarget / hasValidTargetsForCard 等），绝不在在线模式下 mutate 它。
+    // 玩家自己的手牌 / 场上 / 主公在其视角里都是真实的，故这些判定结果正确；
+    // 对手手牌已脱敏成牌背，玩家也不会以其为目标，不影响判定。
+    // 每次新 matchState 都重建引擎 + 新 state 对象 → React 重渲染。
+    const engine = new GameEngine(state, getAllCardsIncludingTokens())
     set({
       onlineMode: true,
-      engine: null,
+      engine,
       state,
+      log: [],
       selectedCardId: null,
       selectedAttackerId: null,
       pendingTargetForCard: null,
@@ -210,13 +233,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // §19.7.8 · 需目标但无合法目标 → 直接打出（targeted 部分跳过）
     // 解决魏延手牌只有自己 + 友方场上无随从死锁 / 程普打 AI 无随从死锁 等场景
     if (needsTarget && !engine.hasValidTargetsForCard(card, 'player')) {
-      engine.playCard('player', instanceId)
+      if (get().onlineMode) {
+        sendOnline({ kind: 'playCard', instanceId })
+      } else {
+        engine.playCard('player', instanceId)
+        get().syncState()
+      }
       set({
         selectedCardId: null,
         pendingTargetForCard: null,
         selectedAttackerId: null,
       })
-      get().syncState()
       return
     }
     set({
@@ -235,9 +262,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!card) return
     // minion 类型 / 无目标 spell：直接 play
     if (card.data.type === 'minion' || card.data.type === 'spell') {
-      engine.playCard('player', selectedCardId)
+      if (get().onlineMode) {
+        sendOnline({ kind: 'playCard', instanceId: selectedCardId })
+      } else {
+        engine.playCard('player', selectedCardId)
+        get().syncState()
+      }
       set({ selectedCardId: null, pendingTargetForCard: null })
-      get().syncState()
     }
   },
 
@@ -249,9 +280,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const card = state.player.hand.find((c) => c.instanceId === selectedCardId)
     if (!card) return
     if (card.data.type === 'weapon') {
-      engine.playCard('player', selectedCardId)
+      if (get().onlineMode) {
+        sendOnline({ kind: 'playCard', instanceId: selectedCardId })
+      } else {
+        engine.playCard('player', selectedCardId)
+        get().syncState()
+      }
       set({ selectedCardId: null, pendingTargetForCard: null })
-      get().syncState()
     }
   },
 
@@ -275,9 +310,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (!engine) return
     // 路径 1：出需要目标的牌
     if (pendingTargetForCard) {
-      engine.playCard('player', pendingTargetForCard, target)
+      if (get().onlineMode) {
+        sendOnline({ kind: 'playCard', instanceId: pendingTargetForCard, target })
+      } else {
+        engine.playCard('player', pendingTargetForCard, target)
+        get().syncState()
+      }
       set({ selectedCardId: null, pendingTargetForCard: null })
-      get().syncState()
       return
     }
     // 路径 2：用选中的攻击者攻击目标
@@ -285,7 +324,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // §19.6 Phase B · 立即清选中态，攻击进入异步前冲流程
       const attackerId = selectedAttackerId
       set({ selectedAttackerId: null })
-      void doAnimatedAttack('player', attackerId, target)
+      if (get().onlineMode) {
+        // 在线模式：动作交服务器裁决，本地不跑前冲动画（伤害浮字由状态 diff 自动触发）
+        sendOnline({ kind: 'attack', attackerId, target })
+      } else {
+        void doAnimatedAttack('player', attackerId, target)
+      }
       return
     }
   },
@@ -293,15 +337,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
   playSelectedCardNoTarget: () => {
     const { engine, selectedCardId, pendingTargetForCard } = get()
     if (!engine || !selectedCardId || pendingTargetForCard) return
-    engine.playCard('player', selectedCardId)
+    if (get().onlineMode) {
+      sendOnline({ kind: 'playCard', instanceId: selectedCardId })
+    } else {
+      engine.playCard('player', selectedCardId)
+      get().syncState()
+    }
     set({ selectedCardId: null })
-    get().syncState()
   },
 
   endTurn: () => {
     const { engine, state } = get()
     if (!engine || !state) return
     if (state.activePlayer !== 'player' || state.phase !== 'main') return
+    if (get().onlineMode) {
+      // 在线模式：结束回合交服务器换手给对手（双人对战，无 AI），不跑本地 AI 流程
+      sendOnline({ kind: 'endTurn' })
+      set({
+        selectedCardId: null,
+        selectedAttackerId: null,
+        pendingTargetForCard: null,
+      })
+      return
+    }
     engine.endTurn()
     set({
       selectedCardId: null,

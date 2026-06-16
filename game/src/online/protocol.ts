@@ -12,6 +12,8 @@
  * 设计原则：所有消息都是 JSON。`type` 字段为判别式（discriminated union）。
  */
 
+import type { TargetRef } from '@/engine'
+
 /** 房间内的两个位置 · host = 建房者，guest = 加入者 */
 export type PlayerSlot = 'host' | 'guest'
 
@@ -19,7 +21,23 @@ export type PlayerSlot = 'host' | 'guest'
 export type OnlineFaction = 'shu' | 'wu'
 
 /** 协议版本 · 前后端不一致时可据此提示用户刷新 */
-export const PROTOCOL_VERSION = 3
+export const PROTOCOL_VERSION = 4
+
+/**
+ * 里程碑 2b · 对战动作意图（客户端 → 服务器）
+ *
+ * 关键约定：所有坐标都用**客户端自身视角**表达 ——
+ * 客户端永远把自己当 `player` 侧、对手当 `ai` 侧（与服务器下发的脱敏状态一致）。
+ * 服务器收到后按发送者的真实 slot 翻转回权威坐标（见 server/index.ts flipSide）。
+ *
+ * - playCard：instanceId 为手牌实例（自己视角下真实可见），target 可选（指敌方 / 友方目标）
+ * - attack：attackerId 为己方场上单位 instanceId 或 'hero_player'；target 为攻击目标
+ * - endTurn：结束本方回合，服务器换手给对手（双人对战，无 AI）
+ */
+export type GameAction =
+  | { kind: 'playCard'; instanceId: string; target?: TargetRef }
+  | { kind: 'attack'; attackerId: string; target: TargetRef }
+  | { kind: 'endTurn' }
 
 /** 房间成员信息 · 用于 roomState 广播让双方互相看到对方阵营 */
 export interface RoomMemberInfo {
@@ -38,6 +56,8 @@ export type ClientMessage =
   | { type: 'joinRoom'; roomCode: string; faction: OnlineFaction }
   /** 房主点「开始对战」· 两人到齐后触发，双方进入教程 → 对战流程 */
   | { type: 'startGame' }
+  /** 里程碑 2b · 对战动作意图（出牌 / 攻击 / 结束回合）· 坐标用客户端自身视角 */
+  | { type: 'action'; action: GameAction }
   /** 里程碑 0 连通测试 · 把文本广播给房间内两人 */
   | { type: 'echo'; text: string }
 

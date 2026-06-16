@@ -63,6 +63,14 @@ interface GameStore {
   endTurn: () => void
 
   syncState: () => void
+
+  // ============================================
+  // 里程碑 2 · 在线对战
+  // ============================================
+  /** 在线模式标记：true 时不持有本地权威 engine，state 来自服务器，AI 回合禁用 */
+  onlineMode: boolean
+  /** 接收服务器个性化脱敏状态 · 直接灌入 state（不创建本地 engine） */
+  applyServerMatchState: (state: GameState) => void
 }
 
 /** v5.5 阵营 → 主公映射 */
@@ -92,6 +100,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   aiDifficulty: 'standard',
   autopilot: false,
+  onlineMode: false,
   autopilotCancelHint: false,
   toggleAutopilot: () => {
     const next = !get().autopilot
@@ -143,6 +152,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       aiThinking: false,
       aiDifficulty,
       autopilot: false, // §24 每局重置托管
+      onlineMode: false, // 单机对战，确保非在线模式
     })
   },
 
@@ -156,6 +166,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       pendingTargetForCard: null,
       aiThinking: false,
       autopilot: false, // §24
+      onlineMode: false,
     })
   },
 
@@ -163,6 +174,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const e = get().engine
     if (!e) return
     set({ state: { ...e.state }, log: [...e.log] })
+  },
+
+  applyServerMatchState: (state) => {
+    // 在线模式：state 来自服务器（已视角翻转 + 脱敏），不持有本地权威 engine
+    set({
+      onlineMode: true,
+      engine: null,
+      state,
+      selectedCardId: null,
+      selectedAttackerId: null,
+      pendingTargetForCard: null,
+      aiThinking: false,
+      autopilot: false,
+    })
   },
 
   selectCard: (instanceId) => {

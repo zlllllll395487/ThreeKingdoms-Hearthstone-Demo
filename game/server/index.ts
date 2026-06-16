@@ -23,9 +23,13 @@ import { networkInterfaces } from 'node:os'
 import type { ClientMessage, ServerMessage, PlayerSlot, OnlineFaction } from '@/online/protocol'
 import { PROTOCOL_VERSION } from '@/online/protocol'
 
-// ── 引擎加载验证 ── 证明引擎与卡牌数据能在 Node 环境加载 ──
+// ── 引擎（在线对战权威裁判，与前端共用同一份）──
 import { GameEngine } from '@/engine/index'
 import { getAllCardsIncludingTokens } from '@/data/cardLibrary'
+import { getDeckByFaction } from '@/data/decks'
+import { serializeState } from '@/online/stateCodec'
+import { sanitizeStateFor } from './sanitize'
+import type { Hero } from '@/engine/types'
 
 const PORT = Number(process.env.PORT) || 8787
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -51,9 +55,48 @@ interface Room {
   guest: WebSocket | null
   hostFaction: OnlineFaction
   guestFaction: OnlineFaction | null
+  /** 里程碑 2 · 房间的权威对战引擎（开局后创建，host=player 侧 / guest=ai 侧） */
+  engine: GameEngine | null
 }
 
 const rooms = new Map<string, Room>()
+
+// ── 开局工具 · 复用 gameStore.startGame 的 createGame 写法 ──
+const HERO_BY_FACTION: Record<OnlineFaction, { name: string; faction: OnlineFaction }> = {
+  shu: { name: '刘备', faction: 'shu' },
+  wu: { name: '孙权', faction: 'wu' },
+}
+function makeHero(faction: OnlineFaction): Hero {
+  return { ...HERO_BY_FACTION[faction], health: 30, maxHealth: 30, armor: 0, attack: 0 }
+}
+/** host → player 侧，guest → ai 侧（与 sanitizeStateFor 的视角约定一致） */
+function createMatchEngine(hostFaction: OnlineFaction, guestFaction: OnlineFaction): GameEngine {
+  return GameEngine.createGame({
+    cardPool: getAllCardsIncludingTokens(),
+    playerHero: makeHero(hostFaction),
+    aiHero: makeHero(guestFaction),
+    deckSize: 30,
+    initialHand: { player: 3, ai: 4 },
+    playerDeckCardIds: getDeckByFaction(hostFaction),
+    aiDeckCardIds: getDeckByFaction(guestFaction),
+  })
+}
+/** 给房间内两人各发个性化脱敏状态（每人都看到自己在 player 侧、对手 ai 侧脱敏） */
+function sendMatchState(room: Room): void {
+  if (!room.engine) return
+  send(room.host, {
+    type: 'matchState',
+    state: serializeState(sanitizeStateFor(room.engine.state, 'player')),
+    yourSide: 'player',
+  })
+  if (room.guest) {
+    send(room.guest, {
+      type: 'matchState',
+      state: serializeState(sanitizeStateFor(room.engine.state, 'ai')),
+      yourSide: 'player',
+    })
+  }
+}
 
 /** 广播房间状态给房间内所有人 · 让双方互相看到对方阵营与是否就位 */
 function broadcastRoomState(room: Room): void {
@@ -143,7 +186,7 @@ wss.on('connection', (ws) => {
     switch (msg.type) {
       case 'createRoom': {
         const code = genRoomCode()
-        const room: Room = { code, host: ws, guest: null, hostFaction: msg.faction, guestFaction: null }
+        const room: Room = { code, host: ws, guest: null, hostFaction: msg.faction, guestFaction: null, engine: null }
         rooms.set(code, room)
         myRoom = room
         mySlot = 'host'
@@ -178,12 +221,15 @@ wss.on('connection', (ws) => {
           send(ws, { type: 'error', message: '只有房主可以开始对战' })
           return
         }
-        if (!myRoom.guest) {
+        if (!myRoom.guest || !myRoom.guestFaction) {
           send(ws, { type: 'error', message: '对手尚未加入' })
           return
         }
+        // 里程碑 2a · 服务器开局：创建权威引擎，给两人各发个性化脱敏初始状态
+        myRoom.engine = createMatchEngine(myRoom.hostFaction, myRoom.guestFaction)
         broadcast(myRoom, { type: 'gameStarting' })
-        console.log(`[server] 房间 ${myRoom.code} 开始对战`)
+        sendMatchState(myRoom)
+        console.log(`[server] 房间 ${myRoom.code} 开局（${myRoom.hostFaction} vs ${myRoom.guestFaction}）`)
         break
       }
 

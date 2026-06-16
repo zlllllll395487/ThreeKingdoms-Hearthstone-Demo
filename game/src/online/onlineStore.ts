@@ -15,6 +15,8 @@ import type {
   PlayerSlot,
   RoomMemberInfo,
 } from './protocol'
+import { deserializeState } from './stateCodec'
+import { useGameStore } from '@/store/gameStore'
 
 const LS_SERVER_URL = 'sgls.online.serverUrl'
 
@@ -59,6 +61,9 @@ interface OnlineState {
   /** 对手是否已就位（两人都在房间） */
   opponentReady: boolean
 
+  /** 里程碑 2 · 是否已进入对局（收到 matchState 后置 true，教程后据此进 battle 而非 mainmenu） */
+  inMatch: boolean
+
   connect: () => void
   disconnect: () => void
   createRoom: () => void
@@ -92,6 +97,7 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
   host: null,
   guest: null,
   opponentReady: false,
+  inMatch: false,
 
   connect: () => {
     const { serverUrl } = get()
@@ -172,6 +178,7 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
       host: null,
       guest: null,
       opponentReady: false,
+      inMatch: false,
     })
   },
 }))
@@ -207,6 +214,13 @@ function handleServerMessage(
     case 'gameStarting':
       set({ lobbyPhase: 'starting' })
       break
+    case 'matchState': {
+      // 里程碑 2a · 收到个性化脱敏状态 → 反序列化灌入 gameStore（在线模式）
+      const state = deserializeState(msg.state)
+      set({ inMatch: true })
+      useGameStore.getState().applyServerMatchState(state)
+      break
+    }
     case 'opponentLeft':
       set({ opponentReady: false, guest: null, errorMsg: '对手离开了房间' })
       break

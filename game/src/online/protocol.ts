@@ -19,7 +19,7 @@ export type PlayerSlot = 'host' | 'guest'
 export type OnlineFaction = 'shu' | 'wu'
 
 /** 协议版本 · 前后端不一致时可据此提示用户刷新 */
-export const PROTOCOL_VERSION = 2
+export const PROTOCOL_VERSION = 3
 
 /** 房间成员信息 · 用于 roomState 广播让双方互相看到对方阵营 */
 export interface RoomMemberInfo {
@@ -52,8 +52,14 @@ export type ServerMessage =
   | { type: 'joinedRoom'; roomCode: string; yourSlot: PlayerSlot; protocolVersion: number }
   /** 房间状态广播 · 任一方加入 / 离开 / 改阵营时推送给房间内所有人 */
   | { type: 'roomState'; host: RoomMemberInfo; guest: RoomMemberInfo | null }
-  /** 房主已点开始 · 双方进入教程 → 对战流程（里程碑 1 仅作流程跳转信号） */
+  /** 房主已点开始 · 双方进入教程 → 对战流程 */
   | { type: 'gameStarting' }
+  /**
+   * 里程碑 2a · 对局状态推送 · 服务器开局或每次动作后给每个玩家发个性化脱敏状态
+   * state 是 serializeState() 的输出 string（已处理 Set，整条消息再 JSON 化不会二次丢）
+   * yourSide 恒为 'player'（服务器已做视角翻转，viewer 永在 player 侧）
+   */
+  | { type: 'matchState'; state: string; yourSide: 'player' }
   /** 对手离开（断线 / 关页） */
   | { type: 'opponentLeft' }
   /** 里程碑 0 连通测试回显 */

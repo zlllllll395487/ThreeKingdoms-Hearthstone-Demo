@@ -11,6 +11,7 @@
  */
 
 import type { Screen } from '@/store/uiStore'
+import { getCardsByFaction } from './cardLibrary'
 
 // 把 portraits/ 下所有立绘资源收集成 { '/src/assets/portraits/guanyu.webp': '/assets/guanyu-xxx.webp' } 形式
 // 立绘已全部转 WebP（无 alpha，无画质损失），仍接受 .png 引用 → 自动 fallback 到 .webp
@@ -87,6 +88,30 @@ function uiUrlsByNames(names: string[]): string[] {
   return names
     .map((n) => tryWebpFallback(uiModules, `/src/assets/ui/${n}`))
     .filter((u): u is string => !!u)
+}
+
+/**
+ * 取某阵营全部卡牌的 cardvisual_*.png 与 portrait 资源 URL
+ *
+ * 用于 Codex 首屏阵营 Tab 的可见资源预加载，让 LoadingScreen 进度条诚实
+ * 反映「打开图鉴默认 tab 已就绪」。
+ * 卡牌 portrait 字段可能是中文（如「魏延.png」）也可能是拼音（如 huangzhong.png），
+ * 这里两种都尝试匹配 .png / .webp。
+ */
+function factionCardvisualAndPortraitUrls(faction: 'shu' | 'wei' | 'wu' | 'qun' | 'neutral'): string[] {
+  const cards = getCardsByFaction(faction)
+  const urls: string[] = []
+  for (const c of cards) {
+    if (!c.portrait) continue
+    const base = c.portrait.replace(/\.(png|webp)$/i, '')
+    // cardvisual_ 仍是 PNG（图鉴主视觉保持原画质）
+    const cv = uiModules[`/src/assets/ui/cardvisual_${base}.png`]
+    if (cv) urls.push(cv)
+    // 立绘已转 WebP，调用方仍写 .png 时由 tryWebpFallback 转向
+    const pt = tryWebpFallback(portraitModules, `/src/assets/portraits/${c.portrait}`)
+    if (pt) urls.push(pt)
+  }
+  return urls
 }
 
 
@@ -277,7 +302,9 @@ export function getPreloadUrlsForScreen(target: Screen): string[] {
         ...uiUrlsByPrefix('cost_'),
         ...uiUrlsByPrefix('attack_'),
         ...uiUrlsByPrefix('health_'),
-        // cardvisual 与 portraits 改由 Card 组件 loading="lazy" 懒加载
+        // 首个 Tab（蜀）的 cardvisual + portrait 预加载，让进度条诚实反映「打开图鉴默认 tab 就绪」
+        // 其它阵营 tab 的卡牌在用户切换时由 Card 组件 loading="lazy" 懒加载
+        ...factionCardvisualAndPortraitUrls('shu'),
       ]
 
     case 'factionselect':

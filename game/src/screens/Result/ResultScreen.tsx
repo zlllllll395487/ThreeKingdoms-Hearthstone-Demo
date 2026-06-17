@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
+import { useOnlineStore } from '@/online/onlineStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 
 /**
@@ -11,6 +12,9 @@ export function ResultScreen() {
   const state = useGameStore((s) => s.state)
   const startGame = useGameStore((s) => s.startGame)
   const endGame = useGameStore((s) => s.endGame)
+  // 里程碑 2c · 在线对局结束后需断连 + 重置，且「再战」回大厅另开房而非本地 AI 局
+  const onlineMode = useGameStore((s) => s.onlineMode)
+  const onlineReset = useOnlineStore((s) => s.reset)
 
   // 优先读真实战斗结果；没结果则随机（如直接跳转测试）
   const winner = state?.winner
@@ -40,12 +44,20 @@ export function ResultScreen() {
   const btnBattleAgainUrl = getUiAssetUrl('btn_battle_again.png')
 
   const handleAgain = () => {
+    if (onlineMode) {
+      // 在线模式：断开旧连接 + 清对局，回大厅重新建 / 加入房间（不开本地 AI 局）
+      onlineReset()
+      endGame()
+      navigate('online')
+      return
+    }
     endGame()
     startGame()
     navigate('battle')
   }
 
   const handleQuit = () => {
+    if (onlineMode) onlineReset()
     endGame()
     navigate('mainmenu')
   }

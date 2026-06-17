@@ -64,6 +64,9 @@ interface OnlineState {
   /** 里程碑 2 · 是否已进入对局（收到 matchState 后置 true，教程后据此进 battle 而非 mainmenu） */
   inMatch: boolean
 
+  /** 里程碑 2c · 对局被异常中断的原因（对手离开 / 断线）· 战斗页据此弹「对局结束」覆盖层 */
+  matchInterrupted: 'opponentLeft' | null
+
   connect: () => void
   disconnect: () => void
   createRoom: () => void
@@ -98,6 +101,7 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
   guest: null,
   opponentReady: false,
   inMatch: false,
+  matchInterrupted: null,
 
   connect: () => {
     const { serverUrl } = get()
@@ -179,6 +183,7 @@ export const useOnlineStore = create<OnlineState>((set, get) => ({
       guest: null,
       opponentReady: false,
       inMatch: false,
+      matchInterrupted: null,
     })
   },
 }))
@@ -226,7 +231,13 @@ function handleServerMessage(
       break
     }
     case 'opponentLeft':
-      set({ opponentReady: false, guest: null, errorMsg: '对手离开了房间' })
+      // 对局中对手离开 → 标记中断，战斗页弹「对局结束」覆盖层（保留 inMatch 让覆盖层可渲染）
+      // 大厅中对手离开 → 仅清空 guest + 提示，回到等待
+      if (get().inMatch) {
+        set({ opponentReady: false, matchInterrupted: 'opponentLeft' })
+      } else {
+        set({ opponentReady: false, guest: null, errorMsg: '对手离开了房间' })
+      }
       break
     case 'error':
       set({ errorMsg: msg.message })

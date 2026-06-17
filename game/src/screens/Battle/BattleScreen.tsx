@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useUIStore } from '@/store/uiStore'
 import { useGameStore } from '@/store/gameStore'
+import { useOnlineStore } from '@/online/onlineStore'
 import { getUiAssetUrl } from '@/data/assetLoader'
 import { Card } from '@/components/Card/Card'
 import { BackButton } from '@/components/BackButton/BackButton'
@@ -54,7 +55,12 @@ export function BattleScreen() {
     endTurn,
     endGame,
     toggleAutopilot,
+    onlineMode,
   } = useGameStore()
+
+  // 里程碑 2c · 在线对局中断（对手离开 / 断线）
+  const matchInterrupted = useOnlineStore((s) => s.matchInterrupted)
+  const onlineReset = useOnlineStore((s) => s.reset)
 
   // §19.6 Phase C · FX 队列（基础设施 · 自动触发先关）
   // 旧版按 log.kind 自动触发被回退：AI 回合时每条 damage/heal log 都炸 sprite
@@ -557,6 +563,15 @@ export function BattleScreen() {
   }
 
   const handleQuit = () => {
+    // 在线模式：先重置在线状态（关闭 ws → 服务器通知对手离开、删房），再清本地对局
+    if (onlineMode) onlineReset()
+    endGame()
+    navigate('mainmenu')
+  }
+
+  // 里程碑 2c · 对手离开 → 结束对局回主菜单
+  const handleInterruptedExit = () => {
+    onlineReset()
     endGame()
     navigate('mainmenu')
   }
@@ -969,6 +984,22 @@ export function BattleScreen() {
           onComplete={() => fxRemove(e.id)}
         />
       ))}
+
+      {/* 里程碑 2c · 在线对手离开 → 对局结束覆盖层（createPortal 绕过 transform: scale）*/}
+      {onlineMode &&
+        matchInterrupted &&
+        createPortal(
+          <div className={styles.interruptOverlay}>
+            <div className={styles.interruptPanel}>
+              <div className={styles.interruptTitle}>对局结束</div>
+              <div className={styles.interruptText}>对手已离开对局</div>
+              <button className={styles.interruptBtn} onClick={handleInterruptedExit}>
+                返回主菜单
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* 长按详情弹窗（createPortal 绕过父级 transform: scale）*/}
       {detailViewCard &&

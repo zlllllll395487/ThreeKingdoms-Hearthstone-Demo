@@ -30,8 +30,12 @@ coverage/
 .env
 .env.local
 
-# 大文件原始素材（可选 — 如果担心 repo 大小可解开注释）
-# assetofsanguo/开屏动画.mp4
+# ── 项目门面瘦身（2026-06-17）· 原始素材 / 历史存档 / 构建产物移出版本库 ──
+# 经 git rm --cached 停止追踪：本地文件原样保留、git 历史亦未重写，三重安全。
+# 仅为保持 showcase 仓库轻量；游戏运行所需成品资源均在 game/src/assets/。
+/asset/
+/assetofsanguo/
+/release/
 
 # 对话原始记录备份（149 MB，太大不入 git）
 docs/11-对话原始记录-*.jsonl

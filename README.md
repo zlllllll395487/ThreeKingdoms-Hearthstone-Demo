@@ -32,10 +32,11 @@
 | 目录 | 用途 |
 |:--|:--|
 | `docs/` | 设计文档（玩法策划、卡牌设计、实施方案、美术清单、审计报告、模拟报告） |
-| `assetofsanguo/` | 美术素材原始工作目录，按需迁移至 `game/src/assets/` |
-| `game/` | React 应用主体（详见 `game/README.md`） |
+| `game/` | React 应用主体，含 `src/assets/` 游戏实际引用的全部成品资源（详见 `game/README.md`） |
 | `.github/workflows/` | GitHub Actions 配置（GitHub Pages 自动部署） |
 | `remove_background.py` | 图像背景去除辅助脚本 |
+
+> **关于美术源文件**：原始美术工作素材（`asset/`）、历史替换存档（`assetofsanguo/`）与发布构建产物（`release/`）体量较大（合计逾 1 GB），仅保留于本地、未纳入版本库，以保持仓库轻量。游戏运行所需的成品资源均已就位于 `game/src/assets/`，克隆本仓库即可完整构建运行。
 
 ## 快速开始
 

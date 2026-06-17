@@ -19,6 +19,14 @@
 
 更多截图与阵营选择屏见 [docs/screenshots/](docs/screenshots/)。
 
+## 美术与设计稿（Figma）
+
+全部界面、卡牌与立绘的设计源文件托管于 Figma，可在线浏览：
+
+**[三国炉石 · Figma 设计稿](https://www.figma.com/design/PaOOfR1UKY8J77vBD09MFf/%E4%B8%89%E5%9B%BD%E7%82%89%E7%9F%B3?node-id=163-4)**
+
+> Figma 为设计源头，仓库内 `game/src/assets/` 下的 PNG / WebP 为其导出物。
+
 ## 仓库结构
 
 | 目录 | 用途 |

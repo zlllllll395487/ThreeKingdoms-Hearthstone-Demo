@@ -143,6 +143,8 @@ docs/sim-reports/             # 模拟报告归档
 
 ### 使用方式
 
+**命令行**：
+
 ```bash
 cd game
 # 执行 1000 局模拟，输出标签为 myrun 的报告
@@ -151,6 +153,10 @@ npx tsx --tsconfig=./tsconfig.app.json scripts/sim/run-sims.ts \
 
 # 报告输出至 docs/sim-reports/sim-YYYY-MM-DD-myrun.md
 ```
+
+**双击启动**：仓库根目录提供 `AI对战模拟.bat`，双击后输入对局数即可运行，
+完成后自动打开报告目录。报告含全部单卡胜率总表，便于针对具体卡牌调整数值。
+（需预先在 `game/` 执行过 `npm install`。）
 
 ### 报告内容（约 300 行）
 

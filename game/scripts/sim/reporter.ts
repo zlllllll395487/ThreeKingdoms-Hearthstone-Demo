@@ -114,6 +114,22 @@ export function renderReport(
   }
   lines.push('')
 
+  // 2.3 全部单卡胜率总表 · 便于针对正在调整的具体卡牌查数
+  lines.push('### 2.3 全部单卡胜率（按 netImpact 排序）')
+  lines.push('')
+  lines.push('> 胜率 = 出现该卡的对局中获胜的比例；netImpact = 胜率 − 50%。出现数过低时统计噪声大，仅供参考。')
+  lines.push('')
+  lines.push('| 卡名 | 出现 | 赢家中 | 胜率 | netImpact |')
+  lines.push('|:--|:-:|:-:|:-:|:-:|')
+  for (const c of stats.cardImpacts) {
+    const mark =
+      c.netImpact > 10 ? '🔴' : c.netImpact > 5 ? '🟡' : c.netImpact < -10 ? '🔵' : c.netImpact < -5 ? '🟦' : ''
+    lines.push(
+      `| ${c.cardName} | ${c.appearances} | ${c.winnerAppearances} | ${c.winrate.toFixed(1)}% | ${c.netImpact >= 0 ? '+' : ''}${c.netImpact.toFixed(1)}% ${mark} |`,
+    )
+  }
+  lines.push('')
+
   // ========== § 3 节奏诊断 ==========
   lines.push('## § 3 · 节奏诊断')
   lines.push('')

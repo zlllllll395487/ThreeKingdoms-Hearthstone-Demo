@@ -58,3 +58,10 @@ _tmp_*.txt
 preview-*.html
 onl.py
 " -*"
+
+# 作品展示打包（本地交付物：游戏构建 + 文档，体积大不入库）
+/作品展示包/
+/作品展示包.zip
+
+# AI 对战模拟双击工具产出的临时报告（label=manual），不入库
+docs/sim-reports/*-manual.md

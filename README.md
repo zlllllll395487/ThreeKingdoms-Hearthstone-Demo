@@ -1,7 +1,28 @@
 # 三国炉石（Three Kingdoms Hearthstone）· Demo
 
-> 三国题材卡牌对战游戏的 Web 端实现，基于 React 19 + TypeScript 6 + Vite 8 构建。
-> 内置 AI 对战模拟框架支撑数值平衡决策，至 iter6.1 阵营差收敛至 5.6%。
+<p align="center">
+  <a href="https://zlllllll395487.github.io/ThreeKingdoms-Hearthstone-Demo/"><img src="https://img.shields.io/badge/▶_在线试玩-Live_Demo-success" alt="Live Demo"></a>
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white" alt="TypeScript 6">
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite 8">
+  <img src="https://img.shields.io/badge/Zustand-5-2D3748" alt="Zustand 5">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License">
+</p>
+
+> 以三国为题材、炉石传说为玩法骨架的卡牌对战游戏 Web 端 Demo。
+> 一套确定性引擎在前端、在线后端与模拟框架三处复用，内置 AI 对战模拟驱动数值平衡，至 iter6.1 阵营胜率差收敛至 5.6%。
+
+**▶ [在线试玩](https://zlllllll395487.github.io/ThreeKingdoms-Hearthstone-Demo/)**　｜　**📖 [游戏设计文档](docs/GAME-DESIGN.md)**　｜　**🎨 [美术设计稿（Figma）](https://www.figma.com/design/PaOOfR1UKY8J77vBD09MFf/%E4%B8%89%E5%9B%BD%E7%82%89%E7%9F%B3?node-id=163-4)**
+
+---
+
+## ✨ 亮点
+
+- **确定性游戏引擎** — 纯 TypeScript 同步状态机，零浏览器与框架依赖；前端、在线后端、模拟框架三处复用同一份规则代码，从根本上规避「服务端与客户端规则不一致」这一多人游戏常见缺陷。
+- **数据驱动的数值平衡** — 内置 AI 对战模拟框架，1000 局约 1.5 秒，经 6 轮迭代将阵营胜率差由 65.3% 收敛至 5.6%，并提供全卡胜率报告与一键模拟工具。
+- **权威服务器在线对战** — 服务器复用同一引擎担任裁判，个性化脱敏与视角翻转使前端战斗界面零改动即可支持真人联机。
+
+---
 
 ## 在线体验
 
@@ -50,13 +71,14 @@ npx tsc --noEmit       # TypeScript 静态检查，要求 0 错误
 
 ## 接手指引
 
-新协作者或新对话接手时，按以下顺序阅读三份核心文档：
+新协作者或新对话接手时，建议按以下顺序阅读：
 
-1. [HANDOFF.md](HANDOFF.md) — 接手手册，含目录结构、约束、待办与协作惯例
-2. [game/PROGRESS.md](game/PROGRESS.md) — 项目进度档案，按阶段记录已完成与待办项
-3. [game/src/assets/ASSETS.md](game/src/assets/ASSETS.md) — 美术资源清单（约 260 张 UI 与 89 张立绘）
+1. [docs/GAME-DESIGN.md](docs/GAME-DESIGN.md) — **游戏设计文档**，作品的统一设计视图（设计入口）
+2. [HANDOFF.md](HANDOFF.md) — 接手手册，含目录结构、约束、待办与协作惯例
+3. [game/PROGRESS.md](game/PROGRESS.md) — 项目进度档案，按阶段记录已完成与待办项
+4. [docs/ASSET-INVENTORY.md](docs/ASSET-INVENTORY.md) — 资产清单（成品资源与源材料分层、命名规范）
 
-设计文档位于 `docs/`，按编号顺序阅读。
+更多分项设计文档位于 `docs/`，按编号顺序阅读。
 
 ## 技术栈
 

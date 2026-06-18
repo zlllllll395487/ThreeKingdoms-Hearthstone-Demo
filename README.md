@@ -37,6 +37,8 @@
 | 主菜单 | 战斗 | 卡牌图鉴 |
 |:-:|:-:|:-:|
 | ![主菜单](docs/screenshots/01_mainmenu.png) | ![战斗](docs/screenshots/02_battle.png) | ![图鉴](docs/screenshots/03_codex.png) |
+| 招募 | 账号 | |
+| ![招募](game/src/assets/ui/subpage_recruit.png) | ![账号](game/src/assets/ui/subpage_account.png) | |
 
 更多截图与阵营选择屏见 [docs/screenshots/](docs/screenshots/)。
 
@@ -47,12 +49,6 @@
 **[三国炉石 · Figma 设计稿](https://www.figma.com/design/PaOOfR1UKY8J77vBD09MFf/%E4%B8%89%E5%9B%BD%E7%82%89%E7%9F%B3?node-id=163-4)**
 
 > Figma 为设计源头，仓库内 `game/src/assets/` 下的 PNG / WebP 为其导出物。
-
-部分界面 UI 设计：
-
-| 招募 | 账号 |
-|:-:|:-:|
-| ![招募界面](game/src/assets/ui/subpage_recruit.png) | ![账号界面](game/src/assets/ui/subpage_account.png) |
 
 整套美术资源总览（武将立绘 89 · 卡牌主视觉 71 · UI 元素 88 · 界面背景 108）：
 

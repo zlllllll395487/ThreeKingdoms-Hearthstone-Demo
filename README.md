@@ -42,7 +42,7 @@
   </tr>
   <tr>
     <td align="center"><b>招募</b><br><img src="game/src/assets/ui/subpage_recruit.png" width="340"></td>
-    <td align="center"><b>账号</b><br><img src="game/src/assets/ui/subpage_account.png" width="340"></td>
+    <td align="center"><b>开屏</b><br><img src="docs/screenshots/00_splash.png" width="340"></td>
   </tr>
 </table>
 

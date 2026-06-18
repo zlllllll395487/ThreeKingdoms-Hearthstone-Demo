@@ -34,11 +34,17 @@
 
 ## 界面预览
 
-| 主菜单 | 战斗 | 卡牌图鉴 |
-|:-:|:-:|:-:|
-| ![主菜单](docs/screenshots/01_mainmenu.png) | ![战斗](docs/screenshots/02_battle.png) | ![图鉴](docs/screenshots/03_codex.png) |
-| 招募 | 账号 | |
-| ![招募](game/src/assets/ui/subpage_recruit.png) | ![账号](game/src/assets/ui/subpage_account.png) | |
+<table>
+  <tr>
+    <td align="center"><b>主菜单</b><br><img src="docs/screenshots/01_mainmenu.png" width="340"></td>
+    <td align="center" rowspan="2"><b>战斗</b><br><img src="docs/screenshots/02_battle.png" width="258"></td>
+    <td align="center"><b>卡牌图鉴</b><br><img src="docs/screenshots/03_codex.png" width="340"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>招募</b><br><img src="game/src/assets/ui/subpage_recruit.png" width="340"></td>
+    <td align="center"><b>账号</b><br><img src="game/src/assets/ui/subpage_account.png" width="340"></td>
+  </tr>
+</table>
 
 更多截图与阵营选择屏见 [docs/screenshots/](docs/screenshots/)。
 

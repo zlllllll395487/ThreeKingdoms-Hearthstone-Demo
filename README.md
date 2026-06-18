@@ -48,6 +48,16 @@
 
 > Figma 为设计源头，仓库内 `game/src/assets/` 下的 PNG / WebP 为其导出物。
 
+部分界面 UI 设计：
+
+| 招募 | 账号 |
+|:-:|:-:|
+| ![招募界面](game/src/assets/ui/subpage_recruit.png) | ![账号界面](game/src/assets/ui/subpage_account.png) |
+
+整套美术资源总览（武将立绘 89 · 卡牌主视觉 71 · UI 元素 88 · 界面背景 108）：
+
+![美术资源总览](docs/screenshots/art_overview.jpg)
+
 ## 仓库结构
 
 | 目录 | 用途 |
